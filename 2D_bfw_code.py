@@ -66,28 +66,28 @@ z_basis = de.Chebyshev('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 
 # 2D Boussinesq hydrodynamics
-problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
-problem.meta['p','b','u','w']['z']['dirichlet'] = True
+problem = de.IVP(domain, variables=['p','r','u','w','rz','uz','wz'])
+problem.meta['p','r','u','w']['z']['dirichlet'] = True
 problem.parameters['P'] = (Rayleigh * Prandtl)**(-1/2)
 problem.parameters['R'] = (Rayleigh / Prandtl)**(-1/2)
 problem.parameters['F'] = F = 1
 # Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
-problem.add_equation("dt(b) - P*(dx(dx(b)) + dz(bz)) - F*w       = -(u*dx(b) + w*bz)")
-problem.add_equation("dt(u) - R*(dx(dx(u)) + dz(uz)) + dx(p)     = -(u*dx(u) + w*uz)")
-problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
+problem.add_equation("dt(r) - F*(dx(dx(r)) + dz(rz)) = -(u*dx(r) + w*rz)")
+problem.add_equation("dt(u) + dx(p)       = -(u*dx(u) + w*uz)")
+problem.add_equation("dt(w) + dz(p) - P*r = -(u*dx(w) + w*wz)")
 # Definitions for easier derivative syntax
-problem.add_equation("bz - dz(b) = 0")
+problem.add_equation("rz - dz(r) = 0")
 problem.add_equation("uz - dz(u) = 0")
 problem.add_equation("wz - dz(w) = 0")
 # Boundary contitions
-problem.add_bc("left(b) = 0")
+problem.add_bc("left(r) = 0")
 # Solid boundaries
 #problem.add_bc("left(u) = 0")
 # Free boundaries
-problem.add_bc("left(uz) = 0")
+#problem.add_bc("left(uz) = 0")
 problem.add_bc("left(w) = 0")
-problem.add_bc("right(b) = 0")
+problem.add_bc("right(r) = 0")
 # Solid boundaries
 #problem.add_bc("right(u) = 0")
 # Free boundaries
@@ -102,8 +102,8 @@ logger.info('Solver built')
 # Initial conditions
 x = domain.grid(0)
 z = domain.grid(1)
-b = solver.state['b']
-bz = solver.state['bz']
+r = solver.state['r']
+rz = solver.state['rz']
 
 # Random perturbations, initialized globally for same results in parallel
 gshape = domain.dist.grid_layout.global_shape(scales=1)
@@ -114,8 +114,8 @@ noise = rand.standard_normal(gshape)[slices]
 # Linear background + perturbations damped at walls
 zb, zt = z_basis.interval
 pert =  1e-3 * noise * (zt - z) * (z - zb)
-b['g'] = F * pert
-b.differentiate('z', out=bz)
+r['g'] = F * pert
+r.differentiate('z', out=rz)
 
 # Initial timestep
 dt = 0.125
