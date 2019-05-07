@@ -50,6 +50,8 @@ aspect_ratio = np.sqrt(2.)
 Lx, Lz = (4.*aspect_ratio, 1.)
 Prandtl = 1.
 Rayleigh = 1e6
+ampl = 0.1
+freq = 1.0
 
 # Read in parameters from docopt
 if __name__ == '__main__':
@@ -65,17 +67,49 @@ x_basis = de.Fourier('x', 256, interval=(-Lx/2, Lx/2), dealias=3/2)
 z_basis = de.Chebyshev('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 
+
+def BoundaryForcing(*args):
+    """this function applies its arguments and returns the forcing
+
+    """
+    t = args[0].value # this is a scalar; we use .value to get its value
+    x = args[1].data # this is an array; we use .data to get its values
+    ampl = args[2].value
+    freq = args[3].value
+
+    return ampl*cos_bump(x)*np.cos(t*freq)
+
+def cos_bump(x, Lx_=Lx, n=10):
+    """a simple, smooth bump function.
+
+    """
+    return (((1-np.cos(2*np.pi/Lx_ * x))/2)**n)
+
+
+def Forcing(*args, domain=domain, F=BoundaryForcing):
+    """This function takes arguments *args, a function F, and a domain and
+    returns a Dedalus GeneralFunction that can be applied.
+
+    """
+    return de.operators.GeneralFunction(domain, layout='g', func=F, args=args)
+
+# now we make it parseable, so the symbol BF can be used in equations
+# and the parser will know what it is.
+de.operators.parseables['BF'] = Forcing
+
 # 2D Boussinesq hydrodynamics
 problem = de.IVP(domain, variables=['p','r','u','w','rz','uz','wz'])
 problem.meta['p','r','u','w']['z']['dirichlet'] = True
 problem.parameters['P'] = (Rayleigh * Prandtl)**(-1/2)
 problem.parameters['R'] = (Rayleigh / Prandtl)**(-1/2)
 problem.parameters['F'] = F = 1
+problem.parameters['ampl'] = ampl
+problem.parameters['freq'] = freq
 # Mass conservation equation
-problem.add_equation("dx(u) + wz = 0")
-problem.add_equation("dt(r) - F*(dx(dx(r)) + dz(rz)) = -(u*dx(r) + w*rz)")
-problem.add_equation("dt(u) + dx(p)       = -(u*dx(u) + w*uz)")
-problem.add_equation("dt(w) + dz(p) - P*r = -(u*dx(w) + w*wz)")
+problem.add_equation("dx(u) + wz = 0") #eq 4
+problem.add_equation("dt(r) - F*(dx(dx(r)) + dz(rz)) = -(u*dx(r) + w*rz)") #eq3
+problem.add_equation("dt(u) + dx(p)       = -(u*dx(u) + w*uz)") #eq 1
+problem.add_equation("dt(w) + dz(p) - P*r = -(u*dx(w) + w*wz)") #eq 2
 # Definitions for easier derivative syntax
 problem.add_equation("rz - dz(r) = 0")
 problem.add_equation("uz - dz(u) = 0")
@@ -87,7 +121,12 @@ problem.add_bc("left(r) = 0")
 # Free boundaries
 #problem.add_bc("left(uz) = 0")
 problem.add_bc("left(w) = 0")
-problem.add_bc("right(r) = 0")
+
+# original
+#problem.add_bc("right(r) = 0")
+# Oscillations
+problem.add_bc("right(r) = right(BF(t, x, ampl, freq))")
+
 # Solid boundaries
 #problem.add_bc("right(u) = 0")
 # Free boundaries

@@ -2,12 +2,13 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py <files>... [--output=<dir>] [--rayleigh=<RA>] [--prandtl=<PR>]
+    plot_2d_series.py <files>... [--output=<dir>] [--ND1=<A1>] [--ND2=<B2>] [--ND3=<C3>]
 
 Options:
     --output=<dir>          Output directory [default: ./frames]
-    --rayleigh=<RA>         Rayleigh number
-    --prandtl=<PR>          Prandtl number
+    --ND1=<A1>              Dimensionless number 1
+    --ND2=<B2>              Dimensionless number 2
+    --ND3=<C3>              Dimensionless number 3
 
 """
 
@@ -19,17 +20,19 @@ import matplotlib.pyplot as plt
 plt.ioff()
 from dedalus.extras import plot_tools
 
-Pr  = 66.6
-Ra = 77.7
+# Placeholders for the 3 dimensionless numbers
+A1 = 1.1
+B2 = 2.2
+C3 = 3.3
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
 
     # Plot settings
-    tasks = ['r', 'p', 'u', 'w']
+    tasks = ['b', 'p', 'u', 'w']
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: 'Ra={:.2E}, Pr={:.2E}, t={:.3f}'.format(Ra, Pr, sim_time)
+    title_func = lambda sim_time: 'A1={:.2E}, B2={:.2E}, C3={:.2E}, t={:.3f}'.format(A1, B2, C3, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     nrows, ncols = 4, 1
@@ -72,10 +75,12 @@ if __name__ == "__main__":
 
     args = docopt(__doc__)
 
-    Ra = float(args['--rayleigh'])
-    print('plot Ra=',Ra)
-    Pr = float(args['--prandtl'])
-    print('plot Pr=',Pr)
+    A1 = float(args['--ND1'])
+    print('plot A1=',A1)
+    B2 = float(args['--ND2'])
+    print('plot B2=',B2)
+    C3 = float(args['--ND3'])
+    print('plot C3=',C3)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:

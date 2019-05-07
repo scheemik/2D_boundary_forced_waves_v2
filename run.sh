@@ -4,6 +4,10 @@
 # which version? 1=b, 2=T, 3=S
 VER=1
 # Define parameters
+A1=1.0
+B2=1.0
+C3=1.0
+
 RA=1e5
 PR=7
 
@@ -24,13 +28,13 @@ if [ $VER -eq 1 ]
 then
   #rm gifs/test.gif
   echo "Running Dedalus script"
-  python3 2D_bfw_code.py $RA $PR
+  python3 current_code.py $A1 $B2 $C3
   echo ""
   echo "Merging snapshots"
   python3 merge.py snapshots
   echo ""
   echo "Plotting 2d series"
-  python3 plot_2d_series.py snapshots/*.h5 --rayleigh=$RA --prandtl=$PR
+  python3 plot_2d_series.py snapshots/*.h5 --ND1=$A1 --ND2=$B2 --ND3=$C3
   echo ""
   echo "Creating gif"
   python3 create_gif.py gifs/test.gif
