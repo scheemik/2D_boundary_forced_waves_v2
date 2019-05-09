@@ -5,8 +5,8 @@
 VER=1
 # Define parameters
 A1=1.0
-B2=1.0
-C3=1.0
+B2=1.1
+C3=1.2
 
 RA=1e5
 PR=7
