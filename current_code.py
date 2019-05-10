@@ -103,7 +103,7 @@ ncc.meta['x', 'y']['constant'] = True
 problem.paramters['c'] = ncc
 '''
 # 2D Boussinesq hydrodynamics
-problem = de.IVP(domain, variables=['p','b','u','w','bz','wz'])
+problem = de.IVP(domain, variables=['p','b','u','w','bz'])
 #problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
 
 problem.meta['p','b','u','w']['z']['dirichlet'] = True
@@ -134,19 +134,19 @@ problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w
 '''
 # ND Equations, no viscosity
 #   Mass conservation equation
-problem.add_equation("dx(u) + wz = 0")
+problem.add_equation("dx(u) + dz(w) = 0") #wz = 0")
 #   Energy equation (in terms of buoyancy)
 problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz)) = -(u*dx(b) + w*bz)")
-#   Horizontal velocity equation
-problem.add_equation("dt(u) + A*dx(p) = -(u*dx(u) + w*dz(u))")#uz)")
-#   Vertical velocity equation
-problem.add_equation("dt(w) + A*dz(p) - b = -(u*dx(w) + w*wz)")
+#   Horizontal momentum equation
+problem.add_equation("dt(u) + A*dx(p) = -(u*dx(u) + w*dz(u))")
+#   Vertical momentum equation
+problem.add_equation("dt(w) + A*dz(p) - b = -(u*dx(w) + w*dz(w))")#wz)")
 #problem.add_equation("dt(w) + A*dz(p) - b - (-1.0/(C**2))*DP(z,rho_min,rho_max)= -(u*dx(w) + w*wz)") # can't have independent variables (x,z) in the eqs
 
 # Required for differential equation solving in Chebyshev
 problem.add_equation("bz - dz(b) = 0")
 #problem.add_equation("uz - dz(u) = 0") # redundant
-problem.add_equation("wz - dz(w) = 0")
+#problem.add_equation("wz - dz(w) = 0") # redundant
 
 # Boundary contitions
 #	Using Fourier basis for x automatically enforces periodic bc's
