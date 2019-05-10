@@ -70,10 +70,10 @@ if __name__ == '__main__':
 # Create bases and domain
 #x_basis = de.Fourier('x', 256, interval=(0, Lx), dealias=3/2)
 x_basis = de.Fourier('x', 256, interval=(-Lx/2, Lx/2), dealias=3/2)
-#z_basis = de.Chebyshev('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
-z_basis = de.Fourier('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
+z_basis = de.Chebyshev('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
+#z_basis = de.Fourier('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
-
+'''
 rho_min = 1.1
 rho_max = 1.2
 def density_profile(*args):
@@ -83,7 +83,7 @@ def density_profile(*args):
 	rho_max = args[2].value
 
 	return rho_bar(z, rho_min, rho_max)
-'''
+
 # Defining the background density profile
 def rho_bar(z, rho_min, rho_max):
 	# defines the background density to be a linear gradient
@@ -95,17 +95,19 @@ def profiling(*args, domain=domain, F=density_profile):
 # Make the density profile parseable
 de.operators.parseables['DP'] = profiling
 '''
-
-# Adding a non-constant coefficient (ncc)
-# ncc = domain.new_field(name='c')
-# ncc['g'] = z**2
-# ncc.meta['x', 'y']['constant'] = True
-# problem.paramters['c'] = ncc
-
-# 2D Boussinesq hydrodynamics
-problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
-problem.meta['p','b','u','w']['z']['dirichlet'] = True
 '''
+# Adding a non-constant coefficient (ncc)
+ncc = domain.new_field(name='c')
+ncc['g'] = z**2
+ncc.meta['x', 'y']['constant'] = True
+problem.paramters['c'] = ncc
+'''
+# 2D Boussinesq hydrodynamics
+problem = de.IVP(domain, variables=['p','b','u','w','bz','wz'])
+#problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
+
+problem.meta['p','b','u','w']['z']['dirichlet'] = True
+
 problem.parameters['A'] = A1 #(Rayleigh * Prandtl)**(-1/2)
 problem.parameters['B'] = B2 #(Rayleigh / Prandtl)**(-1/2)
 problem.parameters['C'] = C3 #F = 1
@@ -113,10 +115,12 @@ problem.parameters['C'] = C3 #F = 1
 problem.parameters['P'] = (Rayleigh * Prandtl)**(-1/2)
 problem.parameters['R'] = (Rayleigh / Prandtl)**(-1/2)
 problem.parameters['F'] = F = 1
-
+'''
+'''
 problem.parameters['rho_min'] = rho_min
 problem.parameters['rho_max'] = rho_max
-
+'''
+'''
 # OG RB Equations
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
@@ -134,22 +138,22 @@ problem.add_equation("dx(u) + wz = 0")
 #   Energy equation (in terms of buoyancy)
 problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz)) = -(u*dx(b) + w*bz)")
 #   Horizontal velocity equation
-problem.add_equation("dt(u) + A*dx(p) = -(u*dx(u) + w*uz)")
+problem.add_equation("dt(u) + A*dx(p) = -(u*dx(u) + w*dz(u))")#uz)")
 #   Vertical velocity equation
 problem.add_equation("dt(w) + A*dz(p) - b = -(u*dx(w) + w*wz)")
 #problem.add_equation("dt(w) + A*dz(p) - b - (-1.0/(C**2))*DP(z,rho_min,rho_max)= -(u*dx(w) + w*wz)") # can't have independent variables (x,z) in the eqs
-'''
-# Required for differential equation solving
+
+# Required for differential equation solving in Chebyshev
 problem.add_equation("bz - dz(b) = 0")
-problem.add_equation("uz - dz(u) = 0")
+#problem.add_equation("uz - dz(u) = 0") # redundant
 problem.add_equation("wz - dz(w) = 0")
-'''
+
 # Boundary contitions
 #	Using Fourier basis for x automatically enforces periodic bc's
 #   Left is bottom, right is top
 # Solid top/bottom boundaries
-problem.add_bc("left(u) = 0")
-problem.add_bc("right(u) = 0")
+#problem.add_bc("left(u) = 0")
+#problem.add_bc("right(u) = 0")
 # Free top/bottom boundaries
 #problem.add_bc("left(uz) = 0")
 #problem.add_bc("right(uz) = 0")
@@ -161,7 +165,7 @@ problem.add_bc("left(b) = 0")
 problem.add_bc("right(b) = 0")
 # Sets gauge pressure to zero in the constant mode
 problem.add_bc("right(p) = 0", condition="(nx == 0)")
-'''
+
 # Build solver
 solver = problem.build_solver(de.timesteppers.RK222)
 logger.info('Solver built')
@@ -209,7 +213,7 @@ CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
-flow.add_property("sqrt(u*u + w*w) / R", name='Re') # this is no longer correct
+flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct
 
 # Main loop
 try:

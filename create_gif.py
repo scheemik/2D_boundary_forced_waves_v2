@@ -2,19 +2,23 @@
 Creates a gif of a set of png images in the stated directory.
 
 Usage:
-    create_gif.py FILENAME
+    python3 create_gif.py FILENAME
 
 Arguments:
     FILENAME        name for gif file
 
 Script created: 2019/03/19, Mikhail Schee
 
-Last updated: 2019/03/19, Mikhail Schee
+Last updated: 2019/05/10, Mikhail Schee
 """
 
 """
 Using imageio
 https://imageio.readthedocs.io/en/latest/installation.html
+install using:
+    conda install -c conda-forge imageio
+OR
+    pip install imageio
 
 Skeleton script from
 https://stackoverflow.com/questions/41228209/making-gif-from-images-using-imageio-in-python
