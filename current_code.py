@@ -83,7 +83,7 @@ def density_profile(*args):
 	rho_max = args[2].value
 
 	return rho_bar(z, rho_min, rho_max)
-
+'''
 # Defining the background density profile
 def rho_bar(z, rho_min, rho_max):
 	# defines the background density to be a linear gradient
@@ -94,28 +94,45 @@ def profiling(*args, domain=domain, F=density_profile):
 
 # Make the density profile parseable
 de.operators.parseables['DP'] = profiling
-
+'''
 # 2D Boussinesq hydrodynamics
 problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
 problem.meta['p','b','u','w']['z']['dirichlet'] = True
+'''
 problem.parameters['A'] = A1 #(Rayleigh * Prandtl)**(-1/2)
 problem.parameters['B'] = B2 #(Rayleigh / Prandtl)**(-1/2)
 problem.parameters['C'] = C3 #F = 1
+'''
+problem.parameters['P'] = (Rayleigh * Prandtl)**(-1/2)
+problem.parameters['R'] = (Rayleigh / Prandtl)**(-1/2)
+problem.parameters['F'] = F = 1
+
 problem.parameters['rho_min'] = rho_min
 problem.parameters['rho_max'] = rho_max
+
+# OG RB Equations
+#   Mass conservation equation
+problem.add_equation("dx(u) + wz = 0")
+#   Energy equation (in terms of buoyancy)
+problem.add_equation("dt(b) - P*(dx(dx(b)) + dz(bz)) - F*w       = -(u*dx(b) + w*bz)")
+#   Horizontal velocity equation
+problem.add_equation("dt(u) - R*(dx(dx(u)) + dz(uz)) + dx(p)     = -(u*dx(u) + w*uz)")
+#   Vertical velocity equation
+problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
+#problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
+'''
+# ND Equations, no viscosity
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Energy equation (in terms of buoyancy)
 problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz)) = -(u*dx(b) + w*bz)")
-#problem.add_equation("dt(b) - P*(dx(dx(b)) + dz(bz)) - F*w       = -(u*dx(b) + w*bz)")
 #   Horizontal velocity equation
 problem.add_equation("dt(u) + A*dx(p) = -(u*dx(u) + w*uz)")
-#problem.add_equation("dt(u) - R*(dx(dx(u)) + dz(uz)) + dx(p)     = -(u*dx(u) + w*uz)")
 #   Vertical velocity equation
 problem.add_equation("dt(w) + A*dz(p) - b = -(u*dx(w) + w*wz)")
 #problem.add_equation("dt(w) + A*dz(p) - b - (-1.0/(C**2))*DP(z,rho_min,rho_max)= -(u*dx(w) + w*wz)") # can't have independent variables (x,z) in the eqs
-#problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
-# Definitions for easier derivative syntax
+'''
+# Required for differential equation solving
 problem.add_equation("bz - dz(b) = 0")
 problem.add_equation("uz - dz(u) = 0")
 problem.add_equation("wz - dz(w) = 0")
@@ -134,7 +151,7 @@ problem.add_bc("left(w) = 0")
 problem.add_bc("right(w) = 0", condition="(nx != 0)")
 # Buoyancy = zero at top/bottom
 problem.add_bc("left(b) = 0")
-#problem.add_bc("right(b) = 0")
+problem.add_bc("right(b) = 0")
 # Sets gauge pressure to zero in the constant mode
 problem.add_bc("right(p) = 0", condition="(nx == 0)")
 '''
@@ -162,8 +179,8 @@ def bg_density(z, rho_min, rho_max):
 # Linear background + perturbations damped at walls
 zb, zt = z_basis.interval
 pert =  1e-3 * noise * (zt - z) * (z - zb)
-#b['g'] = C3 * pert
-b['g'] = (-1.0/(C3**2)) * bg_density(z, rho_min, rho_max)
+b['g'] = C3 * pert
+#b['g'] = (-1.0/(C3**2)) * bg_density(z, rho_min, rho_max)
 b.differentiate('z', out=bz)
 
 # Initial timestep
@@ -185,7 +202,7 @@ CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
-flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct
+flow.add_property("sqrt(u*u + w*w) / R", name='Re') # this is no longer correct
 
 # Main loop
 try:
