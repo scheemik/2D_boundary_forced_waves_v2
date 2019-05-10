@@ -95,6 +95,13 @@ def profiling(*args, domain=domain, F=density_profile):
 # Make the density profile parseable
 de.operators.parseables['DP'] = profiling
 '''
+
+# Adding a non-constant coefficient (ncc)
+# ncc = domain.new_field(name='c')
+# ncc['g'] = z**2
+# ncc.meta['x', 'y']['constant'] = True
+# problem.paramters['c'] = ncc
+
 # 2D Boussinesq hydrodynamics
 problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
 problem.meta['p','b','u','w']['z']['dirichlet'] = True
