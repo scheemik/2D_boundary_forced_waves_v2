@@ -1,6 +1,8 @@
 """
 Dedalus script for 2D Rayleigh-Benard convection.
 
+Modified by Mikhail Schee, May 2019
+
 Usage:
     rb_with_S.py A1 B2 C3
 
@@ -10,7 +12,7 @@ Arguments:
     C3      Dimensionless number: Froude
 
 This script uses a Fourier basis in the x direction with periodic boundary
-conditions.  The equations are scaled in units of the buoyancy time (Fr = 1).
+conditions.  The equations have been non-dimensionalized.
 
 This script can be ran serially or in parallel, and uses the built-in analysis
 framework to save data snapshots in HDF5 files.  The `merge.py` script in this
@@ -44,18 +46,12 @@ logger = logging.getLogger(__name__)
 from docopt import docopt
 
 # Parameters
-#   for free boundaries, I expect the rolls to have an
-#   aspect ratio of sqrt(2). See Lautrup fig 30.3
-aspect_ratio = np.sqrt(2.)
-#   make the horizontal axis fit 4 rolls side by side
-Lx, Lz = (4.*aspect_ratio, 1.)
+aspect_ratio = 4.0
+Lx, Lz = (aspect_ratio, 1.)
 # Placeholders for the 3 dimensionless numbers
 A1 = 1.1
 B2 = 2.2
 C3 = 3.3
-
-Prandtl = 1.
-Rayleigh = 1e6
 
 # Read in parameters from docopt
 if __name__ == '__main__':
@@ -68,12 +64,11 @@ if __name__ == '__main__':
     print('ND C3=',C3)
 
 # Create bases and domain
-#x_basis = de.Fourier('x', 256, interval=(0, Lx), dealias=3/2)
 x_basis = de.Fourier('x', 256, interval=(-Lx/2, Lx/2), dealias=3/2)
 z_basis = de.Chebyshev('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
-#z_basis = de.Fourier('z', 64, interval=(-Lz/2, Lz/2), dealias=3/2)
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 '''
+# Defining the background density profile
 rho_min = 1.1
 rho_max = 1.2
 def density_profile(*args):
@@ -81,10 +76,8 @@ def density_profile(*args):
 	z = args[0].value
 	rho_min = args[1].value
 	rho_max = args[2].value
-
 	return rho_bar(z, rho_min, rho_max)
 
-# Defining the background density profile
 def rho_bar(z, rho_min, rho_max):
 	# defines the background density to be a linear gradient
 	return z*(rho_max-rho_min)/Lz + (rho_max + rho_min)/2.0
@@ -95,6 +88,7 @@ def profiling(*args, domain=domain, F=density_profile):
 # Make the density profile parseable
 de.operators.parseables['DP'] = profiling
 '''
+
 '''
 # Adding a non-constant coefficient (ncc)
 ncc = domain.new_field(name='c')
@@ -102,37 +96,20 @@ ncc['g'] = z**2
 ncc.meta['x', 'y']['constant'] = True
 problem.paramters['c'] = ncc
 '''
+
 # 2D Boussinesq hydrodynamics
 problem = de.IVP(domain, variables=['p','b','u','w','bz'])
 #problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
-
 problem.meta['p','b','u','w']['z']['dirichlet'] = True
-
 problem.parameters['A'] = A1 #(Rayleigh * Prandtl)**(-1/2)
 problem.parameters['B'] = B2 #(Rayleigh / Prandtl)**(-1/2)
 problem.parameters['C'] = C3 #F = 1
 '''
-problem.parameters['P'] = (Rayleigh * Prandtl)**(-1/2)
-problem.parameters['R'] = (Rayleigh / Prandtl)**(-1/2)
-problem.parameters['F'] = F = 1
-'''
-'''
 problem.parameters['rho_min'] = rho_min
 problem.parameters['rho_max'] = rho_max
 '''
-'''
-# OG RB Equations
-#   Mass conservation equation
-problem.add_equation("dx(u) + wz = 0")
-#   Energy equation (in terms of buoyancy)
-problem.add_equation("dt(b) - P*(dx(dx(b)) + dz(bz)) - F*w       = -(u*dx(b) + w*bz)")
-#   Horizontal velocity equation
-problem.add_equation("dt(u) - R*(dx(dx(u)) + dz(uz)) + dx(p)     = -(u*dx(u) + w*uz)")
-#   Vertical velocity equation
-problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
-#problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
-'''
-# ND Equations, no viscosity
+
+# Non-Dimensionalized Equations, no viscosity
 #   Mass conservation equation
 problem.add_equation("dx(u) + dz(w) = 0") #wz = 0")
 #   Energy equation (in terms of buoyancy)
@@ -181,12 +158,12 @@ gshape = domain.dist.grid_layout.global_shape(scales=1)
 slices = domain.dist.grid_layout.slices(scales=1)
 rand = np.random.RandomState(seed=42)
 noise = rand.standard_normal(gshape)[slices]
-
+'''
 # Defining the background density gradient
 def bg_density(z, rho_min, rho_max):
 	# defines the background density to be a linear gradient
 	return z*(rho_max-rho_min)/Lz + (rho_max + rho_min)/2.0
-
+'''
 # Linear background + perturbations damped at walls
 zb, zt = z_basis.interval
 pert =  1e-3 * noise * (zt - z) * (z - zb)
