@@ -2,14 +2,14 @@
 Creates a gif of a set of png images in the stated directory.
 
 Usage:
-    python3 create_gif.py FILENAME
+    create_gif.py FILENAME
 
 Arguments:
     FILENAME        name for gif file
 
 Script created: 2019/03/19, Mikhail Schee
 
-Last updated: 2019/05/10, Mikhail Schee
+Last updated: 2019/05/14, Mikhail Schee
 """
 
 """
