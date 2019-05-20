@@ -262,7 +262,7 @@ CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
-flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct. change to Rossby number?
+flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct
 
 ###############################################################################
 
