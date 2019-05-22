@@ -76,10 +76,11 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - P*(dx(dx(b)) + dz(bz)) - F*w       = -(u*dx(b) + w*bz)")
 problem.add_equation("dt(u) - R*(dx(dx(u)) + dz(uz)) + dx(p)     = -(u*dx(u) + w*uz)")
 problem.add_equation("dt(w) - R*(dx(dx(w)) + dz(wz)) + dz(p) - b = -(u*dx(w) + w*wz)")
-# Definitions for easier derivative syntax
+# Required for differential equation solving in Chebyshev
 problem.add_equation("bz - dz(b) = 0")
 problem.add_equation("uz - dz(u) = 0")
 problem.add_equation("wz - dz(w) = 0")
+
 # Boundary contitions
 problem.add_bc("left(b) = 0")
 # Solid boundaries
