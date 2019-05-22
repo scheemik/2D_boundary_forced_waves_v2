@@ -6,12 +6,13 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, May 2019
 
 Usage:
-    rb_with_S.py A1 B2 C3
+    rb_with_S.py A1 B2 C3 D4
 
 Arguments:
     A1		Dimensionless number: Euler
     B2		Dimensionless number: Fourier
     C3      Dimensionless number: Froude
+    D4      Dimensionless number: Richardson
 
 This script uses a Fourier basis in the x direction with periodic boundary
 conditions.  The equations have been non-dimensionalized.
@@ -55,6 +56,7 @@ z_b, z_t = (-Lz/2, Lz/2)
 A1 = 1.1
 B2 = 2.2
 C3 = 3.3
+D4 = 4.4
 
 # Read in parameters from docopt
 if __name__ == '__main__':
@@ -65,6 +67,8 @@ if __name__ == '__main__':
     print('ND B2=',B2)
     C3 = float(arguments['C3'])
     print('ND C3=',C3)
+    D4 = float(arguments['D4'])
+    print('ND D4=',D4)
 
 ###############################################################################
 
@@ -159,6 +163,7 @@ problem.meta['p','b','u','w']['z']['dirichlet'] = True
 problem.parameters['A'] = A1
 problem.parameters['B'] = B2
 problem.parameters['C'] = C3
+problem.parameters['D'] = D4
 # Parameters for boundary forcing
 problem.parameters['csq'] = 1. #c**2
 problem.parameters['ampl'] = 0.01
@@ -181,7 +186,7 @@ del bgpf
 #problem.substitutions['v*del(u)']
 #   Mass conservation equation
 problem.add_equation("dx(u) + dz(w) = 0") #wz = 0")
-#   Energy equation (in terms of buoyancy)
+#   Equation of state (in terms of buoyancy)
 problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz)) = -(u*dx(b) + w*bz)")
 #   Horizontal momentum equation
 problem.add_equation("dt(u) + A*dx(p) = -(u*dx(u) + w*dz(u))")

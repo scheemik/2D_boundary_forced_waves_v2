@@ -2,13 +2,14 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py <files>... [--output=<dir>] [--ND1=<A1>] [--ND2=<B2>] [--ND3=<C3>]
+    plot_2d_series.py <files>... [--output=<dir>] [--ND1=<A1>] [--ND2=<B2>] [--ND3=<C3>] [--ND4=<D4>]
 
 Options:
     --output=<dir>          Output directory [default: ./frames]
     --ND1=<A1>              Dimensionless number 1
     --ND2=<B2>              Dimensionless number 2
     --ND3=<C3>              Dimensionless number 3
+    --ND4=<D4>              Dimensionless number 4
 
 """
 
@@ -24,6 +25,7 @@ from dedalus.extras import plot_tools
 A1 = 1.1
 B2 = 2.2
 C3 = 3.3
+D4 = 4.4
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
@@ -32,7 +34,7 @@ def main(filename, start, count, output):
     tasks = ['b', 'p', 'u', 'w']
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: 'A1={:.2E}, B2={:.2E}, C3={:.2E}, t={:.3f}'.format(A1, B2, C3, sim_time)
+    title_func = lambda sim_time: 'A1={:.2E}, B2={:.2E}, C3={:.2E}, D4={:.2E}, t={:.3f}'.format(A1, B2, C3, D4, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     nrows, ncols = 4, 1
@@ -81,6 +83,8 @@ if __name__ == "__main__":
     print('plot B2=',B2)
     C3 = float(args['--ND3'])
     print('plot C3=',C3)
+    D4 = float(args['--ND4'])
+    print('plot D4=',D4)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:
