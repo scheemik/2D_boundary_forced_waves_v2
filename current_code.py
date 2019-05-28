@@ -36,6 +36,7 @@ The simulation should take a few process-minutes to run.
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from mpi4py import MPI
 import time
 
@@ -81,7 +82,7 @@ x = domain.grid(0)
 z = domain.grid(1)
 
 ###############################################################################
-
+"""
 # Creating a wave-making boudary condition
 def wave_maker(x, op=0, L_x=2*np.pi, n=10):
     if (op == 0):
@@ -100,58 +101,14 @@ def BoundaryForcing(*args):
     return ampl*wave_maker(x, 0, Lx)*np.cos(t*freq)
 
 def Forcing(*args, domain=domain, F=BoundaryForcing):
-    """This function takes arguments *args, a function F, and a domain and
-    returns a Dedalus GeneralFunction that can be applied."""
+    # This function takes arguments *args, a function F, and a domain and
+    # returns a Dedalus GeneralFunction that can be applied.
     return de.operators.GeneralFunction(domain, layout='g', func=F, args=args)
 
 # now we make it parseable, so the symbol BF can be used in equations
 # and the parser will know what it is.
 de.operators.parseables['BF'] = Forcing
-
-###############################################################################
-
-# Parameters to determine a specific staircase profile
-n_layers = 1
-layer_ratio = 1
-val_bot = 1.0
-val_top = -1.0
-
-# Functions to define an arbitrary staircase profile
-def lin_profile(z, z_b, z_t, val_b, val_t):
-    # Creates a linear profile from (z_b, val_b) to (z_t, val_t)
-    values = 0*z
-    slope = (val_t - val_b) / (z_t - z_b)
-    values = slope*(z - z_b) + val_b
-    return values
-def val_ni(n, index, val_b, val_t):
-    i = index/2
-    # returns value at interface i for n layers (bottom interface=0, bottom layer=1)
-    return val_b + (i/n) * (val_t - val_b)
-def staircase(z, n, ratio, z_b, z_t, val_b, val_t):
-    # initialize array of values to be returned
-    values = 0*z
-    # find the thickness of the layers and the interfaces
-    th_l = (z_t - z_b) / (n + (n-1)/ratio)
-    th_i = th_l/ratio
-    # z is an array of height values
-    # function returns a corresponding array of values (density, for example)
-    z_i = z_b
-    index = 0 # even is interface, odd is layer
-    # Loop from bottom z to top z, alternating layers and interfaces
-    while (z_i < z_t):
-        # Layer
-        if (index%2 == 0):
-            index += 1
-            z_i += th_l
-            val_below = val_ni(n, index-1, val_b, val_t)
-            val_above = val_ni(n, index+1, val_b, val_t)
-            values[(z>(z_i-th_l))&(z<z_i)] = lin_profile(z[(z>(z_i-th_l))&(z<z_i)], z_i-th_l, z_i, val_below, val_above)
-        # Interface
-        else:
-            index += 1
-            z_i += th_i
-            values[(z>(z_i-th_i))&(z<z_i)] = val_ni(n, index, val_b, val_t)
-    return values
+"""
 
 ###############################################################################
 
@@ -205,6 +162,51 @@ problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)"
 
 ###############################################################################
 
+# Parameters to determine a specific staircase profile
+n_layers = 1
+layer_ratio = 1
+val_bot = 1.0
+val_top = -1.0
+
+# Functions to define an arbitrary staircase profile
+def lin_profile(z, z_b, z_t, val_b, val_t):
+    # Creates a linear profile from (z_b, val_b) to (z_t, val_t)
+    values = 0*z
+    slope = (val_t - val_b) / (z_t - z_b)
+    values = slope*(z - z_b) + val_b
+    return values
+def val_ni(n, index, val_b, val_t):
+    i = index/2
+    # returns value at interface i for n layers (bottom interface=0, bottom layer=1)
+    return val_b + (i/n) * (val_t - val_b)
+def staircase(z, n, ratio, z_b, z_t, val_b, val_t):
+    # initialize array of values to be returned
+    values = 0*z
+    # find the thickness of the layers and the interfaces
+    th_l = (z_t - z_b) / (n + (n-1)/ratio)
+    th_i = th_l/ratio
+    # z is an array of height values
+    # function returns a corresponding array of values (density, for example)
+    z_i = z_b
+    index = 0 # even is interface, odd is layer
+    # Loop from bottom z to top z, alternating layers and interfaces
+    while (z_i < z_t):
+        # Layer
+        if (index%2 == 0):
+            index += 1
+            z_i += th_l
+            val_below = val_ni(n, index-1, val_b, val_t)
+            val_above = val_ni(n, index+1, val_b, val_t)
+            values[(z>(z_i-th_l))&(z<z_i)] = lin_profile(z[(z>(z_i-th_l))&(z<z_i)], z_i-th_l, z_i, val_below, val_above)
+        # Interface
+        else:
+            index += 1
+            z_i += th_i
+            values[(z>(z_i-th_i))&(z<z_i)] = val_ni(n, index, val_b, val_t)
+    return values
+
+###############################################################################
+
 # Background Profile (bgpf) as an NCC
 bgpf = domain.new_field()
 bgpf.meta['x']['constant'] = True  # means the NCC is constant along x
@@ -214,20 +216,34 @@ bgpf['g'] = bgpf_array
 problem.parameters['bgpf'] = bgpf  # pass function in as a parameter
 del bgpf
 
+# Plots the background profile
+plot_bgpf = False
+if (plot_bgpf):
+    print(bgpf_array[0])
+    vert = np.array(z[0])
+    hori = np.array(bgpf_array[0])
+    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
+        fg, ax = plt.subplots(1,1)
+        ax.set_title('Test Profile')
+        ax.set_xlabel('density')
+        ax.set_ylabel('z')
+        ax.plot(hori, vert, '-')
+        plt.grid(True)
+        plt.show()
+
 ###############################################################################
 
 # Non-Dimensionalized Equations
-#problem.substitutions['v*del(u)']
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
-problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))                = -(u*dx(b) + w*bz)")
+problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))                =        -(u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + A*dx(p)      = -(u*dx(u) + w*uz)")
+problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + A*dx(p)      =        -(u*dx(u) + w*uz)")
 #   Vertical momentum equation
 problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + A*dz(p) - b  = D*bgpf -(u*dx(w) + w*wz)")
 
-# Required for differential equation solving in Chebyshev
+# Required for differential equation solving in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")
 problem.add_equation("uz - dz(u) = 0")
 problem.add_equation("wz - dz(w) = 0")
