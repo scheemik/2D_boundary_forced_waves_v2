@@ -239,16 +239,16 @@ problem.add_equation("wz - dz(w) = 0")
 #   Left is bottom, right is top
 # Solid top/bottom boundaries
 problem.add_bc("left(u) = 0")
-problem.add_bc("right(u) = fu") #0")
+problem.add_bc("right(u) = right(fu)") #0")
 # Free top/bottom boundaries
 #problem.add_bc("left(uz) = 0")
 #problem.add_bc("right(uz) = 0")
 # No-slip top/bottom boundaries?
 problem.add_bc("left(w) = 0", condition="(nx != 0)") # redunant in constant mode (nx==0)
-problem.add_bc("right(w) = fw") #0")
+problem.add_bc("right(w) = right(fw)") #0")
 # Buoyancy = zero at top/bottom
 problem.add_bc("left(b) = 0")
-problem.add_bc("right(b) = fb") #0")
+problem.add_bc("right(b) = right(fb)") #0")
 # Sets gauge pressure to zero in the constant mode
 problem.add_bc("left(p) = 0", condition="(nx == 0)") # required because of above redundancy
 

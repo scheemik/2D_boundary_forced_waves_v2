@@ -32,7 +32,7 @@ then
   python3 current_code.py $A1 $B2 $C3 $D4
   echo ""
   # check if snapshots folder was made
-  if [ -f /snapshots ]
+  if [ -e snapshots ]
   then
     echo "Merging snapshots"
     python3 merge.py snapshots
