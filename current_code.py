@@ -6,7 +6,7 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, May 2019
 
 Usage:
-    rb_with_S.py A1 B2 C3 D4
+    current_code.py A1 B2 C3 D4
 
 Arguments:
     A1		Dimensionless number: Euler
@@ -163,10 +163,45 @@ problem.parameters['A'] = A1
 problem.parameters['B'] = B2
 problem.parameters['C'] = C3
 problem.parameters['D'] = D4
+
+###############################################################################
+# Forcing from the boundary
+
+# Defining wavenumbers in terms of angle with respect to horizontal
+theta = np.pi/4
+k     = 1.0
+kx    = k*np.cos(theta)
+kz    = k*np.sin(theta)
+# Other parameters
+g     = 9.81 # m/s^2
+A     = 1.0
+N0    = 1.0
+rho0  = 1.0
+omega = 1.0
+
+# Polarization relation (signs implemented later)
+PolRel = {'u': A*(g*omega*kz)/(N0**2*kx),
+          'w': A*(g*omega)/(N0**2),
+          'b': A*g,
+          'p': A*(g*rho0*kz)/(kx**2+kz**2)}
+
+# Creating forcing amplitudes
+for fld in ['u', 'w', 'b', 'p']:
+    BF = domain.new_field()
+    BF.meta['x']['constant'] = True  # means the NCC is constant along x
+    BF['g'] = PolRel[fld]
+    problem.parameters['BF' + fld] = BF  # pass function in as a parameter.
+    del BF
+
 # Parameters for boundary forcing
-problem.parameters['csq'] = 1. #c**2
-problem.parameters['ampl'] = 0.01
-problem.parameters['freq'] = 1.
+problem.parameters['kx'] = kx
+problem.parameters['kz'] = kz
+problem.parameters['omega'] = 1.
+# Substitutions for boundary forcing
+problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)"
+problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)"
+problem.substitutions['fb'] = " BFb*cos(kx*x + kz*z + omega*t)"
+problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)"
 
 ###############################################################################
 
@@ -204,17 +239,16 @@ problem.add_equation("wz - dz(w) = 0")
 #   Left is bottom, right is top
 # Solid top/bottom boundaries
 problem.add_bc("left(u) = 0")
-problem.add_bc("right(u) = 0")
+problem.add_bc("right(u) = fu") #0")
 # Free top/bottom boundaries
 #problem.add_bc("left(uz) = 0")
 #problem.add_bc("right(uz) = 0")
 # No-slip top/bottom boundaries?
 problem.add_bc("left(w) = 0", condition="(nx != 0)") # redunant in constant mode (nx==0)
-problem.add_bc("right(w) = 0")
+problem.add_bc("right(w) = fw") #0")
 # Buoyancy = zero at top/bottom
 problem.add_bc("left(b) = 0")
-#problem.add_bc("right(b) = right(BF(t,x,ampl,freq))")
-problem.add_bc("right(b) = 0")
+problem.add_bc("right(b) = fb") #0")
 # Sets gauge pressure to zero in the constant mode
 problem.add_bc("left(p) = 0", condition="(nx == 0)") # required because of above redundancy
 
