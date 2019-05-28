@@ -31,14 +31,18 @@ then
   echo "Running Dedalus script"
   python3 current_code.py $A1 $B2 $C3 $D4
   echo ""
-  echo "Merging snapshots"
-  python3 merge.py snapshots
-  echo ""
-  echo "Plotting 2d series"
-  python3 plot_2d_series.py snapshots/*.h5 --ND1=$A1 --ND2=$B2 --ND3=$C3 --ND4=$D4
-  echo ""
-  echo "Creating gif"
-  python3 create_gif.py gifs/test.gif
+  # check if snapshots folder was made
+  if [ -f /snapshots ]
+  then
+    echo "Merging snapshots"
+    python3 merge.py snapshots
+    echo ""
+    echo "Plotting 2d series"
+    python3 plot_2d_series.py snapshots/*.h5 --ND1=$A1 --ND2=$B2 --ND3=$C3 --ND4=$D4
+    echo ""
+    echo "Creating gif"
+    python3 create_gif.py gifs/test.gif
+  fi
 elif [ $VER -eq 2 ]
 then
   rm T_RB.gif
