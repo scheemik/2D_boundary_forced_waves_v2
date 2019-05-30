@@ -82,6 +82,7 @@ x = domain.grid(0)
 z = domain.grid(1)
 
 ###############################################################################
+
 """
 # Creating a wave-making boudary condition
 def wave_maker(x, op=0, L_x=2*np.pi, n=10):
