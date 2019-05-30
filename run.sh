@@ -2,12 +2,12 @@
 # A bash script to run the Dedalus python code
 
 # which version?
-VER=2
+VER=1
 # Define parameters
-A1=1.0
-B2=1.1
-C3=1.2
-D4=1.4
+A1=1.0E-1
+B2=1.0E+1
+C3=1.0E+2
+D4=1.0E+1
 
 RA=1e5
 PR=7

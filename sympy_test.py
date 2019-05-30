@@ -18,6 +18,22 @@ y = Function('y')
 dsolve(Eq(y(t).diff(t,t) - y(t), exp(t)))
 
 # %%
+kx, x, kz, z, omega, t = symbols('kx, x, kz, z, omega, t')
+integrate(exp(I*(kx*x + kz*z - omega*t)), t)
+
+# %%
+kx, x, kz, z, omega, t = symbols('kx, x, kz, z, omega, t')
+integrate(exp(I*(kx*x + kz*z - omega*t)), z)
+
+# %%
+k_x, k_z, omega, rho, g, N, U, W, P, R = symbols('k_x, k_z, omega, rho, g, N, U, W, P, R')
+A = Matrix(([1,         0,  -k_x/(rho*omega),               0,      0],
+            [k_x/k_z,   1,          0,                      0,      0],
+            [0,         0, I*N**2*k_x**2/(g*k_z*omega**2),  1,      0],
+            [0,   -rho*omega/k_z,   1,                     -1,      0]))
+linsolve(A, (U, W, P, R))
+
+# %%
 
 # Define a matrix
 A = Matrix([[0,1],[-2,-3]])

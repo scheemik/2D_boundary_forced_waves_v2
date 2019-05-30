@@ -153,7 +153,7 @@ for fld in ['u', 'w', 'b', 'p']:
 # Parameters for boundary forcing
 problem.parameters['kx'] = kx
 problem.parameters['kz'] = kz
-problem.parameters['omega'] = 1.
+problem.parameters['omega'] = omega
 # Substitutions for boundary forcing
 problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)"
 problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)"
@@ -306,14 +306,16 @@ solver.stop_iteration = np.inf
 snapshots = solver.evaluator.add_file_handler('snapshots', sim_dt=0.25, max_writes=50)
 snapshots.add_system(solver.state)
 
-# CFL
-CFL = flow_tools.CFL(solver, initial_dt=dt, cadence=10, safety=1,
-                     max_change=1.5, min_change=0.5, max_dt=0.125, threshold=0.05)
-CFL.add_velocities(('u', 'w'))
+# CFL - adapts time step as the code runs depending on stiffness
+#       implemented in 'while solver.ok' loop
+#CFL = flow_tools.CFL(solver, initial_dt=dt, cadence=10, safety=1,
+#                     max_change=1.5, min_change=0.5, max_dt=0.125, threshold=0.05)
+#CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct. change to Rossby number?
+# flow.add_property("N**2 / (uz)**2", name='Ri') # Richardson number
 
 ###############################################################################
 
@@ -322,7 +324,7 @@ try:
     logger.info('Starting loop')
     start_time = time.time()
     while solver.ok:
-        dt = CFL.compute_dt()
+        #dt = CFL.compute_dt()
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
