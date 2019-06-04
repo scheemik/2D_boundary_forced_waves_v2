@@ -4,10 +4,10 @@
 # which version?
 VER=1
 # Define parameters
-A1=1.0E-1
-B2=1.0E+1
-C3=1.0E+2
-D4=1.0E+1
+DN1=1.0E-1		# Euler number
+DN2=7.0E+0		# Prandtl number
+DN3=1.0E-2		# Reynolds number
+DN4=1.0E+1		# Richardson number
 
 RA=1e5
 PR=7
@@ -28,7 +28,8 @@ fi
 if [ $VER -eq 1 ]
 then
   echo "Running Dedalus script"
-  python3 current_code.py $A1 $B2 $C3 $D4
+  #mpiexec -n 2 python3 current_code.py $ND1 $ND2 $ND3 $ND4
+  python3 current_code.py $DN1 $DN2 $DN3 $DN4
   echo ""
   # check if snapshots folder was made
   if [ -e snapshots ]
@@ -37,7 +38,7 @@ then
     python3 merge.py snapshots
     echo ""
     echo "Plotting 2d series"
-    python3 plot_2d_series.py snapshots/*.h5 --ND1=$A1 --ND2=$B2 --ND3=$C3 --ND4=$D4
+    python3 plot_2d_series.py snapshots/*.h5 --ND1=$DN1 --ND2=$DN2 --ND3=$DN3 --ND4=$DN4
     echo ""
     echo "Creating gif"
     python3 create_gif.py gifs/test.gif
@@ -45,7 +46,7 @@ then
 elif [ $VER -eq 2 ]
 then
   echo "Running Dedalus script"
-  python3 current_code.py $A1 $B2 $C3 $D4
+  python3 current_code.py $DN1 $DN2 $DN3 $DN4
   echo ""
 fi
 

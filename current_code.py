@@ -3,16 +3,16 @@ Dedalus script for simulating internal waves through a vertically stratified
 fluid with a density profile similar to a double-diffusive staircase.
 Originally for 2D Rayleigh-Benard convection.
 
-Modified by Mikhail Schee, May 2019
+Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py A1 B2 C3 D4
+    current_code.py DN1 DN2 DN3 DN4
 
 Arguments:
-    A1		Dimensionless number: Euler
-    B2		Dimensionless number: Fourier
-    C3      Dimensionless number: R = (Ra/Pr)^{-1/2}
-    D4      Dimensionless number: Richardson
+    DN1		 Dimensionless number: Euler
+    DN2		 Dimensionless number: Prandtl
+    DN3      Dimensionless number: Reynolds
+    DN4      Dimensionless number: Richardson
 
 This script uses a Fourier basis in the x direction with periodic boundary
 conditions.  The equations have been non-dimensionalized.
@@ -54,22 +54,39 @@ aspect_ratio = 4.0
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
 # Placeholders for the 3 dimensionless numbers
-A1 = 1.1
-B2 = 2.2
-C3 = 3.3
-D4 = 4.4
+DN1 = 1.1
+DN2 = 2.2
+DN3 = 3.3
+DN4 = 4.4
 
 # Read in parameters from docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    A1 = float(arguments['A1'])
-    print('ND A1=',A1)
-    B2 = float(arguments['B2'])
-    print('ND B2=',B2)
-    C3 = float(arguments['C3'])
-    print('ND C3=',C3)
-    D4 = float(arguments['D4'])
-    print('ND D4=',D4)
+    DN1 = float(arguments['DN1'])
+    print('DN1=',DN1)
+    DN2 = float(arguments['DN2'])
+    print('DN2=',DN2)
+    DN3 = float(arguments['DN3'])
+    print('DN3=',DN3)
+    DN4 = float(arguments['DN4'])
+    print('DN4=',DN4)
+
+###############################################################################
+# Calculate the non-dimensional parameters in the equations from the
+#   dimensionless numbers used as input arguments
+
+#   A = p'_c / (rho_0 * U^2)
+A1 = DN1
+print('A = ',A1)
+#   B = 1 / (Re Pr)
+B2 = 1.0 / (DN3 * DN2)
+print('B = ',B2)
+#   C = 1 / (Re)
+C3 = 1.0 / (DN3)
+print('C = ',C3)
+#   D = Ri
+D4 = DN4
+print('D = ',D4)
 
 ###############################################################################
 
