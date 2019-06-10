@@ -2,7 +2,7 @@
 Originally a Dedalus script for 2D Rayleigh-Benard convection.
 Now, its for testing things without running a long simulation.
 
-Modified by Mikhail Schee, May 2019
+Modified by Mikhail Schee, June 2019
 
 Usage:
     rb_with_S.py A1 B2 C3

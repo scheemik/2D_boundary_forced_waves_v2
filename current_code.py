@@ -9,7 +9,7 @@ Usage:
     current_code.py DN1 DN2 DN3 DN4
 
 Arguments:
-    DN1		 Dimensionless number: Euler
+    DN1		 Dimensionless number: Rayleigh
     DN2		 Dimensionless number: Prandtl
     DN3      Dimensionless number: Reynolds
     DN4      Dimensionless number: Richardson
@@ -75,8 +75,8 @@ if __name__ == '__main__':
 # Calculate the non-dimensional parameters in the equations from the
 #   dimensionless numbers used as input arguments
 
-#   A = p'_c / (rho_0 * U^2)
-A1 = DN1
+#   A = Ra / (Re^2 Pr)
+A1 = DN1 / (DN3**2 * DN2)
 print('A = ',A1)
 #   B = 1 / (Re Pr)
 B2 = 1.0 / (DN3 * DN2)
@@ -259,7 +259,7 @@ problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))                =        -(u
 #   Horizontal momentum equation
 problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + A*dx(p)      =        -(u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + A*dz(p) - b  = D*bgpf -(u*dx(w) + w*wz)")
+problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + dz(p) - A*b  = D*bgpf -(u*dx(w) + w*wz)")
 
 # Required for differential equation solving in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")

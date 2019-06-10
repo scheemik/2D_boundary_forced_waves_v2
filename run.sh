@@ -4,10 +4,10 @@
 # which version?
 VER=1
 # Define parameters
-DN1=1.0E-1		# Euler number
+DN1=1.0E-1		# Rayleigh number
 DN2=7.0E+0		# Prandtl number
 DN3=1.0E-2		# Reynolds number
-DN4=1.0E+1		# Richardson number
+DN4=0.0E+1		# Richardson number
 
 RA=1e5
 PR=7
