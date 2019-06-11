@@ -1,8 +1,23 @@
 #!/bin/bash
 # A bash script to run the Dedalus python code
+# Optionally takes in arguments:
+#	$ sh run.sh -v <version_number>
 
-# which version?
-VER=1
+while getopts v: option
+do
+	case "${option}"
+		in
+		v) VER=${OPTARG};;
+	esac
+done
+
+# check to see if arguments were passed
+if [ -z "$VER" ]
+then
+	echo "No version specified, using VER=1"
+	VER=1
+fi
+
 # Define parameters
 DN1=1.0E-1		# Rayleigh number
 DN2=7.0E+0		# Prandtl number
@@ -45,7 +60,12 @@ then
   fi
 elif [ $VER -eq 2 ]
 then
-  echo "Running Dedalus script"
+  echo "Running Dedalus script for Niagara. Are nx and nz multiples of 40?"
+  mpirun python3.6 current_code.py $DN1 $DN2 $DN3 $DN4
+  echo ""
+elif [ $VER -eq 3 ]
+then
+  echo "Running Dedalus script, but not plotting"
   python3 current_code.py $DN1 $DN2 $DN3 $DN4
   echo ""
 fi

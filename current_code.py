@@ -50,6 +50,8 @@ logger = logging.getLogger(__name__)
 from docopt import docopt
 
 # Parameters
+nx = 40*7
+nz = 40*2
 aspect_ratio = 4.0
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
@@ -91,8 +93,8 @@ print('D = ',D4)
 ###############################################################################
 
 # Create bases and domain
-x_basis = de.Fourier('x', 256, interval=(-Lx/2, Lx/2), dealias=3/2)
-z_basis = de.Chebyshev('z', 64, interval=(z_b, z_t), dealias=3/2)
+x_basis = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
+z_basis = de.Chebyshev('z', nz, interval=(z_b, z_t), dealias=3/2)
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
