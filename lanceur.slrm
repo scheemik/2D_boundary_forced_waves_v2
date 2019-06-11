@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 #SBATCH --account=def-ngrisoua
 #SBATCH --mail-user=mschee@physics.utoronto.ca
 #SBATCH --mail-type=ALL
