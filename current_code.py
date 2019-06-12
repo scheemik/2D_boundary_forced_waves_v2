@@ -295,23 +295,28 @@ snapshots.add_system(solver.state)
 
 # CFL - adapts time step as the code runs depending on stiffness
 #       implemented in 'while solver.ok' loop
-#CFL = flow_tools.CFL(solver, initial_dt=dt, cadence=10, safety=1,
-#                     max_change=1.5, min_change=0.5, max_dt=0.125, threshold=0.05)
-#CFL.add_velocities(('u', 'w'))
+CFL = flow_tools.CFL(solver, initial_dt=dt, cadence=10, safety=1,
+                     max_change=1.5, min_change=0.5, max_dt=0.125, threshold=0.05)
+CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct. change to Rossby number?
-# flow.add_property("N**2 / (uz)**2", name='Ri') # Richardson number
+# Reduced Richardson number
+#flow.add_property("(4*(N2 + bz) - (vz**2 + uz**2))/N0**2", name='Ri_red')
 
 ###############################################################################
+
+# Turn on/off adaptive time stepping
+adapt_dt = True
 
 # Main loop
 try:
     logger.info('Starting loop')
     start_time = time.time()
     while solver.ok:
-        #dt = CFL.compute_dt()
+        if (adapt_dt == True):
+            dt = CFL.compute_dt()
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
