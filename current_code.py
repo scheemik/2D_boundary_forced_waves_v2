@@ -6,9 +6,10 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py DN1 DN2 DN3 DN4
+    current_code.py LOC DN1 DN2 DN3 DN4
 
 Arguments:
+    LOC		 1 if local, 0 if on Niagara
     DN1		 Dimensionless number: Rayleigh
     DN2		 Dimensionless number: Prandtl
     DN3      Dimensionless number: Reynolds
@@ -37,8 +38,13 @@ The simulation should take a few process-minutes to run.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpi4py import MPI
 import time
+import sys
+from mpi4py import MPI
+comm = MPI.COMM_WORLD
+#print("thread %d of %d" % (comm.Get_rank(), comm.Get_size()))
+size = comm.Get_size()
+rank = comm.Get_rank()
 
 from dedalus import public as de
 from dedalus.extras import flow_tools
@@ -50,28 +56,50 @@ logger = logging.getLogger(__name__)
 from docopt import docopt
 
 # Parameters
-nx = 40*7
-nz = 40*2
 aspect_ratio = 4.0
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
-# Placeholders for the 3 dimensionless numbers
+# Placeholders for dimensionless numbers
 DN1 = 1.1
 DN2 = 2.2
 DN3 = 3.3
 DN4 = 4.4
+# Placeholders for params
+nx = 40*8
+nz = 40*2
 
 # Read in parameters from docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
+    LOC = bool(arguments['LOC'])
     DN1 = float(arguments['DN1'])
-    print('DN1=',DN1)
     DN2 = float(arguments['DN2'])
-    print('DN2=',DN2)
     DN3 = float(arguments['DN3'])
-    print('DN3=',DN3)
     DN4 = float(arguments['DN4'])
-    print('DN4=',DN4)
+    if (rank == 0):
+        print('LOC=',LOC)
+        print('DN1=',DN1)
+        print('DN2=',DN2)
+        print('DN3=',DN3)
+        print('DN4=',DN4)
+
+###############################################################################
+# Fetch parameters from the correct params file
+
+# Add correct path to params files
+sys.path.insert(0, './_params')
+if LOC:
+    import params_local
+    params = params_local
+elif LOC == False:
+    import params_Niagara
+    params = params_Niagara
+
+nx = int(params.n_x)
+nz = int(params.n_z)
+sim_time_stop  = params.sim_time_stop
+wall_time_stop = params.wall_time_stop
+adapt_dt = params.adapt_dt
 
 ###############################################################################
 # Calculate the non-dimensional parameters in the equations from the
@@ -79,16 +107,18 @@ if __name__ == '__main__':
 
 #   A = Ra / (Re^2 Pr)
 A1 = DN1 / (DN3**2 * DN2)
-print('A = ',A1)
 #   B = 1 / (Re Pr)
 B2 = 1.0 / (DN3 * DN2)
-print('B = ',B2)
 #   C = 1 / (Re)
 C3 = 1.0 / (DN3)
-print('C = ',C3)
 #   D = Ri
 D4 = DN4
-print('D = ',D4)
+
+if (rank == 0):
+    print('A = ',A1)
+    print('B = ',B2)
+    print('C = ',C3)
+    print('D = ',D4)
 
 ###############################################################################
 
@@ -151,7 +181,7 @@ kx    = k*np.cos(theta)
 kz    = k*np.sin(theta)
 # Other parameters
 g     = 9.81 # m/s^2
-A     = 1.0
+A     = 1.0e-5
 N0    = 1.0
 rho0  = 1.0
 omega = 1.0
@@ -194,8 +224,8 @@ val_top = -1.0
 bgpf = domain.new_field()
 bgpf.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the staircase function from the background profile script
-import sys
-sys.path.insert(0, './background_profile')
+#import sys
+sys.path.insert(0, './_background_profile')
 from background_profile import staircase
 # Store profile in an array so it can be used for initial conditions later
 bgpf_array = staircase(z, n_layers, layer_ratio, z_b, z_t, val_bot, val_top)
@@ -285,8 +315,8 @@ b.differentiate('z', out=bz)
 dt = 0.125
 
 # Integration parameters
-solver.stop_sim_time = 25
-solver.stop_wall_time = 30 * 60.
+solver.stop_sim_time = sim_time_stop
+solver.stop_wall_time = wall_time_stop * 60.
 solver.stop_iteration = np.inf
 
 # Analysis
@@ -307,8 +337,7 @@ flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct.
 
 ###############################################################################
 
-# Turn on/off adaptive time stepping
-adapt_dt = True
+# Adaptive time stepping turned on/off in params file
 
 # Main loop
 try:

@@ -21,7 +21,9 @@ export MPLBACKEND=pdf
 
 source ${HOME}/Dedalus_Projects/venv/bin/activate
 
-sh run.sh -v 2
+# Runs script and outputs snapshots,
+#   but doesn't merge, create frames, or output gif
+sh run.sh -v 3
 
 deactivate
 
