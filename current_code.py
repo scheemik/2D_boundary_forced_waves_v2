@@ -164,7 +164,10 @@ de.operators.parseables['BF'] = Forcing
 
 # 2D Boussinesq hydrodynamics
 problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
-problem.meta['p','b','u','w']['z']['dirichlet'] = True
+# From Nico: all variables are dirchlet by default, so only need to
+#   specify those that are not dirchlet (variables w/o top & bottom bc's)
+problem.meta['p','bz','uz','wz']['z']['dirichlet'] = False
+#problem.meta['p','b','u','w']['z']['dirichlet'] = True
 # Parameters for the dimensionless numbers
 problem.parameters['A'] = A1
 problem.parameters['B'] = B2
@@ -186,11 +189,12 @@ N0    = 1.0
 rho0  = 1.0
 omega = 1.0
 
-# Polarization relation (signs implemented later)
+# Polarization relation from Cushman-Roisin and Beckers eq (13.7)
+#   (signs implemented later)
 PolRel = {'u': A*(g*omega*kz)/(N0**2*kx),
           'w': A*(g*omega)/(N0**2),
           'b': A*g,
-          'p': A*(g*rho0*kz)/(kx**2+kz**2)}
+          'p': A*(g*rho0*kz)/(kx**2+kz**2)} # relation for p not used
 
 # Creating forcing amplitudes
 for fld in ['u', 'w', 'b', 'p']:
@@ -204,11 +208,20 @@ for fld in ['u', 'w', 'b', 'p']:
 problem.parameters['kx'] = kx
 problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
-# Substitutions for boundary forcing
-problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)"
-problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)"
-problem.substitutions['fb'] = " BFb*cos(kx*x + kz*z + omega*t)"
-problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)"
+"""
+# Windowing function (gaussian)
+problem.parameters['a'] = 1.0     # height of peak
+problem.parameters['b'] = 0.0     # center of peak
+# FWHM = 2\sqrt{2*ln{2}}*c = L_x/6
+FWHM = Lx/6.0
+problem.parameters['c'] = FWHM / (2.0*np.sqrt(2.0*np.log(2.0)))     # RMS width
+problem.substitutions['window'] = "a"#*exp(-(x-b)**2/(2.0*c)**2)"
+"""
+# Substitutions for boundary forcing (see C-R & B eq 13.7)
+problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)"#"*window"
+problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)"#"*window"
+problem.substitutions['fb'] = " BFb*cos(kx*x + kz*z + omega*t)"#"*window"
+problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)"#"*window"
 
 ###############################################################################
 
