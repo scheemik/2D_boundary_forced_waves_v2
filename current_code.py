@@ -13,7 +13,7 @@ Arguments:
     DN1		 Dimensionless number: Rayleigh
     DN2		 Dimensionless number: Prandtl
     DN3      Dimensionless number: Reynolds
-    DN4      Dimensionless number: Richardson
+    DN4      Dimensionless number: N_0 (formely, Richardson)
 
 This script uses a Fourier basis in the x direction with periodic boundary
 conditions.  The equations have been non-dimensionalized.
@@ -102,6 +102,26 @@ wall_time_stop = params.wall_time_stop
 adapt_dt = params.adapt_dt
 
 ###############################################################################
+# Setting parameters
+
+# Bounds of the forcing window
+fl_edge = -Lx/12.0
+fr_edge =  Lx/12.0
+# Angle of beam w.r.t. the horizontal
+theta = -np.pi/4
+# Horizontal wavelength
+lam_x = fr_edge - fl_edge
+# Horizontal wavenumber
+kx    = 2*np.pi/lam_x
+# Vertical wavenumber = 2*pi/lam_z, or from trig:
+kz    = kx * np.tan(theta)
+# Other parameters
+g     = 9.81 # [m/s^2]
+A     = 1.0e-4
+N0    = DN4
+rho0  = 1.0 # only shows up in pressure PolRel
+omega = N0 * np.cos(theta) # [s^-1], from dispersion relation
+
 # Calculate the non-dimensional parameters in the equations from the
 #   dimensionless numbers used as input arguments
 
@@ -111,8 +131,8 @@ A1 = DN1 / (DN3**2 * DN2)
 B2 = 1.0 / (DN3 * DN2)
 #   C = 1 / (Re)
 C3 = 1.0 / (DN3)
-#   D = Ri
-D4 = DN4
+#   D = (Pr Re^2 / Ra) * (N0^2 / omega^2)
+D4 = N0**2 / (omega**2 * A1)
 
 if (rank == 0):
     print('A = ',A1)
@@ -177,18 +197,6 @@ problem.parameters['D'] = D4
 ###############################################################################
 # Forcing from the boundary
 
-# Defining wavenumbers in terms of angle with respect to horizontal
-theta = np.pi/4
-k     = 1.0
-kx    = k*np.cos(theta)
-kz    = k*np.sin(theta)
-# Other parameters
-g     = 9.81 # m/s^2
-A     = 1.0e-5
-N0    = 1.0
-rho0  = 1.0
-omega = 1.0
-
 # Polarization relation from Cushman-Roisin and Beckers eq (13.7)
 #   (signs implemented later)
 PolRel = {'u': A*(g*omega*kz)/(N0**2*kx),
@@ -209,19 +217,25 @@ problem.parameters['kx'] = kx
 problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
 """
-# Windowing function (gaussian)
-problem.parameters['a'] = 1.0     # height of peak
-problem.parameters['b'] = 0.0     # center of peak
-# FWHM = 2\sqrt{2*ln{2}}*c = L_x/6
-FWHM = Lx/6.0
-problem.parameters['c'] = FWHM / (2.0*np.sqrt(2.0*np.log(2.0)))     # RMS width
-problem.substitutions['window'] = "a"#*exp(-(x-b)**2/(2.0*c)**2)"
+# Windowing function (multiplying tanh's)
+slope = 10
+left_edge = -L_x/6.0
+right_edge = L_x/6.0
+left_side = 0.5*(np.tanh(slope*(X2-left_edge))+1)
+right_side = 0.5*(np.tanh(slope*(-X2+right_edge))+1)
+win = left_side*right_side
 """
+# Windowing function (multiplying tanh's)
+problem.parameters['slope'] = 10
+problem.parameters['left_edge'] = fl_edge
+problem.parameters['right_edge'] = fr_edge
+problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"
+
 # Substitutions for boundary forcing (see C-R & B eq 13.7)
-problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)"#"*window"
-problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)"#"*window"
-problem.substitutions['fb'] = " BFb*cos(kx*x + kz*z + omega*t)"#"*window"
-problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)"#"*window"
+problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)*window"
+problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)*window"
+problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z + omega*t)*window"
+problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)*window"
 
 ###############################################################################
 
@@ -267,11 +281,11 @@ if (plot_bgpf):
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
-problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))                =        -(u*dx(b) + w*bz)")
+problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))               = -D*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + A*dx(p)      =        -(u*dx(u) + w*uz)")
+problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + dx(p)       =      - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + dz(p) - A*b  = D*bgpf -(u*dx(w) + w*wz)")
+problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + dz(p) - A*b =      - (u*dx(w) + w*wz)")
 
 # Required for differential equation solving in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")
