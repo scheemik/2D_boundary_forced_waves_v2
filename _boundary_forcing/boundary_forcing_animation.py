@@ -46,9 +46,6 @@ x_min = -3
 L_x = 6
 x_max = x_min + L_x
 
-z = 0
-kz = 1
-kx = 1
 omega = .2
 period = 2*np.pi/omega
 
@@ -57,7 +54,7 @@ ax.set(xlim=(x_min, x_max), ylim=(-1, 1))
 x = np.linspace(x_min, x_max, 91)
 t = np.linspace(0, period, 30)
 X2, T2 = np.meshgrid(x, t)
-
+"""
 # Windowing function (gaussian)
 a = 1.0     # height of peak
 b = 0.0     # center of peak
@@ -65,13 +62,25 @@ b = 0.0     # center of peak
 FWHM = L_x/6
 c = FWHM / (2*np.sqrt(2*np.log(2)))     # RMS width
 win = a*np.exp(-(X2-b)**2/(2.0*c)**2)
+"""
+# Windowing function (multiplying tanh's)
+slope = 10
+left_edge = -1
+right_edge = 1
+left_side = 0.5*(np.tanh(slope*(X2-left_edge))+1)
+right_side = 0.5*(np.tanh(slope*(-X2+right_edge))+1)
+win = left_side*right_side
+
+z = 0
+kz = right_edge - left_edge
+kx = 1
 
 # Boundary forcing for u
 Fu = -np.sin(kx*X2 + kz*z - omega*T2)*win
 # Boundary forcing for w
 Fw =  np.sin(kx*X2 + kz*z - omega*T2)*win
 # Boundary forcing for b
-Fb =  np.cos(kx*X2 + kz*z - omega*T2)*win
+Fb = -np.cos(kx*X2 + kz*z - omega*T2)*win
 
 line0 = ax.plot(x, win[0, :], '--', lw=1)[0]
 line1 = ax.plot(x, Fu[0, :], color='r', lw=2)[0]
