@@ -38,9 +38,9 @@ fi
 
 # Define parameters
 DN1=1.0E-1		# Rayleigh number
-DN2=7.0E+0		# Prandtl number
-DN3=1.0E-2		# Reynolds number
-DN4=0.0E+1		# Richardson number
+DN2=1.0E+0		# Prandtl number (~7 for water)
+DN3=1.0E-1		# Reynolds number
+DN4=1.0E+0		# N_0 (formerly, Richardson number)
 
 RA=1e5
 PR=7
