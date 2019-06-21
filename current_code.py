@@ -135,6 +135,7 @@ C3 = 1.0 / (DN3)
 D4 = N0**2 / (omega**2 * A1)
 
 if (rank == 0):
+    print('omega = ',omega)
     print('A = ',A1)
     print('B = ',B2)
     print('C = ',C3)
@@ -149,36 +150,6 @@ domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
 z = domain.grid(1)
-
-###############################################################################
-
-"""
-# Creating a wave-making boudary condition
-def wave_maker(x, op=0, L_x=2*np.pi, n=10):
-    if (op == 0):
-        # a plane wave
-        return 1.0
-    elif (op ==1):
-        # a simple, smooth bump function
-        return (((1-np.cos(2*np.pi/L_x * x))/2)**n)
-
-def BoundaryForcing(*args):
-    # this function applies its arguments and returns the forcing
-    t = args[0].value # this is a scalar; we use .value to get its value
-    x = args[1].data # this is an array; we use .data to get its values
-    ampl = args[2].value
-    freq = args[3].value
-    return ampl*wave_maker(x, 0, Lx)*np.cos(t*freq)
-
-def Forcing(*args, domain=domain, F=BoundaryForcing):
-    # This function takes arguments *args, a function F, and a domain and
-    # returns a Dedalus GeneralFunction that can be applied.
-    return de.operators.GeneralFunction(domain, layout='g', func=F, args=args)
-
-# now we make it parseable, so the symbol BF can be used in equations
-# and the parser will know what it is.
-de.operators.parseables['BF'] = Forcing
-"""
 
 ###############################################################################
 
@@ -216,15 +187,7 @@ for fld in ['u', 'w', 'b', 'p']:
 problem.parameters['kx'] = kx
 problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
-"""
-# Windowing function (multiplying tanh's)
-slope = 10
-left_edge = -L_x/6.0
-right_edge = L_x/6.0
-left_side = 0.5*(np.tanh(slope*(X2-left_edge))+1)
-right_side = 0.5*(np.tanh(slope*(-X2+right_edge))+1)
-win = left_side*right_side
-"""
+
 # Windowing function (multiplying tanh's)
 problem.parameters['slope'] = 10
 problem.parameters['left_edge'] = fl_edge
