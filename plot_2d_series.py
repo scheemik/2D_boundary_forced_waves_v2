@@ -20,6 +20,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.ioff()
 from dedalus.extras import plot_tools
+from mpi4py import MPI
+comm = MPI.COMM_WORLD
+#print("thread %d of %d" % (comm.Get_rank(), comm.Get_size()))
+size = comm.Get_size()
+rank = comm.Get_rank()
 
 # Placeholders for the 3 dimensionless numbers
 A1 = 1.1
@@ -78,13 +83,14 @@ if __name__ == "__main__":
     args = docopt(__doc__)
 
     A1 = float(args['--ND1'])
-    print('plot A1=',A1)
     B2 = float(args['--ND2'])
-    print('plot B2=',B2)
     C3 = float(args['--ND3'])
-    print('plot C3=',C3)
     D4 = float(args['--ND4'])
-    print('plot D4=',D4)
+    if (rank==0):
+        print('plot A1=',A1)
+        print('plot B2=',B2)
+        print('plot C3=',C3)
+        print('plot D4=',D4)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:

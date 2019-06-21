@@ -4,7 +4,25 @@
 #SBATCH --mail-type=ALL
 #SBATCH --ntasks-per-node=40
 #SBATCH --nodes=1
-#SBATCH --time=0-01:00  # one hour
+#SBATCH --time=0-01:00  # d-HH:MM
+
+# Optionally takes in arguments:
+#	$ sbatch lanceur.slrm -c <cores>
+
+while getopts c: option
+do
+	case "${option}"
+		in
+		c) CORES=${OPTARG};;
+	esac
+done
+
+# check to see if arguments were passed
+if [ -z "$CORES" ]
+then
+	echo "No number of cores specified, using CORES=2"
+	CORES=2
+fi
 
 module purge
 module load python/3.6.5
@@ -23,7 +41,7 @@ source ${HOME}/Dedalus_Projects/venv/bin/activate
 
 # Runs script and outputs snapshots,
 #   but doesn't merge, create frames, or output gif
-sh run.sh -v 2 -l 0
+sh run.sh -v 2 -l 0 -c $CORES
 
 deactivate
 

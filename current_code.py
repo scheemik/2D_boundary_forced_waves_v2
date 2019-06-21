@@ -360,7 +360,7 @@ CFL.add_velocities(('u', 'w'))
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct. change to Rossby number?
 # Reduced Richardson number
-#flow.add_property("(4*(N2 + bz) - (vz**2 + uz**2))/N0**2", name='Ri_red')
+#flow.add_property("(4*(N0 + bz) - (uz**2))/N0**2", name='Ri_red')
 
 ###############################################################################
 
@@ -377,6 +377,11 @@ try:
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
             logger.info('Max Re = %f' %flow.max('Re'))
+            """
+            logger.info('Min reduced Ri = {0:f}'.format(flow.min('Ri_red')))
+            if isnan(flow.min('Ri_red')):
+                raise NameError('Code blew up it seems')
+                """
 except:
     logger.error('Exception raised, triggering end of main loop.')
     raise
