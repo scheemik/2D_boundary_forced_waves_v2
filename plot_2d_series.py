@@ -34,16 +34,34 @@ Bstr = 'Pr'
 C3 = 3.3
 Cstr = 'Re'
 D4 = 4.4
-Dstr = 'N_0'
+Dstr = r'$N_0$'
+
+# Expects numbers in the format 7.0E+2
+def latex_exp(num):
+    float_str = "{:.1E}".format(num)
+    if "E" in float_str:
+        base, exponent = float_str.split("E")
+        exp = int(exponent)
+        str1 = '$' + str(base) + r'\cdot10^{' + str(exp) + '}$'
+        return r"{0}".format(str1)
+    else:
+        return float_str
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
+
+    # Format the dimensionless numbers nicely
+    A = latex_exp(A1)
+    B = latex_exp(B2)
+    C = latex_exp(C3)
+    D = latex_exp(D4)
 
     # Plot settings
     tasks = ['b', 'p', 'u', 'w']
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: '{:}={:.2E}, {:}={:.2E}, {:}={:.2E}, {:}={:.2E}, t={:.3f}'.format(Astr, A1, Bstr, B2, Cstr, C3, Dstr, D4, sim_time)
+    title_func = lambda sim_time: r'{:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(Astr, A, Bstr, B, Cstr, C, Dstr, D, sim_time)
+    #title_func = lambda sim_time: '{:}={:.2E}, {:}={:.2E}, {:}={:.2E}, {:}={:.2E}, t={:.3f}'.format(Astr, A1, Bstr, B2, Cstr, C3, Dstr, D4, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     nrows, ncols = 4, 1
@@ -67,7 +85,7 @@ def main(filename, start, count, output):
             # Add time title
             title = title_func(file['scales/sim_time'][index])
             title_height = 1 - 0.5 * mfig.margin.top / mfig.fig.y
-            fig.suptitle(title, x=0.3, y=title_height, ha='left')
+            fig.suptitle(title, x=0.3, y=title_height, ha='left', fontsize='xx-large')
             # Save figure
             savename = savename_func(file['scales/write_number'][index])
             savepath = output.joinpath(savename)
