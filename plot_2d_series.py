@@ -28,9 +28,13 @@ rank = comm.Get_rank()
 
 # Placeholders for the 3 dimensionless numbers
 A1 = 1.1
+Astr = 'Ra'
 B2 = 2.2
+Bstr = 'Pr'
 C3 = 3.3
+Cstr = 'Re'
 D4 = 4.4
+Dstr = 'N_0'
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
@@ -39,7 +43,7 @@ def main(filename, start, count, output):
     tasks = ['b', 'p', 'u', 'w']
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: 'A1={:.2E}, B2={:.2E}, C3={:.2E}, D4={:.2E}, t={:.3f}'.format(A1, B2, C3, D4, sim_time)
+    title_func = lambda sim_time: '{:}={:.2E}, {:}={:.2E}, {:}={:.2E}, {:}={:.2E}, t={:.3f}'.format(Astr, A1, Bstr, B2, Cstr, C3, Dstr, D4, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     nrows, ncols = 4, 1
@@ -87,10 +91,10 @@ if __name__ == "__main__":
     C3 = float(args['--ND3'])
     D4 = float(args['--ND4'])
     if (rank==0):
-        print('plot A1=',A1)
-        print('plot B2=',B2)
-        print('plot C3=',C3)
-        print('plot D4=',D4)
+        print('plot ',Astr,' = ',A1)
+        print('plot ',Bstr,' = ',B2)
+        print('plot ',Cstr,' = ',C3)
+        print('plot ',Dstr,' = ',D4)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:
