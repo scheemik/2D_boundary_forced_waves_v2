@@ -19,7 +19,7 @@ def tanh_(z, bottom, top, slope, center):
 def rho_profile(z, n, bottom, top, slope, left, right):
     # initialize array of values to be returned
     values = 0*z
-    # calculate height of domain
+    # calculate height of staircase in value (density)
     H = top - bottom # don't take absolute value, this lets staircase flip
     # calculate height of steps
     height = H / float(n)
@@ -41,7 +41,7 @@ def cosh2(z, height, slope, center):
     # initialize array of values to be returned
     values = 0*z
     # calculate step
-    values = (height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
+    values = -(height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
     return values
 
 def N2_profile(z, n, bottom, top, slope, left, right):

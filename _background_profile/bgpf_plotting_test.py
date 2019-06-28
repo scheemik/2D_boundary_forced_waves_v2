@@ -21,8 +21,8 @@ from background_profile import rho_profile
 from background_profile import N2_profile
 
 # Parameters
-nx = 40*16
-nz = 40*8
+nx = 512
+nz = 128
 aspect_ratio = 4.0
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
@@ -40,10 +40,10 @@ z = domain.grid(1)
 ###############################################################################
 
 # Parameters to determine a specific staircase profile
-n_layers = 5
-slope = 50.0*n_layers
-val_bot = +1.0
-val_top = -1.0
+n_layers = -1
+slope = 10.0*n_layers
+val_bot = +0.1
+val_top = -0.1
 z_bot = z_b
 z_top = z_t
 
@@ -64,6 +64,7 @@ if (plot_bgpf):
         ax1.set_title('Test Profile')
         ax1.set_xlabel(r'density ($\bar\rho$)')
         ax1.set_ylabel(r'depth ($z$)')
+        ax1.set_ylim([z_b,z_t])
         ax1.plot(plot_p, plot_z, 'k-')
 
         ax2.set_xlabel(r'frequency ($N^2$)')
