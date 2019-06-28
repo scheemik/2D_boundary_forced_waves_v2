@@ -1,5 +1,5 @@
 """
-A script to test plotting the background profiles without
+A script to test plotting Foran's background profiles without
 having to run the whole Dedalus script.
 
 Modified by Mikhail Schee, June 2019
@@ -55,6 +55,8 @@ bgpf_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
 # Plots the background profile
 plot_bgpf = True
 if (plot_bgpf):
+    font = {'size' : 12}
+    plt.rc('font', **font)
     plot_z = np.array(z[0])
     plot_p = np.array(bgpf_array[0])
     #plot_N = np.array(bgpf_array2[0])
@@ -70,6 +72,7 @@ if (plot_bgpf):
 
         #ax2.set_xlabel(r'frequency ($N^2$)')
         #ax2.plot(plot_N, plot_z, '-')
+
         plt.grid(True)
         plt.show()
 # %%

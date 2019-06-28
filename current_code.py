@@ -6,10 +6,11 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC DN1 DN2 DN3 DN4
+    current_code.py LOC ASR DN1 DN2 DN3 DN4
 
 Arguments:
     LOC		 1 if local, 0 if on Niagara
+    ASR		 Aspect ratio of domain
     DN1		 Dimensionless number: Rayleigh
     DN2		 Dimensionless number: Prandtl
     DN3      Dimensionless number: Reynolds
@@ -56,7 +57,7 @@ logger = logging.getLogger(__name__)
 from docopt import docopt
 
 # Parameters
-aspect_ratio = 4.0
+aspect_ratio = 3.0
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
 # Placeholders for dimensionless numbers
@@ -105,8 +106,8 @@ adapt_dt = params.adapt_dt
 # Setting parameters
 
 # Bounds of the forcing window
-fl_edge = -Lx/12.0
-fr_edge =  Lx/12.0
+fl_edge = -3.0*Lx/12.0
+fr_edge =  -Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
@@ -158,7 +159,6 @@ problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
 # From Nico: all variables are dirchlet by default, so only need to
 #   specify those that are not dirchlet (variables w/o top & bottom bc's)
 problem.meta['p','bz','uz','wz']['z']['dirichlet'] = False
-#problem.meta['p','b','u','w']['z']['dirichlet'] = True
 # Parameters for the dimensionless numbers
 problem.parameters['A'] = A1
 problem.parameters['B'] = B2
@@ -207,10 +207,10 @@ n_layers = 0
 slope = 100.0*(n_layers+1)
 val_bot = 1.0E-4
 val_top = -val_bot
-N_1 = 0.95
-N_2 = 1.24
-z_bot = -0.05 #z_b
-z_top =  0.05 #z_t
+N_1 = 0.95                  # The stratification value above the staircase
+N_2 = 1.24                  # The stratification value below the staircase
+z_bot = -0.1                # Top of staircase (not domain)
+z_top =  0.1                # Bottom of staircase (not domian)
 
 ###############################################################################
 
@@ -232,8 +232,6 @@ del bgpf
 # Plots the background profile
 plot_bgpf = True
 if (plot_bgpf and rank == 0 and LOC):
-#    print(bgpf_array[0])
-#    print(z[0])
     vert = np.array(z[0])
     hori = np.array(bgpf_array[0])
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):

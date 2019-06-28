@@ -41,7 +41,7 @@ source ${HOME}/Dedalus_Projects/venv/bin/activate
 
 # Runs script and outputs snapshots,
 #   but doesn't merge, create frames, or output gif
-sh run.sh -v 2 -l 0 -c $CORES
+sh run.sh -v 1 -l 0 -c $CORES
 
 deactivate
 
