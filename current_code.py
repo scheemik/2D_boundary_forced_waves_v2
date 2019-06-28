@@ -108,7 +108,7 @@ adapt_dt = params.adapt_dt
 fl_edge = -Lx/12.0
 fr_edge =  Lx/12.0
 # Angle of beam w.r.t. the horizontal
-theta = -np.pi/4
+theta = np.pi/4
 # Horizontal wavelength
 lam_x = fr_edge - fl_edge
 # Horizontal wavenumber
@@ -195,18 +195,22 @@ problem.parameters['right_edge'] = fr_edge
 problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"
 
 # Substitutions for boundary forcing (see C-R & B eq 13.7)
-problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z + omega*t)*window"
-problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z + omega*t)*window"
-problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z + omega*t)*window"
-problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z + omega*t)*window"
+problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z - omega*t)*window"
+problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z - omega*t)*window"
+problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
+problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
 
 ###############################################################################
 
 # Parameters to determine a specific staircase profile
-n_layers = 1
-layer_ratio = 1
-val_bot = 1.0
-val_top = -1.0
+n_layers = 0
+slope = 100.0*(n_layers+1)
+val_bot = 1.0E-4
+val_top = -val_bot
+N_1 = 0.95
+N_2 = 1.24
+z_bot = -0.05 #z_b
+z_top =  0.05 #z_t
 
 ###############################################################################
 
@@ -216,24 +220,29 @@ bgpf.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the staircase function from the background profile script
 #import sys
 sys.path.insert(0, './_background_profile')
-from background_profile import staircase
+from Foran_profile import Foran_profile
+#from background_profile import N2_profile
 # Store profile in an array so it can be used for initial conditions later
-bgpf_array = staircase(z, n_layers, layer_ratio, z_b, z_t, val_bot, val_top)
+bgpf_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
+#bgpf_array = N2_profile(z, n_layers, val_bot, val_top, slope, z_b, z_t)
 bgpf['g'] = bgpf_array
 problem.parameters['bgpf'] = bgpf  # pass function in as a parameter
 del bgpf
 
 # Plots the background profile
-plot_bgpf = False
-if (plot_bgpf):
-    print(bgpf_array[0])
+plot_bgpf = True
+if (plot_bgpf and rank == 0 and LOC):
+#    print(bgpf_array[0])
+#    print(z[0])
     vert = np.array(z[0])
     hori = np.array(bgpf_array[0])
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
         fg, ax = plt.subplots(1,1)
         ax.set_title('Test Profile')
-        ax.set_xlabel('density')
+        ax.set_xlabel(r'frequency ($N^2$)')
+        ax.set_ylabel(r'depth ($z$)')
         ax.set_ylabel('z')
+        ax.set_ylim([z_b,z_t])
         ax.plot(hori, vert, '-')
         plt.grid(True)
         plt.show()
@@ -244,7 +253,7 @@ if (plot_bgpf):
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
-problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))               = -D*w - (u*dx(b) + w*bz)")
+problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))          = -D*bgpf*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
 problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + dx(p)       =      - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
