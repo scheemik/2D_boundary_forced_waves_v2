@@ -30,19 +30,16 @@ then
 	CORES=2
 fi
 
-# On local pc
-# VER = 1 and LOC=1
+# if:
+# VER = 1
 #	-> run the script, merge, plot, and create a gif
-# VER = 2 and LOC=1
+# VER = 2
 #	-> run the script
-
-# On Niagara
-# VER = 1 and LOC=0
-#	-> merge, plot, and create a gif
-# VER = 2 and LOC=0
-#	-> run the script
+# VER = 3
+# 	-> merge, plot, and create a gif
 
 # Define parameters
+ASR=3.0			# Aspect ratio of domain
 DN1=1.0E-1		# Rayleigh number
 DN2=7.0E+0		# Prandtl number (~7 for water)
 DN3=1.0E+4		# Reynolds number
@@ -54,7 +51,7 @@ PR=7
 # If VER = 1, then the code will merge, plot, and create a gif
 # 	Check to see if the frames and snapshots folders exist
 #	If so, remove them before running the dedalus script
-if [ $VER -eq 1 ]
+if [ $VER -ne 3 ]
 then
 	if [ -e frames ]
 	then
@@ -68,36 +65,36 @@ then
 	fi
 fi
 
-# If running on local pc
-if [ $LOC -eq 1 ]
+# If running on local pc and VER=/=3
+if [ $LOC -eq 1 ] && [ $VER -ne 3 ]
 then
 	#echo 0 > /proc/sys/kernel/yama/ptrace_scope
 	echo "Running Dedalus script for local pc"
 	# mpiexec uses -n flag for number of processes to use
-    mpiexec -n $CORES python3 current_code.py $LOC $DN1 $DN2 $DN3 $DN4
+    mpiexec -n $CORES python3 current_code.py $LOC $ASR $DN1 $DN2 $DN3 $DN4
     echo ""
 fi
 
-# If running on Niagara
-if [ $LOC -eq 0 ] && [ $VER -eq 2 ]
+# If running on Niagara and VER=/=3
+if [ $LOC -eq 0 ] && [ $VER -ne 3 ]
 then
 	echo "Running Dedalus script for Niagara"
 	# mpirun uses -c, -n, --n, or -np for number of threads / cores
 	#mpirun -c $CORES python3.6 current_code.py $LOC $DN1 $DN2 $DN3 $DN4
 	# mpiexec uses -n flag for number of processes to use
-    mpiexec -n $CORES python3.6 current_code.py $LOC $DN1 $DN2 $DN3 $DN4
+    mpiexec -n $CORES python3.6 current_code.py $LOC $ASR $DN1 $DN2 $DN3 $DN4
 	echo ""
 fi
 
-# If VER = 1, then run the rest of the code,
+# If VER = 1 or 3, then run the rest of the code,
 # 	but first check if snapshots folder was made
-if [ $VER -eq 1 ] && [ -e snapshots ]
+if [ $VER -ne 2 ] && [ -e snapshots ]
 then
 	echo "Merging snapshots"
 	mpiexec -n $CORES python3 merge.py snapshots
 	echo ""
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py snapshots/*.h5 --ND1=$DN1 --ND2=$DN2 --ND3=$DN3 --ND4=$DN4
+	mpiexec -n $CORES python3 plot_2d_series.py snapshots/*.h5 --ASR=$ASR --ND1=$DN1 --ND2=$DN2 --ND3=$DN3 --ND4=$DN4
 	echo ""
 	echo "Creating gif"
 	python3 create_gif.py gifs/test.gif
