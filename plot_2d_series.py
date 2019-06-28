@@ -2,10 +2,11 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py <files>... [--output=<dir>] [--ND1=<A1>] [--ND2=<B2>] [--ND3=<C3>] [--ND4=<D4>]
+    plot_2d_series.py <files>... [--output=<dir>] [--ASR=<AR>] [--ND1=<A1>] [--ND2=<B2>] [--ND3=<C3>] [--ND4=<D4>]
 
 Options:
     --output=<dir>          Output directory [default: ./frames]
+    --ASR=<A1>              Aspect ratio of domain
     --ND1=<A1>              Dimensionless number 1
     --ND2=<B2>              Dimensionless number 2
     --ND3=<C3>              Dimensionless number 3
@@ -35,6 +36,7 @@ C3 = 3.3
 Cstr = 'Re'
 D4 = 4.4
 Dstr = r'$N_0$'
+AR = 3.0
 
 # Expects numbers in the format 7.0E+2
 def latex_exp(num):
@@ -49,6 +51,8 @@ def latex_exp(num):
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
+    font = {'size' : 14}
+    plt.rc('font', **font)
 
     # Format the dimensionless numbers nicely
     A = latex_exp(A1)
@@ -64,8 +68,8 @@ def main(filename, start, count, output):
     #title_func = lambda sim_time: '{:}={:.2E}, {:}={:.2E}, {:}={:.2E}, {:}={:.2E}, t={:.3f}'.format(Astr, A1, Bstr, B2, Cstr, C3, Dstr, D4, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
-    nrows, ncols = 4, 1
-    image = plot_tools.Box(4, 1)
+    nrows, ncols = 2, 2#4, 1
+    image = plot_tools.Box(AR, 1)
     pad = plot_tools.Frame(0.2, 0.2, 0.1, 0.1)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
 
@@ -84,8 +88,7 @@ def main(filename, start, count, output):
                 plot_tools.plot_bot_3d(dset, 0, index, axes=axes, title=task, even_scale=True) # clim=(cmin,cmax) # specify constant colorbar limits
             # Add time title
             title = title_func(file['scales/sim_time'][index])
-            title_height = 1 - 0.5 * mfig.margin.top / mfig.fig.y
-            fig.suptitle(title, x=0.3, y=title_height, ha='left', fontsize='xx-large')
+            fig.suptitle(title, fontsize='large')
             # Save figure
             savename = savename_func(file['scales/write_number'][index])
             savepath = output.joinpath(savename)
@@ -104,6 +107,7 @@ if __name__ == "__main__":
 
     args = docopt(__doc__)
 
+    AR = float(args['--ASR'])
     A1 = float(args['--ND1'])
     B2 = float(args['--ND2'])
     C3 = float(args['--ND3'])
