@@ -51,7 +51,7 @@ PR=7
 # If VER = 1, then the code will merge, plot, and create a gif
 # 	Check to see if the frames and snapshots folders exist
 #	If so, remove them before running the dedalus script
-if [ $VER -ne 3 ]
+if [ $VER -lt 3 ]
 then
 	if [ -e frames ]
 	then
@@ -65,8 +65,8 @@ then
 	fi
 fi
 
-# If running on local pc and VER=/=3
-if [ $LOC -eq 1 ] && [ $VER -ne 3 ]
+# If running on local pc and VER=1 or 2
+if [ $LOC -eq 1 ] && [ $VER -lt 3 ]
 then
 	#echo 0 > /proc/sys/kernel/yama/ptrace_scope
 	echo "Running Dedalus script for local pc"
@@ -75,8 +75,8 @@ then
     echo ""
 fi
 
-# If running on Niagara and VER=/=3
-if [ $LOC -eq 0 ] && [ $VER -ne 3 ]
+# If running on Niagara and VER=1 or 2
+if [ $LOC -eq 0 ] && [ $VER -lt 3 ]
 then
 	echo "Running Dedalus script for Niagara"
 	# mpirun uses -c, -n, --n, or -np for number of threads / cores
@@ -88,7 +88,7 @@ fi
 
 # If VER = 1 or 3, then run the rest of the code,
 # 	but first check if snapshots folder was made
-if [ $VER -ne 2 ] && [ -e snapshots ]
+if [ $VER -ne 2 ] && [ $VER -ne 4 ] && [ -e snapshots ]
 then
 	echo "Merging snapshots"
 	mpiexec -n $CORES python3 merge.py snapshots
@@ -98,6 +98,16 @@ then
 	echo ""
 	echo "Creating gif"
 	python3 create_gif.py gifs/test.gif
+fi
+
+# If VER = 4, then create an mp4 video of the existing frames
+if [ $VER -eq 4 ] && [ -e frames ]
+then
+	echo "Creating mp4"
+	cd frames/
+	ffmpeg -framerate 10 -i write_%06d.png -c:v libx264 -pix_fmt yuv420p test.mp4
+	cd ..
+	mv frames/test.mp4 mp4s/
 fi
 
 echo "Done"

@@ -222,7 +222,7 @@ bgpf.meta['x']['constant'] = True  # means the NCC is constant along x
 sys.path.insert(0, './_background_profile')
 from Foran_profile import Foran_profile
 #from background_profile import N2_profile
-# Store profile in an array so it can be used for initial conditions later
+# Store profile in an array so it can be used later
 bgpf_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
 #bgpf_array = N2_profile(z, n_layers, val_bot, val_top, slope, z_b, z_t)
 bgpf['g'] = bgpf_array
@@ -251,11 +251,11 @@ if (plot_bgpf and rank == 0 and LOC):
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
-problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))          = -D*bgpf*w - (u*dx(b) + w*bz)")
+problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))     = -D*bgpf*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + dx(p)       =      - (u*dx(u) + w*uz)")
+problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + dx(p)       = - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + dz(p) - A*b =      - (u*dx(w) + w*wz)")
+problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + dz(p) - A*b = - (u*dx(w) + w*wz)")
 
 # Required for differential equation solving in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")
@@ -291,7 +291,7 @@ logger.info('Solver built')
 # Initial conditions
 b = solver.state['b']
 bz = solver.state['bz']
-'''
+
 # Random perturbations, initialized globally for same results in parallel
 gshape = domain.dist.grid_layout.global_shape(scales=1)
 slices = domain.dist.grid_layout.slices(scales=1)
@@ -301,9 +301,9 @@ noise = rand.standard_normal(gshape)[slices]
 # Linear background + perturbations damped at walls
 zb, zt = z_basis.interval
 pert =  1e-3 * noise * (zt - z) * (z - zb)
-'''
+
 # Buoyancy initial conditions
-b['g'] = bgpf_array #C3 * pert
+b['g'] = pert * 0.0
 b.differentiate('z', out=bz)
 
 ###############################################################################
