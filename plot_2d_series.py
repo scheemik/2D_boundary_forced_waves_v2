@@ -2,15 +2,17 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py <files>... [--output=<dir>] [--ASR=<AR>] [--ND1=<A1>] [--ND2=<B2>] [--ND3=<C3>] [--ND4=<D4>]
+    plot_2d_series.py LOC AR NU PR R0 N0 NL <files>... [--output=<dir>]
 
 Options:
-    --output=<dir>          Output directory [default: ./frames]
-    --ASR=<A1>              Aspect ratio of domain
-    --ND1=<A1>              Dimensionless number 1
-    --ND2=<B2>              Dimensionless number 2
-    --ND3=<C3>              Dimensionless number 3
-    --ND4=<D4>              Dimensionless number 4
+    --output=<dir>         Output directory [default: ./frames]
+    LOC             Aspect ratio of domain
+    AR              Dimensionless number 1
+    NU              Dimensionless number 2
+    PR              Dimensionless number 3
+    R0              Dimensionless number 4
+    N0              Dimensionless number 5
+    NL              Dimensionless number 6
 
 """
 
@@ -27,16 +29,13 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
-# Placeholders for the 3 dimensionless numbers
-A1 = 1.1
-Astr = 'Ra'
-B2 = 2.2
-Bstr = 'Pr'
-C3 = 3.3
-Cstr = 'Re'
-D4 = 4.4
-Dstr = r'$N_0$'
-AR = 3.0
+# Strings for the parameters
+str_ar = 'Aspect ratio'
+str_nu = r'$\nu$'
+str_pr = r'$Pr$'
+str_r0 = r'$\rho_0$'
+str_n0 = r'$N_0$'
+str_nl = r'$n_{layers}$'
 
 # Expects numbers in the format 7.0E+2
 def latex_exp(num):
@@ -44,27 +43,32 @@ def latex_exp(num):
     if "E" in float_str:
         base, exponent = float_str.split("E")
         exp = int(exponent)
-        str1 = '$' + str(base) + r'\cdot10^{' + str(exp) + '}$'
+        str1 = '$' + str(base)
+        if (exp != 0):
+            str1 = str1 + r'\cdot10^{' + str(exp)
+        str1 = str1 + '}$'
         return r"{0}".format(str1)
     else:
         return float_str
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
-    font = {'size' : 14}
+    # Change the size of the text overall
+    font = {'size' : 16}
     plt.rc('font', **font)
 
     # Format the dimensionless numbers nicely
-    A = latex_exp(A1)
-    B = latex_exp(B2)
-    C = latex_exp(C3)
-    D = latex_exp(D4)
+    Nu    = latex_exp(NU)
+    Pr    = latex_exp(PR)
+    rho_0 = latex_exp(R0)
+    N_0   = latex_exp(N0)
+    n_l   = NL
 
     # Plot settings
     tasks = ['b', 'p', 'u', 'w']
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(Astr, A, Bstr, B, Cstr, C, Dstr, D, sim_time)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_pr, Pr, str_r0, rho_0, str_n0, N_0, str_nl, n_l, sim_time)
     #title_func = lambda sim_time: '{:}={:.2E}, {:}={:.2E}, {:}={:.2E}, {:}={:.2E}, t={:.3f}'.format(Astr, A1, Bstr, B2, Cstr, C3, Dstr, D4, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
@@ -96,7 +100,7 @@ def main(filename, start, count, output):
             fig.clear()
     plt.close(fig)
 
-
+# Not sure why, but this block needs to be at the end of the script
 if __name__ == "__main__":
 
     import pathlib
@@ -107,16 +111,22 @@ if __name__ == "__main__":
 
     args = docopt(__doc__)
 
-    AR = float(args['--ASR'])
-    A1 = float(args['--ND1'])
-    B2 = float(args['--ND2'])
-    C3 = float(args['--ND3'])
-    D4 = float(args['--ND4'])
+    LOC = bool(args['LOC'])
+    str_loc = 'Local' if LOC else 'Niagara'
+    AR = float(args['AR'])
+    NU = float(args['NU'])
+    PR = float(args['PR'])
+    R0 = float(args['R0'])
+    N0 = float(args['N0'])
+    NL = int(args['NL'])
     if (rank==0):
-        print('plot ',Astr,' = ',A1)
-        print('plot ',Bstr,' = ',B2)
-        print('plot ',Cstr,' = ',C3)
-        print('plot ',Dstr,' = ',D4)
+        print('plot',str_loc,'=',LOC)
+        print('plot',str_ar,'=',AR)
+        print('plot',str_nu,'=',NU)
+        print('plot',str_pr,'=',PR)
+        print('plot',str_r0,'=',R0)
+        print('plot',str_n0,'=',N0)
+        print('plot',str_nl,'=',NL)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:
