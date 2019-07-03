@@ -39,14 +39,12 @@ fi
 # 	-> merge, plot, and create a gif
 
 # Define parameters
-ASR=3.0			# Aspect ratio of domain
-DN1=1.0E-1		# Rayleigh number
-DN2=7.0E+0		# Prandtl number (~7 for water)
-DN3=1.0E+4		# Reynolds number
-DN4=1.0E+0		# N_0 (formerly, Richardson number)
-
-RA=1e5
-PR=7
+AR=3.0			# [nondim]  Aspect ratio of domain
+NU=1.0E-4		# [m^2/s]   Viscosity (momentum diffusivity)
+PR=7.0E+0		# [nondim]  Prandtl number, nu/kappa = 7 for water
+R0=1.0E+0		# [kg/m^3]  Characteristic density
+N0=1.0E+0		# [rad/s]   Characteristic stratification
+NL=0			# [nondim]	Number of inner interfaces
 
 # If VER = 1, then the code will merge, plot, and create a gif
 # 	Check to see if the frames and snapshots folders exist
@@ -71,7 +69,7 @@ then
 	#echo 0 > /proc/sys/kernel/yama/ptrace_scope
 	echo "Running Dedalus script for local pc"
 	# mpiexec uses -n flag for number of processes to use
-    mpiexec -n $CORES python3 current_code.py $LOC $ASR $DN1 $DN2 $DN3 $DN4
+    mpiexec -n $CORES python3 current_code.py $LOC $AR $NU $PR $R0 $N0 $NL
     echo ""
 fi
 
@@ -82,7 +80,7 @@ then
 	# mpirun uses -c, -n, --n, or -np for number of threads / cores
 	#mpirun -c $CORES python3.6 current_code.py $LOC $DN1 $DN2 $DN3 $DN4
 	# mpiexec uses -n flag for number of processes to use
-    mpiexec -n $CORES python3.6 current_code.py $LOC $ASR $DN1 $DN2 $DN3 $DN4
+    mpiexec -n $CORES python3.6 current_code.py $LOC $AR $NU $PR $R0 $N0 $NL
 	echo ""
 fi
 
@@ -90,14 +88,30 @@ fi
 # 	but first check if snapshots folder was made
 if [ $VER -ne 2 ] && [ $VER -ne 4 ] && [ -e snapshots ]
 then
+	if [ -e gifs/test.gif ]
+	then
+		echo "Deleting test.gif"
+		rm -rf gifs/test.gif
+		echo ""
+	fi
 	echo "Merging snapshots"
 	mpiexec -n $CORES python3 merge.py snapshots
 	echo ""
+	if [ -e frames ]
+	then
+		echo "Removing frames"
+		rm -rf frames
+		echo ""
+	fi
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py snapshots/*.h5 --ASR=$ASR --ND1=$DN1 --ND2=$DN2 --ND3=$DN3 --ND4=$DN4
+	mpiexec -n $CORES python3 plot_2d_series.py $LOC $AR $NU $PR $R0 $N0 $NL snapshots/*.h5
 	echo ""
-	echo "Creating gif"
-	python3 create_gif.py gifs/test.gif
+	files=/frames/*
+	if [ -e frames ] && [ ${#files[@]} -gt 0 ]
+	then
+		echo "Creating gif"
+		python3 create_gif.py gifs/test.gif
+	fi
 fi
 
 # If VER = 4, then create an mp4 video of the existing frames

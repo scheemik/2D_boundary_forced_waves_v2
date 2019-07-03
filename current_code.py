@@ -6,15 +6,16 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC ASR DN1 DN2 DN3 DN4
+    current_code.py LOC AR NU PR R0 N0 NL
 
 Arguments:
-    LOC		 1 if local, 0 if on Niagara
-    ASR		 Aspect ratio of domain
-    DN1		 Dimensionless number: Rayleigh
-    DN2		 Dimensionless number: Prandtl
-    DN3      Dimensionless number: Reynolds
-    DN4      Dimensionless number: N_0 (formely, Richardson)
+    LOC     # 1 if local, 0 if on Niagara
+    AR		# [nondim]  Aspect ratio of domain
+    NU		# [m^2/s]   Viscosity (momentum diffusivity)
+    PR		# [nondim]  Prandtl number, nu/kappa = 7 for water
+    R0		# [kg/m^3]  Characteristic density
+    N0		# [rad/s]   Characteristic stratification
+    NL		# [nondim]	Number of inner interfaces
 
 This script uses a Fourier basis in the x direction with periodic boundary
 conditions.  The equations have been non-dimensionalized.
@@ -56,33 +57,32 @@ logger = logging.getLogger(__name__)
 # For adding arguments when running
 from docopt import docopt
 
-# Parameters
-aspect_ratio = 3.0
-Lx, Lz = (aspect_ratio, 1.)
-z_b, z_t = (-Lz/2, Lz/2)
-# Placeholders for dimensionless numbers
-DN1 = 1.1
-DN2 = 2.2
-DN3 = 3.3
-DN4 = 4.4
-# Placeholders for params
-nx = 40*8
-nz = 40*2
-
 # Read in parameters from docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     LOC = bool(arguments['LOC'])
-    DN1 = float(arguments['DN1'])
-    DN2 = float(arguments['DN2'])
-    DN3 = float(arguments['DN3'])
-    DN4 = float(arguments['DN4'])
+    AR = float(arguments['AR'])
+    NU = float(arguments['NU'])
+    PR = float(arguments['PR'])
+    R0 = float(arguments['R0'])
+    N0 = float(arguments['N0'])
+    NL = int(arguments['NL'])
     if (rank == 0):
         print('LOC=',LOC)
-        print('DN1=',DN1)
-        print('DN2=',DN2)
-        print('DN3=',DN3)
-        print('DN4=',DN4)
+        print('AR=',AR)
+        print('NU=',NU)
+        print('PR=',PR)
+        print('R0=',R0)
+        print('N0=',N0)
+        print('NL=',NL)
+
+# Parameters
+aspect_ratio = AR
+Lx, Lz = (aspect_ratio, 1.)
+z_b, z_t = (-Lz/2, Lz/2)
+# Placeholders for params
+nx = 40*8
+nz = 40*2
 
 ###############################################################################
 # Fetch parameters from the correct params file
@@ -105,6 +105,15 @@ adapt_dt = params.adapt_dt
 ###############################################################################
 # Setting parameters
 
+# Physical parameters
+nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
+Pr    = PR          # [nondim]  Prandtl number, nu/kappa = 7 for water
+kappa = nu/Pr       # [m^2/s]   Thermal diffusivity
+rho_0 = R0          # [kg/m^3]  Characteristic density
+N_0   = N0          # [rad/s]   Characteristic stratification
+g     = 9.81        # [m/s^2]   Acceleration due to gravity
+
+# Boundary forcing parameters
 # Bounds of the forcing window
 fl_edge = -3.0*Lx/12.0
 fr_edge =  -Lx/12.0
@@ -117,30 +126,8 @@ kx    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
 kz    = kx * np.tan(theta)
 # Other parameters
-g     = 9.81 # [m/s^2]
 A     = 1.0e-4
-N0    = DN4
-rho0  = 1.0 # only shows up in pressure PolRel
-omega = N0 * np.cos(theta) # [s^-1], from dispersion relation
-
-# Calculate the non-dimensional parameters in the equations from the
-#   dimensionless numbers used as input arguments
-
-#   A = Ra / (Re^2 Pr)
-A1 = DN1 / (DN3**2 * DN2)
-#   B = 1 / (Re Pr)
-B2 = 1.0 / (DN3 * DN2)
-#   C = 1 / (Re)
-C3 = 1.0 / (DN3)
-#   D = (Pr Re^2 / Ra) * (N0^2 / omega^2)
-D4 = N0**2 / (omega**2 * A1)
-
-if (rank == 0):
-    print('omega = ',omega)
-    print('A = ',A1)
-    print('B = ',B2)
-    print('C = ',C3)
-    print('D = ',D4)
+omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 ###############################################################################
 
@@ -159,21 +146,21 @@ problem = de.IVP(domain, variables=['p','b','u','w','bz','uz','wz'])
 # From Nico: all variables are dirchlet by default, so only need to
 #   specify those that are not dirchlet (variables w/o top & bottom bc's)
 problem.meta['p','bz','uz','wz']['z']['dirichlet'] = False
-# Parameters for the dimensionless numbers
-problem.parameters['A'] = A1
-problem.parameters['B'] = B2
-problem.parameters['C'] = C3
-problem.parameters['D'] = D4
+# Parameters for the equations of motion
+problem.parameters['NU'] = nu
+problem.parameters['KA'] = kappa
+problem.parameters['R0'] = rho_0
+problem.parameters['N0'] = N_0
 
 ###############################################################################
 # Forcing from the boundary
 
 # Polarization relation from Cushman-Roisin and Beckers eq (13.7)
 #   (signs implemented later)
-PolRel = {'u': A*(g*omega*kz)/(N0**2*kx),
-          'w': A*(g*omega)/(N0**2),
+PolRel = {'u': A*(g*omega*kz)/(N_0**2*kx),
+          'w': A*(g*omega)/(N_0**2),
           'b': A*g,
-          'p': A*(g*rho0*kz)/(kx**2+kz**2)} # relation for p not used
+          'p': A*(g*rho_0*kz)/(kx**2+kz**2)} # relation for p not used
 
 # Creating forcing amplitudes
 for fld in ['u', 'w', 'b', 'p']:
@@ -203,10 +190,8 @@ problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
 ###############################################################################
 
 # Parameters to determine a specific staircase profile
-n_layers = 0
+n_layers = NL
 slope = 100.0*(n_layers+1)
-val_bot = 1.0E-4
-val_top = -val_bot
 N_1 = 0.95                  # The stratification value above the staircase
 N_2 = 1.24                  # The stratification value below the staircase
 z_bot = -0.1                # Top of staircase (not domain)
@@ -214,26 +199,25 @@ z_top =  0.1                # Bottom of staircase (not domian)
 
 ###############################################################################
 
-# Background Profile (bgpf) as an NCC
-bgpf = domain.new_field()
-bgpf.meta['x']['constant'] = True  # means the NCC is constant along x
+# Background Profile (BP) as an NCC
+BP = domain.new_field()
+BP.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the staircase function from the background profile script
 #import sys
 sys.path.insert(0, './_background_profile')
 from Foran_profile import Foran_profile
 #from background_profile import N2_profile
 # Store profile in an array so it can be used later
-bgpf_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
-#bgpf_array = N2_profile(z, n_layers, val_bot, val_top, slope, z_b, z_t)
-bgpf['g'] = bgpf_array
-problem.parameters['bgpf'] = bgpf  # pass function in as a parameter
-del bgpf
+BP_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
+BP['g'] = BP_array
+problem.parameters['BP'] = BP  # pass function in as a parameter
+del BP
 
 # Plots the background profile
-plot_bgpf = True
-if (plot_bgpf and rank == 0 and LOC):
+plot_BP = True
+if (plot_BP and rank == 0 and LOC):
     vert = np.array(z[0])
-    hori = np.array(bgpf_array[0])
+    hori = np.array(BP_array[0])
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
         fg, ax = plt.subplots(1,1)
         ax.set_title('Test Profile')
@@ -251,11 +235,14 @@ if (plot_bgpf and rank == 0 and LOC):
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
-problem.add_equation("dt(b) - B*(dx(dx(b)) + dz(bz))     = -D*bgpf*w - (u*dx(b) + w*bz)")
+problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
+                    + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - C*(dx(dx(u)) + dz(uz)) + dx(p)       = - (u*dx(u) + w*uz)")
+problem.add_equation("dt(u) - NU*(dx(dx(u)) + dz(uz)) + dx(p)/R0"
+                    + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - C*(dx(dx(w)) + dz(wz)) + dz(p) - A*b = - (u*dx(w) + w*wz)")
+problem.add_equation("dt(w) - NU*(dx(dx(w)) + dz(wz)) + dz(p)/R0 - b"
+                    + "= - (u*dx(w) + w*wz)")
 
 # Required for differential equation solving in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")
@@ -328,9 +315,8 @@ CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
-flow.add_property("sqrt(u*u + w*w) / A", name='Re') # this is no longer correct. change to Rossby number?
 # Reduced Richardson number
-#flow.add_property("(4*(N0 + bz) - (uz**2))/N0**2", name='Ri_red')
+flow.add_property("(4*(N0 + bz) - (uz**2))/N0**2", name='Ri_red')
 
 ###############################################################################
 
@@ -346,12 +332,11 @@ try:
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
-            logger.info('Max Re = %f' %flow.max('Re'))
-            """
+            #logger.info('Max Re = %f' %flow.max('Re'))
             logger.info('Min reduced Ri = {0:f}'.format(flow.min('Ri_red')))
-            if isnan(flow.min('Ri_red')):
+            if np.isnan(flow.min('Ri_red')):
                 raise NameError('Code blew up it seems')
-                """
+
 except:
     logger.error('Exception raised, triggering end of main loop.')
     raise
