@@ -6,13 +6,13 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC AR NU PR R0 N0 NL
+    current_code.py LOC AR NU KA R0 N0 NL
 
 Arguments:
     LOC     # 1 if local, 0 if on Niagara
     AR		# [nondim]  Aspect ratio of domain
     NU		# [m^2/s]   Viscosity (momentum diffusivity)
-    PR		# [nondim]  Prandtl number, nu/kappa = 7 for water
+    KA		# [m^2/s]   Thermal diffusivity
     R0		# [kg/m^3]  Characteristic density
     N0		# [rad/s]   Characteristic stratification
     NL		# [nondim]	Number of inner interfaces
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     LOC = bool(arguments['LOC'])
     AR = float(arguments['AR'])
     NU = float(arguments['NU'])
-    PR = float(arguments['PR'])
+    KA = float(arguments['KA'])
     R0 = float(arguments['R0'])
     N0 = float(arguments['N0'])
     NL = int(arguments['NL'])
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         print('LOC=',LOC)
         print('AR=',AR)
         print('NU=',NU)
-        print('PR=',PR)
+        print('KA=',KA)
         print('R0=',R0)
         print('N0=',N0)
         print('NL=',NL)
@@ -107,8 +107,9 @@ adapt_dt = params.adapt_dt
 
 # Physical parameters
 nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
-Pr    = PR          # [nondim]  Prandtl number, nu/kappa = 7 for water
-kappa = nu/Pr       # [m^2/s]   Thermal diffusivity
+kappa = KA          # [m^2/s]   Thermal diffusivity
+Pr    = NU/KA       # [nondim]  Prandtl number, nu/kappa = 7 for water
+print('Prandtl number =',Pr)
 rho_0 = R0          # [kg/m^3]  Characteristic density
 N_0   = N0          # [rad/s]   Characteristic stratification
 g     = 9.81        # [m/s^2]   Acceleration due to gravity
@@ -214,7 +215,7 @@ problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
 
 # Plots the background profile
-plot_BP = True
+plot_BP = False
 if (plot_BP and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(BP_array[0])
@@ -316,7 +317,7 @@ CFL.add_velocities(('u', 'w'))
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 # Reduced Richardson number
-flow.add_property("(4*(N0 + bz) - (uz**2))/N0**2", name='Ri_red')
+flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
 
 ###############################################################################
 

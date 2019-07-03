@@ -40,9 +40,9 @@ fi
 
 # Define parameters
 AR=3.0			# [nondim]  Aspect ratio of domain
-NU=1.0E-4		# [m^2/s]   Viscosity (momentum diffusivity)
-PR=7.0E+0		# [nondim]  Prandtl number, nu/kappa = 7 for water
-R0=1.0E+0		# [kg/m^3]  Characteristic density
+NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
+KA=1.4E-7		# [m^2/s]   Thermal diffusivity
+R0=1.0E+3		# [kg/m^3]  Characteristic density
 N0=1.0E+0		# [rad/s]   Characteristic stratification
 NL=0			# [nondim]	Number of inner interfaces
 
@@ -69,7 +69,7 @@ then
 	#echo 0 > /proc/sys/kernel/yama/ptrace_scope
 	echo "Running Dedalus script for local pc"
 	# mpiexec uses -n flag for number of processes to use
-    mpiexec -n $CORES python3 current_code.py $LOC $AR $NU $PR $R0 $N0 $NL
+    mpiexec -n $CORES python3 current_code.py $LOC $AR $NU $KA $R0 $N0 $NL
     echo ""
 fi
 
@@ -80,7 +80,7 @@ then
 	# mpirun uses -c, -n, --n, or -np for number of threads / cores
 	#mpirun -c $CORES python3.6 current_code.py $LOC $DN1 $DN2 $DN3 $DN4
 	# mpiexec uses -n flag for number of processes to use
-    mpiexec -n $CORES python3.6 current_code.py $LOC $AR $NU $PR $R0 $N0 $NL
+    mpiexec -n $CORES python3.6 current_code.py $LOC $AR $NU $KA $R0 $N0 $NL
 	echo ""
 fi
 
@@ -104,7 +104,7 @@ then
 		echo ""
 	fi
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py $LOC $AR $NU $PR $R0 $N0 $NL snapshots/*.h5
+	mpiexec -n $CORES python3 plot_2d_series.py $LOC $AR $NU $KA $R0 $N0 $NL snapshots/*.h5
 	echo ""
 	files=/frames/*
 	if [ -e frames ] && [ ${#files[@]} -gt 0 ]
