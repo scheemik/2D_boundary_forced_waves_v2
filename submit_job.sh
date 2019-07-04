@@ -30,13 +30,6 @@ DIRECTORY='2D_boundary_forced_waves_v2'
 
 set -x # echos each command as it is executed
 
-cd ${HOME}/Dedalus_Projects/$DIRECTORY
-
-if [ -e ${SCRATCH}/Dedalus_Scratch/$DIRECTORY ]
-then
-        rm -rf ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/*
-fi
-
 # Go into directory of job to run
 cd ${HOME}/Dedalus_Projects/$DIRECTORY
 # Pull from github the latest version of that project
