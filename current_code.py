@@ -81,8 +81,8 @@ aspect_ratio = AR
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
 # Placeholders for params
-nx = 40*8
-nz = 40*2
+nx = 40*2
+nz = 40*1
 
 ###############################################################################
 # Fetch parameters from the correct params file
@@ -98,6 +98,9 @@ elif LOC == False:
 
 nx = int(params.n_x)
 nz = int(params.n_z)
+if (rank==0):
+    print('n_x =',nx)
+    print('n_z =',nz)
 sim_time_stop  = params.sim_time_stop
 wall_time_stop = params.wall_time_stop
 adapt_dt = params.adapt_dt
@@ -127,7 +130,7 @@ kx    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
 kz    = kx * np.tan(theta)
 # Other parameters
-A     = 1.0e-4
+A     = 3.0e-4
 omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 ###############################################################################
@@ -190,6 +193,29 @@ problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
 
 ###############################################################################
 
+# Parameters to set a sponge layer at the bottom
+sp_slope = -10.
+max_sp   =  10.
+H_sl     =  0.1
+
+###############################################################################
+
+# Sponge Layer (SL) as an NCC
+SL = domain.new_field()
+SL.meta['x']['constant'] = True  # means the NCC is constant along x
+# Import the sponge layer function from the sponge layer script
+#import sys
+sys.path.insert(0, './_sponge_layer')
+from sponge_layer import sponge_profile
+# Store profile in an array so it can be used later
+SL_array = sponge_profile(z, z_b, z_t, sp_slope, max_sp, H_sl)
+SL['g'] = SL_array
+problem.parameters['SL'] = SL  # pass function in as a parameter
+#   Multiply nu by SL in the equations of motion
+del SL
+
+###############################################################################
+
 # Parameters to determine a specific staircase profile
 n_layers = NL
 slope = 100.0*(n_layers+1)
@@ -207,7 +233,6 @@ BP.meta['x']['constant'] = True  # means the NCC is constant along x
 #import sys
 sys.path.insert(0, './_background_profile')
 from Foran_profile import Foran_profile
-#from background_profile import N2_profile
 # Store profile in an array so it can be used later
 BP_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
 BP['g'] = BP_array
@@ -239,10 +264,10 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - NU*(dx(dx(u)) + dz(uz)) + dx(p)/R0"
+problem.add_equation("dt(u) - SL*NU*(dx(dx(u)) + dz(uz)) + dx(p)/R0"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - NU*(dx(dx(w)) + dz(wz)) + dz(p)/R0 - b"
+problem.add_equation("dt(w) - SL*NU*(dx(dx(w)) + dz(wz)) + dz(p)/R0 - b"
                     + "= - (u*dx(w) + w*wz)")
 
 # Required for differential equation solving in Chebyshev dimension
@@ -318,6 +343,10 @@ CFL.add_velocities(('u', 'w'))
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 # Reduced Richardson number
 flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
+# Gradient Richardson number
+#flow.add_property("4*bz - (uz**2)", name='Ri_grd')
+# N^2(z)
+#flow.add_property("(N0)")
 
 ###############################################################################
 
@@ -333,10 +362,15 @@ try:
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
-            #logger.info('Max Re = %f' %flow.max('Re'))
+            '''
+            logger.info('Min gradient Ri = {0:f}'.format(flow.min('Ri_grd')))
+            if np.isnan(flow.min('Ri_grd')):
+                raise NameError('Code blew up it seems')
+            '''
             logger.info('Min reduced Ri = {0:f}'.format(flow.min('Ri_red')))
             if np.isnan(flow.min('Ri_red')):
                 raise NameError('Code blew up it seems')
+
 
 except:
     logger.error('Exception raised, triggering end of main loop.')

@@ -119,7 +119,7 @@ if __name__ == "__main__":
     N0 = float(args['N0'])
     NL = int(args['NL'])
     if (rank==0):
-        print('plot',str_loc,'=',LOC)
+        print('plot',str_loc)
         print('plot',str_ar,'=',AR)
         print('plot',str_nu,'=',NU)
         print('plot',str_ka,'=',KA)
