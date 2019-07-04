@@ -42,7 +42,7 @@ cd ${HOME}/Dedalus_Projects/$DIRECTORY
 # Pull from github the latest version of that project
 git pull
 # Copy that into the scratch directory, ignoring the .git/ directory and others
-rsync -av --progress /home/n/ngrisoua/mschee/Dedalus_Projects/2D_boundary_forced_waves_v2 /scratch/n/ngrisoua/mschee/Dedalus_Scratch --exclude .git/ --exclude mp4s/ --exclude non-dimensional/ --exclude OG_RB_code/
+rsync -av --progress /home/n/ngrisoua/mschee/Dedalus_Projects/2D_boundary_forced_waves_v2 /scratch/n/ngrisoua/mschee/Dedalus_Scratch --exclude .git/ --exclude mp4s/ --exclude non-dimensional/ --exclude OG_RB_code/ --exclude _boundary_forcing/ --exclude _code_checkpnts/ --exclude sympy_test.py
 mv ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$SUBDIR ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR
 cd ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR
 
