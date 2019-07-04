@@ -23,18 +23,18 @@ fi
 DATE=`date +"%m/%d-%H:%M"`
 JOBNAME="n$CORES-$DATE-2D_BF"
 DIRECTORY='2D_boundary_forced_waves_v2'
-SUBDIR=''
+#SUBDIR=''
 # create a 2 digit version of CORES to help with file naming
-printf -v CO "%02d" $CORES
-NSUBDIR=''#"n$CO-$SUBDIR"
+#printf -v CO "%02d" $CORES
+#NSUBDIR=''#"n$CO-$SUBDIR"
 
 set -x # echos each command as it is executed
 
 cd ${HOME}/Dedalus_Projects/$DIRECTORY
 
-if [ -e ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR ]
+if [ -e ${SCRATCH}/Dedalus_Scratch/$DIRECTORY ]
 then
-        rm -rf ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR
+        rm -rf ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/*
 fi
 
 # Go into directory of job to run
@@ -42,8 +42,8 @@ cd ${HOME}/Dedalus_Projects/$DIRECTORY
 # Pull from github the latest version of that project
 git pull
 # Copy that into the scratch directory, ignoring the .git/ directory and others
-rsync -av --progress /home/n/ngrisoua/mschee/Dedalus_Projects/2D_boundary_forced_waves_v2 /scratch/n/ngrisoua/mschee/Dedalus_Scratch --exclude .git/ --exclude mp4s/ --exclude non-dimensional/ --exclude OG_RB_code/ --exclude _boundary_forcing/ --exclude _code_checkpnts/ --exclude sympy_test.py
-mv ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$SUBDIR ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR
+rsync -av --progress /home/n/ngrisoua/mschee/Dedalus_Projects/2D_boundary_forced_waves_v2 /scratch/n/ngrisoua/mschee/Dedalus_Scratch --exclude .git/ --exclude mp4s/ --exclude non-dimensional/ --exclude OG_RB_code/ --exclude _boundary_forcing/ --exclude _code_checkpnts/ --exclude misc/ --exclude snapshots/ --exclude frames/
+#mv ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$SUBDIR ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR
 cd ${SCRATCH}/Dedalus_Scratch/$DIRECTORY/$NSUBDIR
 
 # Submit the job
