@@ -109,7 +109,7 @@ adapt_dt = params.adapt_dt
 nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
 kappa = KA          # [m^2/s]   Thermal diffusivity
 Pr    = NU/KA       # [nondim]  Prandtl number, nu/kappa = 7 for water
-print('Prandtl number =',Pr)
+if (rank==0) print('Prandtl number =',Pr)
 rho_0 = R0          # [kg/m^3]  Characteristic density
 N_0   = N0          # [rad/s]   Characteristic stratification
 g     = 9.81        # [m/s^2]   Acceleration due to gravity

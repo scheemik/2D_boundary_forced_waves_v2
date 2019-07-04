@@ -110,8 +110,8 @@ if __name__ == "__main__":
 
     args = docopt(__doc__)
 
-    LOC = bool(args['LOC'])
-    str_loc = 'Local' if LOC else 'Niagara'
+    LOC = int(args['LOC'])
+    str_loc = 'Local' if bool(LOC) else 'Niagara'
     AR = float(args['AR'])
     NU = float(args['NU'])
     KA = float(args['KA'])

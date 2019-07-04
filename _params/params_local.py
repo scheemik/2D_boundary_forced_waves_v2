@@ -2,8 +2,8 @@
 #   Runs faster, but coarser resolution
 
 # Number of points in each dimension
-n_x = 512 #256
-n_z = 128 #64
+n_x = 1024 #256
+n_z = 256 #64
 
 # Stop times for the simulation
 sim_time_stop = 25 # time units (t)
