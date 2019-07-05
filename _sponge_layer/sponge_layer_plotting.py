@@ -39,9 +39,9 @@ z = domain.grid(1)
 ###############################################################################
 
 # Parameters to determine a specific staircase profile
-slope = -100.0
-max_sp = 10.
-H_sl = 0.1
+slope = -50.0
+max_sp = 50.
+H_sl = 0.05
 
 # Store profile in an array
 sponge_array = sponge_profile(z, z_b, z_t, slope, max_sp, H_sl)

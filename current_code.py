@@ -194,9 +194,9 @@ problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
 ###############################################################################
 
 # Parameters to set a sponge layer at the bottom
-sp_slope = -10.
-max_sp   =  10.
-H_sl     =  0.1
+sp_slope = -50.
+max_sp   =  50.
+H_sl     =  0.05
 
 ###############################################################################
 
