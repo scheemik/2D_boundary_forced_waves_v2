@@ -64,7 +64,7 @@ if __name__ == '__main__':
     AR = float(arguments['AR'])
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
-    R0 = float(arguments['R0'])
+    #R0 = float(arguments['R0'])
     N0 = float(arguments['N0'])
     NL = int(arguments['NL'])
     if (rank == 0):
@@ -72,7 +72,7 @@ if __name__ == '__main__':
         print('AR=',AR)
         print('NU=',NU)
         print('KA=',KA)
-        print('R0=',R0)
+        #print('R0=',R0)
         print('N0=',N0)
         print('NL=',NL)
 
@@ -113,7 +113,7 @@ nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
 kappa = KA          # [m^2/s]   Thermal diffusivity
 Pr    = NU/KA       # [nondim]  Prandtl number, nu/kappa = 7 for water
 if (rank==0): print('Prandtl number =',Pr)
-rho_0 = R0          # [kg/m^3]  Characteristic density
+#rho_0 = R0          # [kg/m^3]  Characteristic density -> now wrapped into pressure
 N_0   = N0          # [rad/s]   Characteristic stratification
 g     = 9.81        # [m/s^2]   Acceleration due to gravity
 
@@ -153,7 +153,7 @@ problem.meta['p','bz','uz','wz']['z']['dirichlet'] = False
 # Parameters for the equations of motion
 problem.parameters['NU'] = nu
 problem.parameters['KA'] = kappa
-problem.parameters['R0'] = rho_0
+#problem.parameters['R0'] = rho_0
 problem.parameters['N0'] = N_0
 
 ###############################################################################
@@ -163,11 +163,11 @@ problem.parameters['N0'] = N_0
 #   (signs implemented later)
 PolRel = {'u': A*(g*omega*kz)/(N_0**2*kx),
           'w': A*(g*omega)/(N_0**2),
-          'b': A*g,
-          'p': A*(g*rho_0*kz)/(kx**2+kz**2)} # relation for p not used
+          'b': A*g}#,
+          #'p': A*(g*rho_0*kz)/(kx**2+kz**2)} # relation for p not used
 
 # Creating forcing amplitudes
-for fld in ['u', 'w', 'b', 'p']:
+for fld in ['u', 'w', 'b']:#, 'p']:
     BF = domain.new_field()
     BF.meta['x']['constant'] = True  # means the NCC is constant along x
     BF['g'] = PolRel[fld]
@@ -189,7 +189,7 @@ problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(ta
 problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z - omega*t)*window"
 problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z - omega*t)*window"
 problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
-problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
+#problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
 
 ###############################################################################
 
@@ -257,17 +257,17 @@ if (plot_BP and rank == 0 and LOC):
 
 ###############################################################################
 
-# Non-Dimensionalized Equations
+# Non-Dimensionalized Equations (non-linear terms on RHS)
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - SL*NU*(dx(dx(u)) + dz(uz)) + dx(p)/R0"
+problem.add_equation("dt(u) - SL*NU*(dx(dx(u)) + dz(uz)) + dx(p)" #/R0"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - SL*NU*(dx(dx(w)) + dz(wz)) + dz(p)/R0 - b"
+problem.add_equation("dt(w) - SL*NU*(dx(dx(w)) + dz(wz)) + dz(p) - b" #/R0"
                     + "= - (u*dx(w) + w*wz)")
 
 # Required for differential equation solving in Chebyshev dimension
