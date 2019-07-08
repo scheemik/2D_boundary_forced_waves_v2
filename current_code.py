@@ -81,8 +81,8 @@ aspect_ratio = AR
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
 # Placeholders for params
-nx = 40*2
-nz = 40*1
+nx = 40*2       # number of grid points in x direction
+nz = 40*1       # number of grid points in z direction in main domain
 
 ###############################################################################
 # Fetch parameters from the correct params file
@@ -135,9 +135,20 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 ###############################################################################
 
+# Parameters to set a sponge layer at the bottom
+nz_sp = 40          # number of grid points in z direction in sponge domain
+sp_slope = -50.     # slope of tanh function in slope
+max_sp   =  50.     # max coefficient for nu at bottom of sponge
+H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
+z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
+
+###############################################################################
+
 # Create bases and domain
-x_basis = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
-z_basis = de.Chebyshev('z', nz, interval=(z_b, z_t), dealias=3/2)
+x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
+z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
+z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
+z_basis  = de.Compound('z', (z_sponge, z_main))
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
@@ -193,13 +204,6 @@ problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
 
 ###############################################################################
 
-# Parameters to set a sponge layer at the bottom
-sp_slope = -50.
-max_sp   =  50.
-H_sl     =  0.05
-
-###############################################################################
-
 # Sponge Layer (SL) as an NCC
 SL = domain.new_field()
 SL.meta['x']['constant'] = True  # means the NCC is constant along x
@@ -208,11 +212,27 @@ SL.meta['x']['constant'] = True  # means the NCC is constant along x
 sys.path.insert(0, './_sponge_layer')
 from sponge_layer import sponge_profile
 # Store profile in an array so it can be used later
-SL_array = sponge_profile(z, z_b, z_t, sp_slope, max_sp, H_sl)
+SL_array = sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
 SL['g'] = SL_array
 problem.parameters['SL'] = SL  # pass function in as a parameter
 #   Multiply nu by SL in the equations of motion
 del SL
+
+# Plots the background profile
+plot_SL = True
+if (plot_SL and rank == 0 and LOC):
+    vert = np.array(z[0])
+    hori = np.array(SL_array[0])
+    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
+        fg, ax = plt.subplots(1,1)
+        ax.set_title('Sponge Profile')
+        ax.set_xlabel(r'viscosity coefficient')
+        ax.set_ylabel(r'depth ($z$)')
+        ax.set_ylabel('z')
+        ax.set_ylim([z_sb,z_t])
+        ax.plot(hori, vert, '-')
+        plt.grid(True)
+        plt.show()
 
 ###############################################################################
 
@@ -246,7 +266,7 @@ if (plot_BP and rank == 0 and LOC):
     hori = np.array(BP_array[0])
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
         fg, ax = plt.subplots(1,1)
-        ax.set_title('Test Profile')
+        ax.set_title('Background Profile')
         ax.set_xlabel(r'frequency ($N^2$)')
         ax.set_ylabel(r'depth ($z$)')
         ax.set_ylabel('z')

@@ -26,11 +26,20 @@ aspect_ratio = 3.0
 Lx, Lz = (aspect_ratio, 1.)
 z_b, z_t = (-Lz/2, Lz/2)
 
+# Parameters to set a sponge layer at the bottom
+nz_sp = 40          # number of grid points in z direction in sponge domain
+sp_slope = -50.     # slope of tanh function in slope
+max_sp   =  50.     # max coefficient for nu at bottom of sponge
+H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
+z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
+
 ###############################################################################
 
 # Create bases and domain
-x_basis = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
-z_basis = de.Chebyshev('z', nz, interval=(z_b, z_t), dealias=3/2)
+x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
+z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
+z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
+z_basis  = de.Compound('z', (z_sponge, z_main))
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
@@ -38,13 +47,8 @@ z = domain.grid(1)
 
 ###############################################################################
 
-# Parameters to determine a specific staircase profile
-slope = -50.0
-max_sp = 50.
-H_sl = 0.05
-
 # Store profile in an array
-sponge_array = sponge_profile(z, z_b, z_t, slope, max_sp, H_sl)
+sponge_array = sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
 
 # Plots the background profile
 plot_bgpf = True
@@ -59,7 +63,7 @@ if (plot_bgpf):
         ax1.set_title('Test Profile')
         ax1.set_xlabel(r'sponge coefficient')
         ax1.set_ylabel(r'depth ($z$)')
-        ax1.set_ylim([z_b,z_t])
+        ax1.set_ylim([z_sb,z_t])
         ax1.plot(plot_p, plot_z, 'k-')
 
         plt.grid(True)
