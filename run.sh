@@ -37,6 +37,8 @@ fi
 #	-> run the script
 # VER = 3
 # 	-> merge, plot, and create a gif
+# VER = 4
+#	-> create mp4 from frames
 
 # Define parameters
 AR=3.0			# [nondim]  Aspect ratio of domain
