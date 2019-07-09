@@ -23,6 +23,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.ioff()
 from dedalus.extras import plot_tools
+
+# Modified the dedalus plot function to accept y limits
+import sys
+sys.path.insert(0, './_misc')
+from plot_tools_mod import plot_bot_3d_mod
+
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 #print("thread %d of %d" % (comm.Get_rank(), comm.Get_size()))
@@ -88,7 +94,7 @@ def main(filename, start, count, output):
                 axes = mfig.add_axes(i, j, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
-                plot_tools.plot_bot_3d(dset, 0, index, axes=axes, title=task, even_scale=True) # clim=(cmin,cmax) # specify constant colorbar limits
+                plot_bot_3d_mod(dset, 0, index, y_lims=[-0.5,0.5], axes=axes, title=task, even_scale=True) # clim=(cmin,cmax) # specify constant colorbar limits
             # Add time title
             title = title_func(file['scales/sim_time'][index])
             fig.suptitle(title, fontsize='large')

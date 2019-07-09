@@ -155,7 +155,7 @@ x = domain.grid(0)
 z = domain.grid(1)
 
 # Making a plot of the grid spacing in the z direction
-plot_z_basis = True
+plot_z_basis = False
 if (plot_z_basis and rank==0 and LOC):
     # scale should match dealias
     grid_spacing = z_basis.grid(scale=3/2)
@@ -235,7 +235,7 @@ problem.parameters['SL'] = SL  # pass function in as a parameter
 del SL
 
 # Plots the background profile
-plot_SL = True
+plot_SL = False
 if (plot_SL and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(SL_array[0])
