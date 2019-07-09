@@ -137,7 +137,7 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 # Parameters to set a sponge layer at the bottom
 nz_sp = 40          # number of grid points in z direction in sponge domain
-sp_slope = -50.     # slope of tanh function in slope
+sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
 H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
 z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
@@ -153,6 +153,22 @@ domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
 z = domain.grid(1)
+
+# Making a plot of the grid spacing in the z direction
+plot_z_basis = True
+if (plot_z_basis and rank==0 and LOC):
+    # scale should match dealias
+    grid_spacing = z_basis.grid(scale=3/2)
+    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
+        plt.figure(figsize=(10, 1))
+        plt.plot(grid_spacing, np.zeros_like(grid_spacing)+1, '.', markersize=2)
+        # Makes a dividing line between the sponge and the main domain
+        plt.plot((z_b, z_b), (0, 2), 'k--')
+        plt.title('Vertical grid spacing')
+        plt.xlabel(r'depth ($z$)')
+        plt.ylim([0, 2])
+        plt.gca().yaxis.set_ticks([])
+        plt.show()
 
 ###############################################################################
 
@@ -228,7 +244,6 @@ if (plot_SL and rank == 0 and LOC):
         ax.set_title('Sponge Profile')
         ax.set_xlabel(r'viscosity coefficient')
         ax.set_ylabel(r'depth ($z$)')
-        ax.set_ylabel('z')
         ax.set_ylim([z_sb,z_t])
         ax.plot(hori, vert, '-')
         plt.grid(True)
@@ -269,7 +284,6 @@ if (plot_BP and rank == 0 and LOC):
         ax.set_title('Background Profile')
         ax.set_xlabel(r'frequency ($N^2$)')
         ax.set_ylabel(r'depth ($z$)')
-        ax.set_ylabel('z')
         ax.set_ylim([z_b,z_t])
         ax.plot(hori, vert, '-')
         plt.grid(True)

@@ -28,7 +28,7 @@ z_b, z_t = (-Lz/2, Lz/2)
 
 # Parameters to set a sponge layer at the bottom
 nz_sp = 40          # number of grid points in z direction in sponge domain
-sp_slope = -50.     # slope of tanh function in slope
+sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
 H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
 z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer

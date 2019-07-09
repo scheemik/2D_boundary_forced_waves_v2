@@ -23,8 +23,8 @@ def sponge_profile(z, z_bottom, z_top, slope, max_coeff, H_sl):
     values = 0*z
     # Find height of domain
     H = z_top - z_bottom
-    # Find top of sponge layer
-    sp_t = z_bottom + H*H_sl
+    # Find middle of sponge layer
+    sp_t = z_bottom + H*H_sl/2
     # Add upper stratification
     values += 1 + tanh_(z, max_coeff-1, slope, sp_t)
     return values
