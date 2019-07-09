@@ -115,8 +115,16 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
     cmap = matplotlib.cm.get_cmap(cmap)
     cmap.set_bad('0.7')
 
+    # Fix off-by-one mismatch between meshes and data
+    xmesh = xmesh[1:,1:]
+    ymesh = ymesh[1:,1:]
+
     # Plot
     plot = paxes.pcolormesh(xmesh, ymesh, data, cmap=cmap, zorder=1)
+    # print('x',xmesh.shape)
+    # print('y',ymesh.shape)
+    # print('d',data.shape)
+    plat = paxes.contour(xmesh, ymesh, data, colors='k')
     paxes.axis(pad_limits(xmesh, ymesh))
     paxes.tick_params(length=0, width=0)
     if clim is None:

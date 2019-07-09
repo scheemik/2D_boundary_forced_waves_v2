@@ -3,7 +3,7 @@
 
 # Number of points in each dimension
 n_x = 1024 #256
-n_z = 256 #64
+n_z = 512 #64
 
 # Stop times for the simulation
 sim_time_stop = 25 # time units (t)

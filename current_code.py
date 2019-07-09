@@ -136,7 +136,8 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 ###############################################################################
 
 # Parameters to set a sponge layer at the bottom
-nz_sp = 40          # number of grid points in z direction in sponge domain
+nz_sp = 256          # number of grid points in z direction in sponge domain
+nz_m  = nz-nz_sp
 sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
 H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
@@ -146,8 +147,8 @@ z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
 
 # Create bases and domain
 x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
-z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
-z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
+z_main   = de.Chebyshev('zm', 256, interval=(z_b, z_t), dealias=3/2)
+z_sponge = de.Chebyshev('zs', 40, interval=(z_sb, z_b), dealias=3/2)
 z_basis  = de.Compound('z', (z_sponge, z_main))
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
