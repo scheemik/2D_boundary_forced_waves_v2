@@ -137,7 +137,6 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 # Parameters to set a sponge layer at the bottom
 nz_sp = 40          # number of grid points in z direction in sponge domain
-nz_m  = nz-nz_sp
 sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
 H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
@@ -147,13 +146,9 @@ z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
 
 # Create bases and domain
 x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
-compound_z = False
-if compound_z:
-    z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
-    z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
-    z_basis  = de.Compound('z', (z_sponge, z_main))
-else:
-    z_basis = de.Chebyshev('z', nz, interval=(z_sb, z_t), dealias=3/2)
+z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
+z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
+z_basis  = de.Compound('z', (z_sponge, z_main))
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
@@ -233,14 +228,14 @@ SL.meta['x']['constant'] = True  # means the NCC is constant along x
 sys.path.insert(0, './_sponge_layer')
 from sponge_layer import sponge_profile
 # Store profile in an array so it can be used later
-SL_array = 0*z + 1 #sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
+SL_array = sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
 SL['g'] = SL_array
 problem.parameters['SL'] = SL  # pass function in as a parameter
 #   Multiply nu by SL in the equations of motion
 del SL
 
 # Plots the sponge layer coefficient profile
-plot_SL = True
+plot_SL = False
 if (plot_SL and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(SL_array[0])

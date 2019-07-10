@@ -74,7 +74,7 @@ def main(filename, start, count, output):
     plot_all = False
     if plot_all:
         tasks = ['b', 'p', 'u', 'w']
-        nrows, ncols = 2, 2#4, 1
+        nrows, ncols = 2, 2
     else:
         tasks = ['b', 'w']
         nrows, ncols = 2, 1
@@ -83,7 +83,7 @@ def main(filename, start, count, output):
     title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_r0, rho_0, str_n0, N_0, str_nl, n_l, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
-    #   nrows and ncols specified above
+    #   nrows, ncols set above
     image = plot_tools.Box(AR, 1)
     pad = plot_tools.Frame(0.2, 0.2, 0.1, 0.1)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
@@ -130,7 +130,8 @@ if __name__ == "__main__":
     R0 = float(args['R0'])
     N0 = float(args['N0'])
     NL = int(args['NL'])
-    if (rank==0):
+    print_vals = False
+    if (rank==0 and print_vals):
         print('plot',str_loc)
         print('plot',str_ar,'=',AR)
         print('plot',str_nu,'=',NU)
