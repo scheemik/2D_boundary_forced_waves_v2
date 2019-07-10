@@ -96,8 +96,13 @@ then
 		rm -rf gifs/test.gif
 		echo ""
 	fi
-	echo "Merging snapshots"
-	mpiexec -n $CORES python3 merge.py snapshots
+	if [ -e snapshots/snapshots_s1.h5 ]
+	then
+		echo "Snapshots already merged"
+	else
+		echo "Merging snapshots"
+		mpiexec -n $CORES python3 merge.py snapshots
+	fi
 	echo ""
 	if [ -e frames ]
 	then
