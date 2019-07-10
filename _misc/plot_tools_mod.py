@@ -124,7 +124,8 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
     # print('x',xmesh.shape)
     # print('y',ymesh.shape)
     # print('d',data.shape)
-    plat = paxes.contour(xmesh, ymesh, data, colors='k')
+    eps = 0.0001
+    plat = paxes.contour(xmesh, ymesh, np.ma.masked_where(data > -eps and data < eps, data), 15, cmap='BuYlRd')
     paxes.axis(pad_limits(xmesh, ymesh))
     paxes.tick_params(length=0, width=0)
     if clim is None:
