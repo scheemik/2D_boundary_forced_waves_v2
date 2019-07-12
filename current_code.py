@@ -353,6 +353,7 @@ pert =  1e-3 * noise * (zt - z) * (z - zb)
 
 # Buoyancy initial conditions
 b['g'] = pert * 0.0
+print('rank',rank,'has shape =',np.shape(b['g']))
 b.differentiate('z', out=bz)
 
 ###############################################################################
@@ -378,11 +379,10 @@ CFL.add_velocities(('u', 'w'))
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 # Reduced Richardson number
-flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
-# Gradient Richardson number
-#flow.add_property("4*bz - (uz**2)", name='Ri_grd')
-# N^2(z)
-#flow.add_property("(N0)")
+#flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
+# Some other criterion
+flow.add_property("(u*dx(u) + w*uz)/omega", name='Lin_Criterion')
+# (kx*u + kz*w)/omega
 
 ###############################################################################
 
@@ -398,14 +398,14 @@ try:
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
-            '''
-            logger.info('Min gradient Ri = {0:f}'.format(flow.min('Ri_grd')))
-            if np.isnan(flow.min('Ri_grd')):
+            logger.info('Max linear criterion = {0:f}'.format(flow.max('Lin_Criterion')))
+            if np.isnan(flow.max('Lin_Criterion')):
                 raise NameError('Code blew up it seems')
             '''
             logger.info('Min reduced Ri = {0:f}'.format(flow.min('Ri_red')))
             if np.isnan(flow.min('Ri_red')):
                 raise NameError('Code blew up it seems')
+            '''
 
 
 except:
