@@ -136,6 +136,7 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 ###############################################################################
 
 # Parameters to set a sponge layer at the bottom
+use_sponge_layer = False
 nz_sp = 40          # number of grid points in z direction in sponge domain
 sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
@@ -146,9 +147,12 @@ z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
 
 # Create bases and domain
 x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
-z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
-z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
-z_basis  = de.Compound('z', (z_sponge, z_main))
+if use_sponge_layer:
+    z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
+    z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
+    z_basis  = de.Compound('z', (z_sponge, z_main))
+else:
+    z_basis = de.Chebyshev('z', nz, interval=(z_b, z_t), dealias=3/2)
 domain = de.Domain([x_basis, z_basis], grid_dtype=np.float64)
 # Initial conditions
 x = domain.grid(0)
@@ -221,6 +225,7 @@ problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
 ###############################################################################
 
 # Sponge Layer (SL) as an NCC
+#   Check state of `use_sponge_layer` above
 SL = domain.new_field()
 SL.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the sponge layer function from the sponge layer script
@@ -228,7 +233,10 @@ SL.meta['x']['constant'] = True  # means the NCC is constant along x
 sys.path.insert(0, './_sponge_layer')
 from sponge_layer import sponge_profile
 # Store profile in an array so it can be used later
-SL_array = sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
+if use_sponge_layer:
+    SL_array = sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
+else:
+    SL_array = z*0.0 + 1.0
 SL['g'] = SL_array
 problem.parameters['SL'] = SL  # pass function in as a parameter
 #   Multiply nu by SL in the equations of motion
@@ -382,7 +390,6 @@ flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 #flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
 # Some other criterion
 flow.add_property("(u*dx(u) + w*uz)/omega", name='Lin_Criterion')
-# (kx*u + kz*w)/omega
 
 ###############################################################################
 
