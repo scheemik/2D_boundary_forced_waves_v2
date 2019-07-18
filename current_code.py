@@ -67,7 +67,8 @@ if __name__ == '__main__':
     #R0 = float(arguments['R0'])
     N0 = float(arguments['N0'])
     NL = int(arguments['NL'])
-    if (rank == 0):
+    print_params = False
+    if (rank == 0 and print_params):
         print('LOC=',LOC)
         print('AR=',AR)
         print('NU=',NU)
@@ -389,7 +390,7 @@ flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 # Reduced Richardson number
 #flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
 # Some other criterion
-flow.add_property("(u*dx(u) + w*uz)/omega", name='Lin_Criterion')
+flow.add_property("dx(u)/omega", name='Lin_Criterion')
 
 ###############################################################################
 
