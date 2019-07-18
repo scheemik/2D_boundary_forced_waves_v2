@@ -39,6 +39,8 @@ fi
 # 	-> merge, plot, and create a gif
 # VER = 4
 #	-> create mp4 from frames
+# VER = 5
+#	-> merge and plot energy flux
 
 # Define parameters
 AR=3.0			# [nondim]  Aspect ratio of domain
@@ -62,6 +64,11 @@ then
 	then
 		echo "Removing snapshots"
 		rm -r snapshots
+	fi
+	if [ -e ef_snapshots ]
+	then
+		echo "Removing energy flux snapshots"
+		rm -r ef_snapshots
 	fi
 fi
 
@@ -88,7 +95,7 @@ fi
 
 # If VER = 1 or 3, then run the rest of the code,
 # 	but first check if snapshots folder was made
-if [ $VER -ne 2 ] && [ $VER -ne 4 ] && [ -e snapshots ]
+if [ $VER -ne 2 ] && [ $VER -ne 4 ] && [ $VER -ne 5 ] && [ -e snapshots ]
 then
 	if [ -e gifs/test.gif ]
 	then
@@ -129,6 +136,20 @@ then
 	ffmpeg -framerate 10 -i write_%06d.png -c:v libx264 -pix_fmt yuv420p test.mp4
 	cd ..
 	mv frames/test.mp4 mp4s/
+fi
+
+# If VER = 5, then merge and plot the energy flux
+if [ $VER -eq 5 ] && [ -e ef_snapshots ]
+then
+	if [ -e ef_snapshots/ef_snapshots_s1.h5 ]
+	then
+		echo "Energy flux snapshots already merged"
+	else
+		echo "Merging energy flux snapshots"
+		mpiexec -n $CORES python3 _energy_flux/ef_merge.py ef_snapshots
+	fi
+	echo "Plotting EF for z vs. t"
+	mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $AR $NU $KA $R0 $N0 $NL ef_snapshots/*.h5
 fi
 
 echo "Done"

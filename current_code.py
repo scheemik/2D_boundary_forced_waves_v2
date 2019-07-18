@@ -210,6 +210,7 @@ for fld in ['u', 'w', 'b']:#, 'p']:
 problem.parameters['kx'] = kx
 problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
+problem.parameters['grav'] = g # can't use 'g' because Dedalus already uses that for grid
 
 # Windowing function (multiplying tanh's)
 problem.parameters['slope'] = 10
@@ -391,6 +392,14 @@ flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 #flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
 # Some other criterion
 flow.add_property("dx(u)/omega", name='Lin_Criterion')
+
+###############################################################################
+# Measuring "energy flux" through a horizontal boundary at some z
+
+# Adding a new file handler
+ef_snapshots = solver.evaluator.add_file_handler('ef_snapshots', sim_dt=0.25, max_writes=100)
+# Adding a task to integrate energy flux across x for values of z
+ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
 
 ###############################################################################
 
