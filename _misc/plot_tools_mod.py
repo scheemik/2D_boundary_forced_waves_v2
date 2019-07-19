@@ -125,7 +125,7 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
     plot = paxes.pcolormesh(xmesh, ymesh, data, cmap=cmap, zorder=1)
     if plot_contours:
         eps = 0.0001
-        plat = paxes.contour(xmesh, ymesh, data, 10, cmap='coolwarm')
+        plat = paxes.contour(xmesh, ymesh, data, 15, cmap='coolwarm')#'RdBu_r')
     paxes.axis(pad_limits(xmesh, ymesh))
     paxes.tick_params(length=0, width=0)
     if clim is None:
@@ -135,6 +135,7 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
         else:
             clim = (data.min(), data.max())
     plot.set_clim(*clim)
+    plat.set_clim(*clim)
 
     # Colorbar
     cbar = plt.colorbar(plot, cax=caxes, orientation='horizontal',

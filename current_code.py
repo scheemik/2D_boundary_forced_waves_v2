@@ -137,7 +137,7 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 ###############################################################################
 
 # Parameters to set a sponge layer at the bottom
-use_sponge_layer = False
+use_sponge_layer = True
 nz_sp = 40          # number of grid points in z direction in sponge domain
 sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
@@ -160,7 +160,7 @@ x = domain.grid(0)
 z = domain.grid(1)
 
 # Making a plot of the grid spacing in the z direction
-plot_z_basis = False
+plot_z_basis = True
 if (plot_z_basis and rank==0 and LOC):
     # scale should match dealias
     grid_spacing = z_basis.grid(scale=3/2)
@@ -245,7 +245,7 @@ problem.parameters['SL'] = SL  # pass function in as a parameter
 del SL
 
 # Plots the sponge layer coefficient profile
-plot_SL = False
+plot_SL = True
 if (plot_SL and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(SL_array[0])
