@@ -272,6 +272,7 @@ z_top =  0.1                # Bottom of staircase (not domian)
 ###############################################################################
 
 # Background Profile (BP) as an NCC
+set_N_const = True
 BP = domain.new_field()
 BP.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the staircase function from the background profile script
@@ -279,13 +280,16 @@ BP.meta['x']['constant'] = True  # means the NCC is constant along x
 sys.path.insert(0, './_background_profile')
 from Foran_profile import Foran_profile
 # Store profile in an array so it can be used later
-BP_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
+if set_N_const:
+    BP_array = z*0 + 1.0
+else:
+    BP_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
 BP['g'] = BP_array
 problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
 
 # Plots the background profile
-plot_BP = False
+plot_BP = True
 if (plot_BP and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(BP_array[0])
@@ -399,7 +403,8 @@ flow.add_property("dx(u)/omega", name='Lin_Criterion')
 # Adding a new file handler
 ef_snapshots = solver.evaluator.add_file_handler('ef_snapshots', sim_dt=0.25, max_writes=100)
 # Adding a task to integrate energy flux across x for values of z
-ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
+ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
+#ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
 
 ###############################################################################
 

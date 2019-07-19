@@ -30,20 +30,50 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
-fig = plt.figure(figsize=(10, 6))
-ax = fig.add_subplot(111)
+t_0 =  0.0
+t_f = 25.0
+z_b = -0.5
+z_t =  0.5
+ratio = 0.4
+
 with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     ef = file['tasks']['<ef>']
-    ef = ef[:, 0, :].T
     print(ef.shape)
+    print(ef)
     fig, ax = plt.subplots()
-    c = ax.pcolormesh(ef, cmap='coolwarm')
-    ax.set_title('Energy flux')
-    ax.set_xlabel('time')
-    ax.set_ylabel('depth (z)')
-    fig.colorbar(c, ax=ax)
-    plt.show()
+    plot_tools.plot_bot_3d(ef, 1, 0, axes=ax, even_scale=True)
+    '''
+    #ef = np.flipud(ef[:, 0, :].T)
+    ef = np.rot90(ef[:, 0, :])
+    print('Grid space:',ef.shape)
+    fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=True)
+    #c = ax0.pcolormesh(ef, cmap='coolwarm')
 
+    c = ax0.imshow(ef, cmap='coolwarm', extent=[t_0, t_f, z_b, z_t])
+    ax0.set_title('Energy flux')
+    ax0.set_xlabel('time')
+    ax0.set_ylabel('depth (z)')
+    ax0.set_xlim(t_0, t_f)
+    ax0.xaxis.set_tick_params(labelbottom=True)
+    fig.colorbar(c, ax=ax0, orientation='horizontal', fraction=0.05)
+    L_z = z_t - z_b
+    L_t = t_f - t_0
+    ax0.set_aspect(ratio*(L_t/L_z), adjustable='box')
+
+    top_ef = ef[0, :]
+    n_t = len(top_ef)
+    t = np.linspace(t_0, t_f, n_t)
+    ax1.plot(t, top_ef)
+    ax1.set_title('Top boundary energy flux')
+    ax1.set_xlabel('time')
+    ax1.set_ylabel('EF')
+    tef_min = min(top_ef)
+    tef_max = max(top_ef)
+    tef_range = tef_max - tef_min
+    ax1.set_aspect(ratio*(L_t/tef_range), adjustable='box')
+    '''
+    plt.show()
+# add plot of top boundary ef in subplot side by side
 
 # Not sure why, but this block needs to be at the end of the script
 if __name__ == "__main__":
