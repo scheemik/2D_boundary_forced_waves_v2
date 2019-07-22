@@ -56,6 +56,12 @@ logger = logging.getLogger(__name__)
 # For adding arguments when running
 from docopt import docopt
 
+# Optional outputs (will not plot if run remotely)
+plot_z_basis = True
+plot_SL = True
+plot_BP = True
+print_params = True
+
 # Options for simulation
 use_sponge_layer = True
 set_N_const = True
@@ -70,7 +76,6 @@ if __name__ == '__main__':
     #R0 = float(arguments['R0'])
     N0 = float(arguments['N0'])
     NL = int(arguments['NL'])
-    print_params = False
     if (rank == 0 and print_params):
         print('LOC=',LOC)
         print('AR=',AR)
@@ -79,11 +84,6 @@ if __name__ == '__main__':
         #print('R0=',R0)
         print('N0=',N0)
         print('NL=',NL)
-
-# Optional plots (will not plot if run remotely)
-plot_z_basis = True
-plot_SL = True
-plot_BP = True
 
 # Parameters
 aspect_ratio = AR
@@ -107,7 +107,7 @@ elif LOC == False:
 
 nx = int(params.n_x)
 nz = int(params.n_z)
-if (rank==0):
+if (rank==0 and print_params):
     print('n_x =',nx)
     print('n_z =',nz)
 sim_time_stop  = params.sim_time_stop
