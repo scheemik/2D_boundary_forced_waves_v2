@@ -56,6 +56,10 @@ logger = logging.getLogger(__name__)
 # For adding arguments when running
 from docopt import docopt
 
+# Options for simulation
+use_sponge_layer = True
+set_N_const = True
+
 # Read in parameters from docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
@@ -75,6 +79,11 @@ if __name__ == '__main__':
         #print('R0=',R0)
         print('N0=',N0)
         print('NL=',NL)
+
+# Optional plots (will not plot if run remotely)
+plot_z_basis = True
+plot_SL = True
+plot_BP = True
 
 # Parameters
 aspect_ratio = AR
@@ -136,7 +145,7 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 ###############################################################################
 
 # Parameters to set a sponge layer at the bottom
-use_sponge_layer = True
+
 nz_sp = 40          # number of grid points in z direction in sponge domain
 sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
@@ -159,7 +168,6 @@ x = domain.grid(0)
 z = domain.grid(1)
 
 # Making a plot of the grid spacing in the z direction
-plot_z_basis = True
 if (plot_z_basis and rank==0 and LOC):
     # scale should match dealias
     grid_spacing = z_basis.grid(scale=3/2)
@@ -244,7 +252,6 @@ problem.parameters['SL'] = SL  # pass function in as a parameter
 del SL
 
 # Plots the sponge layer coefficient profile
-plot_SL = True
 if (plot_SL and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(SL_array[0])
@@ -271,7 +278,6 @@ z_top =  0.1                # Bottom of staircase (not domian)
 ###############################################################################
 
 # Background Profile (BP) as an NCC
-set_N_const = True
 BP = domain.new_field()
 BP.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the staircase function from the background profile script
@@ -288,7 +294,6 @@ problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
 
 # Plots the background profile
-plot_BP = True
 if (plot_BP and rank == 0 and LOC):
     vert = np.array(z[0])
     hori = np.array(BP_array[0])
