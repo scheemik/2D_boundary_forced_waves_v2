@@ -2,15 +2,13 @@
 Plot planes from joint energy flux analysis files.
 
 Usage:
-    ef_plot_2d_series.py LOC AR NU KA R0 N0 NL <files>... [--output=<dir>]
+    ef_plot_2d_series.py LOC NU KA N0 NL <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
     LOC                 # 1 if local, 0 if on Niagara
-    AR		            # [nondim]  Aspect ratio of domain
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
-    R0		            # [kg/m^3]  Characteristic density
     N0		            # [rad/s]   Characteristic stratification
     NL		            # [nondim]	Number of inner interfaces
 
@@ -35,13 +33,66 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
+# Strings for the parameters
+str_nu = r'$\nu$'
+str_ka = r'$\kappa$'
+str_n0 = r'$N_0$'
+str_nl = r'$n_{layers}$'
+
+# Expects numbers in the format 7.0E+2
+def latex_exp(num):
+    float_str = "{:.1E}".format(num)
+    if "E" in float_str:
+        base, exponent = float_str.split("E")
+        exp = int(exponent)
+        str1 = '$' + str(base)
+        if (exp != 0):
+            str1 = str1 + r'\cdot10^{' + str(exp)
+        str1 = str1 + '}$'
+        return r"{0}".format(str1)
+    else:
+        return float_str
+
 t_0 =  0.0
 t_f = 25.0
 z_b = -0.5
 z_t =  0.5
 ratio = 0.4
 
+# Not sure why, but this block needs to be at the end of the script
+if __name__ == "__main__":
+
+    import pathlib
+    from docopt import docopt
+    from dedalus.tools import logging
+    from dedalus.tools import post
+    from dedalus.tools.parallel import Sync
+
+    args = docopt(__doc__)
+
+    LOC = int(args['LOC'])
+    str_loc = 'Local' if bool(LOC) else 'Niagara'
+    NU = float(args['NU'])
+    KA = float(args['KA'])
+    N0 = float(args['N0'])
+    NL = int(args['NL'])
+    print_vals = False
+    if (rank==0 and print_vals):
+        print('plot',str_loc)
+        print('plot',str_nu,'=',NU)
+        print('plot',str_ka,'=',KA)
+        print('plot',str_n0,'=',N0)
+        print('plot',str_nl,'=',NL)
+    output_path = pathlib.Path(args['--output']).absolute()
+
+
 with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
+    # Format the dimensionless numbers nicely
+    Nu    = latex_exp(NU)
+    Ka    = latex_exp(KA)
+    N_0   = latex_exp(N0)
+    n_l   = NL
+
     ef = file['tasks']['<ef>']
     print(ef.shape)
     print(ef)
@@ -57,70 +108,14 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     t = np.linspace(t_0, t_f, n_t)
 
     ax1.plot(t, top_ef)
-    ax1.set_title('Top boundary energy flux')
-    ax1.set_xlabel('t')
-    ax1.set_ylabel('<ef>')
+    ax1.set_title('Top boundary energy flux', fontsize='medium')
+    ax1.set_xlabel(r't')
+    y_label = r'\overline{F_z}(z)'
+    ax1.set_ylabel(y_label)
     ax1.set_xlim(t_0, t_f)
     ax1.get_shared_x_axes().join(ax0, ax1)
-    '''
-    #ef = np.flipud(ef[:, 0, :].T)
 
-    print('Grid space:',ef.shape)
-
-    #c = ax0.pcolormesh(ef, cmap='coolwarm')
-
-    c = ax0.imshow(ef, cmap='coolwarm', extent=[t_0, t_f, z_b, z_t])
-    ax0.set_title('Energy flux')
-    ax0.set_xlabel('time')
-    ax0.set_ylabel('depth (z)')
-    ax0.set_xlim(t_0, t_f)
-    ax0.xaxis.set_tick_params(labelbottom=True)
-    fig.colorbar(c, ax=ax0, orientation='horizontal', fraction=0.05)
-    L_z = z_t - z_b
-    L_t = t_f - t_0
-    ax0.set_aspect(ratio*(L_t/L_z), adjustable='box')
-
-    top_ef = ef[0, :]
-    n_t = len(top_ef)
-    t = np.linspace(t_0, t_f, n_t)
-    ax1.plot(t, top_ef)
-    ax1.set_title('Top boundary energy flux')
-    ax1.set_xlabel('time')
-    ax1.set_ylabel('EF')
-    tef_min = min(top_ef)
-    tef_max = max(top_ef)
-    tef_range = tef_max - tef_min
-    ax1.set_aspect(ratio*(L_t/tef_range), adjustable='box')
-    '''
-    plt.show()
+    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l)
+    fig.suptitle(title, fontsize='large')
+    fig.savefig('./_energy_flux/ef_test.png', dpi=100)
 # add plot of top boundary ef in subplot side by side
-
-# Not sure why, but this block needs to be at the end of the script
-if __name__ == "__main__":
-
-    import pathlib
-    from docopt import docopt
-    from dedalus.tools import logging
-    from dedalus.tools import post
-    from dedalus.tools.parallel import Sync
-
-    args = docopt(__doc__)
-
-    LOC = int(args['LOC'])
-    str_loc = 'Local' if bool(LOC) else 'Niagara'
-    AR = float(args['AR'])
-    NU = float(args['NU'])
-    KA = float(args['KA'])
-    R0 = float(args['R0'])
-    N0 = float(args['N0'])
-    NL = int(args['NL'])
-    print_vals = False
-    if (rank==0 and print_vals):
-        print('plot',str_loc)
-        print('plot',str_ar,'=',AR)
-        print('plot',str_nu,'=',NU)
-        print('plot',str_ka,'=',KA)
-        print('plot',str_r0,'=',R0)
-        print('plot',str_n0,'=',N0)
-        print('plot',str_nl,'=',NL)
-    output_path = pathlib.Path(args['--output']).absolute()
