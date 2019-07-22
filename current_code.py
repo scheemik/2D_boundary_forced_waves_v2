@@ -6,14 +6,13 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC AR NU KA R0 N0 NL
+    current_code.py LOC AR NU KA N0 NL
 
 Arguments:
     LOC     # 1 if local, 0 if on Niagara
     AR		# [nondim]  Aspect ratio of domain
     NU		# [m^2/s]   Viscosity (momentum diffusivity)
     KA		# [m^2/s]   Thermal diffusivity
-    R0		# [kg/m^3]  Characteristic density
     N0		# [rad/s]   Characteristic stratification
     NL		# [nondim]	Number of inner interfaces
 
