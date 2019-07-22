@@ -33,6 +33,8 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
+###############################################################################
+
 # Strings for the parameters
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
@@ -53,13 +55,8 @@ def latex_exp(num):
     else:
         return float_str
 
-t_0 =  0.0
-t_f = 25.0
-z_b = -0.5
-z_t =  0.5
-ratio = 0.4
+###############################################################################
 
-# Not sure why, but this block needs to be at the end of the script
 if __name__ == "__main__":
 
     import pathlib
@@ -85,6 +82,25 @@ if __name__ == "__main__":
         print('plot',str_nl,'=',NL)
     output_path = pathlib.Path(args['--output']).absolute()
 
+###############################################################################
+# Fetch parameters from the correct params file
+
+# Add correct path to params files
+sys.path.insert(0, './_params')
+if LOC:
+    import params_local
+    params = params_local
+elif LOC == False:
+    import params_Niagara
+    params = params_Niagara
+
+t_0 =  0.0
+t_f = params.sim_time_stop
+z_b = -0.5
+z_t =  0.5
+#ratio = 0.4
+
+###############################################################################
 
 with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     # Format the dimensionless numbers nicely
