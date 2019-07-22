@@ -64,12 +64,13 @@ print_params = True
 
 # Options for simulation
 use_sponge_layer = True
-set_N_const = True
+set_N_const = False
 
 # Read in parameters from docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     LOC = int(arguments['LOC'])
+    LOC = bool(LOC)
     AR = float(arguments['AR'])
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
@@ -78,15 +79,12 @@ if __name__ == '__main__':
     NL = int(arguments['NL'])
     if (rank == 0 and print_params):
         print('LOC=',LOC)
-        print('LOC (bool)=',bool(LOC))
-        print('AR=',AR)
-        print('NU=',NU)
-        print('KA=',KA)
+        print('AR =',AR)
+        print('NU =',NU)
+        print('KA =',KA)
         #print('R0=',R0)
-        print('N0=',N0)
-        print('NL=',NL)
-
-LOC = bool(LOC)
+        print('N0 =',N0)
+        print('NL =',NL)
 
 # Parameters
 aspect_ratio = AR
@@ -111,8 +109,8 @@ elif LOC == False:
 nx = int(params.n_x)
 nz = int(params.n_z)
 if (rank==0 and print_params):
-    print('n_x =',nx)
-    print('n_z =',nz)
+    print('n_x=',nx)
+    print('n_z=',nz)
 sim_time_stop  = params.sim_time_stop
 wall_time_stop = params.wall_time_stop
 adapt_dt = params.adapt_dt
