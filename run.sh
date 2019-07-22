@@ -13,6 +13,10 @@ do
 	esac
 done
 
+echo "VER=$VER"
+echo "LOC=$LOC"
+echo "CORES=$CORES"
+
 # check to see if arguments were passed
 if [ -z "$VER" ]
 then
