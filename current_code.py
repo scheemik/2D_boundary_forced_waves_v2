@@ -69,7 +69,7 @@ set_N_const = True
 # Read in parameters from docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
-    LOC = bool(arguments['LOC'])
+    LOC = int(arguments['LOC'])
     AR = float(arguments['AR'])
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
@@ -78,12 +78,15 @@ if __name__ == '__main__':
     NL = int(arguments['NL'])
     if (rank == 0 and print_params):
         print('LOC=',LOC)
+        print('LOC (bool)=',bool(LOC))
         print('AR=',AR)
         print('NU=',NU)
         print('KA=',KA)
         #print('R0=',R0)
         print('N0=',N0)
         print('NL=',NL)
+
+LOC = bool(LOC)
 
 # Parameters
 aspect_ratio = AR
