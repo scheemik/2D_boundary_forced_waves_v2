@@ -386,7 +386,11 @@ solver.stop_wall_time = wall_time_stop * 60.
 solver.stop_iteration = np.inf
 
 # Analysis
-snapshots = solver.evaluator.add_file_handler('snapshots', sim_dt=0.25, max_writes=50)
+if LOC:
+    snapshots_path = 'snapshots'
+else:
+    snapshots_path = '/scratch/n/ngrisoua/mschee/Dedalus/Vanilla_Dedalus/2D_boundary_forced_waves_v2/snapshots'
+snapshots = solver.evaluator.add_file_handler(snapshots_path, sim_dt=0.25, max_writes=50)
 snapshots.add_system(solver.state)
 
 # CFL - adapts time step as the code runs depending on stiffness
@@ -406,7 +410,11 @@ flow.add_property("dx(u)/omega", name='Lin_Criterion')
 # Measuring "energy flux" through a horizontal boundary at some z
 
 # Adding a new file handler
-ef_snapshots = solver.evaluator.add_file_handler('ef_snapshots', sim_dt=0.25, max_writes=100)
+if LOC:
+    ef_snapshots_path = 'ef_snapshots'
+else:
+    ef_snapshots_path = '/scratch/n/ngrisoua/mschee/Dedalus/Vanilla_Dedalus/2D_boundary_forced_waves_v2/ef_snapshots'
+ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
 # Adding a task to integrate energy flux across x for values of z
 ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
 #ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
