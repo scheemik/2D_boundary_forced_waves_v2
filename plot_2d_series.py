@@ -2,7 +2,7 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py LOC AR NU KA R0 N0 NL <files>... [--output=<dir>]
+    plot_2d_series.py LOC AR NU KA N0 NL <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./frames]
@@ -10,7 +10,6 @@ Options:
     AR		            # [nondim]  Aspect ratio of domain
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
-    R0		            # [kg/m^3]  Characteristic density
     N0		            # [rad/s]   Characteristic stratification
     NL		            # [nondim]	Number of inner interfaces
 
@@ -39,7 +38,7 @@ rank = comm.Get_rank()
 str_ar = 'Aspect ratio'
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
-str_r0 = r'$\rho_0$'
+#str_r0 = r'$\rho_0$'
 str_n0 = r'$N_0$'
 str_nl = r'$n_{layers}$'
 
@@ -66,7 +65,7 @@ def main(filename, start, count, output):
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
     Ka    = latex_exp(KA)
-    rho_0 = latex_exp(R0)
+#    rho_0 = latex_exp(R0)
     N_0   = latex_exp(N0)
     n_l   = NL
 
@@ -80,7 +79,7 @@ def main(filename, start, count, output):
         nrows, ncols = 2, 1
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_r0, rho_0, str_n0, N_0, str_nl, n_l, sim_time)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
@@ -127,7 +126,7 @@ if __name__ == "__main__":
     AR = float(args['AR'])
     NU = float(args['NU'])
     KA = float(args['KA'])
-    R0 = float(args['R0'])
+#    R0 = float(args['R0'])
     N0 = float(args['N0'])
     NL = int(args['NL'])
     print_vals = False
@@ -136,7 +135,7 @@ if __name__ == "__main__":
         print('plot',str_ar,'=',AR)
         print('plot',str_nu,'=',NU)
         print('plot',str_ka,'=',KA)
-        print('plot',str_r0,'=',R0)
+#        print('plot',str_r0,'=',R0)
         print('plot',str_n0,'=',N0)
         print('plot',str_nl,'=',NL)
     output_path = pathlib.Path(args['--output']).absolute()
