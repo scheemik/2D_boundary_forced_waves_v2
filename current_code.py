@@ -268,7 +268,7 @@ if (plot_SL and rank == 0 and LOC):
 ###############################################################################
 
 # Parameters to determine a specific staircase profile
-n_layers = NL
+n_layers = NL - 1
 slope = 100.0*(n_layers+1)
 N_1 = 0.95                  # The stratification value above the staircase
 N_2 = 1.24                  # The stratification value below the staircase
