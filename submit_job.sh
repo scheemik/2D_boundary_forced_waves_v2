@@ -20,10 +20,10 @@ fi
 
 # Prepare scratch
 
-DATE=`date +"%m/%d-%H:%M"`
+DATE=`date +"%m-%d_%Hh%M"`
 # create a 2 digit version of CORES
 printf -v CO "%02d" $CORES
-JOBNAME="n$CO-$DATE-2D_BF"
+JOBNAME="$DATE-2D_BF-n$CO"
 DIRECTORY='2D_boundary_forced_waves_v2'
 
 set -x # echos each command as it is executed
@@ -32,11 +32,12 @@ set -x # echos each command as it is executed
 cd ${HOME}/Dedalus/Dedalus_Files/$DIRECTORY
 # Pull from github the latest version of that project
 git pull
-# Create new directory for job
-mkdir ${SCRATCH}/Dedalus/Dedalus_Files/$JOBNAME
 # Copy that into the scratch directory, ignoring the .git/ directory and others
-rsync -av --progress /home/n/ngrisoua/mschee/Dedalus/Dedalus_Files/2D_boundary_forced_waves_v2 /scratch/n/ngrisoua/mschee/Dedalus/Dedalus_Files/$JOBNAME --exclude .git/ --exclude mp4s/ --exclude _boundary_forcing/ --exclude _code_checkpnts/ --exclude _energy_flux/ --exclude _misc/ --exclude snapshots/ --exclude ef_snapshots/ --exclude frames/ --exclude gifs/*
+cp -r ${HOME}/Dedalu/Dedalus_Files/$DIRECTORY ${SCRATCH}/Dedalus/Dedalus_Files/$DIRECTORY
+#rsync -av --progress ${HOME}/Dedalus/Dedalus_Files/$DIRECTORY ${SCRATCH}/Dedalus/Dedalus_Files/ --exclude .git/ --exclude mp4s/ --exclude _boundary_forcing/ --exclude _code_checkpnts/ --exclude _energy_flux/ --exclude _misc/ --exclude snapshots/ --exclude ef_snapshots/ --exclude frames/ --exclude gifs/*
+mv ${SCRATCH}/Dedalus/Dedalus_Files/$DIRECTORY ${SCRATCH}/Dedalus/Dedalus_Files/$JOBNAME
 cd ${SCRATCH}/Dedalus/Dedalus_Files/$JOBNAME
+ls
 
 # Submit the job
 sbatch --job-name=$JOBNAME lanceur.slrm -c $CORES
