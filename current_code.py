@@ -312,7 +312,7 @@ if (plot_BP and rank == 0 and LOC):
 
 ###############################################################################
 
-# Non-Dimensionalized Equations (non-linear terms on RHS)
+# Equations of motion (non-linear terms on RHS)
 #   Mass conservation equation
 problem.add_equation("dx(u) + wz = 0")
 #   Equation of state (in terms of buoyancy)
