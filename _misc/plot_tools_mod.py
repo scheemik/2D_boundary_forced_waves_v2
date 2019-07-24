@@ -47,7 +47,16 @@ class DimWrapper:
             return self.basis.elements
 
 
-def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), clim=None, even_scale=False, cmap='RdBu_r', axes=None, figkw={}, title=None, func=None):
+def fmt(x, pos):
+    a, b = '{:.1e}'.format(x).split('e')
+    b = int(b)
+    if (b==0):
+        return r'${}$'.format(a)
+    else:
+        return r'${} \cdot 10^{{{}}}$'.format(a, b)
+
+
+def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), clim=None, even_scale=False, cmap='RdBu_r', axes=None, figkw={}, title=None, func=None, plot_contours=True):
     """
     Plot a 2d slice of the grid data of a dset/field.
 
@@ -115,7 +124,7 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
     cmap = matplotlib.cm.get_cmap(cmap)
     cmap.set_bad('0.7')
 
-    plot_contours = True
+    #plot_contours = True
     if plot_contours:
         # Fix the off-by-one error
         xmesh = xmesh[1:,1:]
@@ -124,10 +133,9 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
     # Plot
     plot = paxes.pcolormesh(xmesh, ymesh, data, cmap=cmap, zorder=1)
     if plot_contours:
-        eps = 0.0001
         plat = paxes.contour(xmesh, ymesh, data, 15, cmap='coolwarm')#'RdBu_r')
     paxes.axis(pad_limits(xmesh, ymesh))
-    paxes.tick_params(length=0, width=0)
+    #paxes.tick_params(length=0, width=0)
     if clim is None:
         if even_scale:
             lim = max(abs(data.min()), abs(data.max()))
@@ -135,11 +143,12 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
         else:
             clim = (data.min(), data.max())
     plot.set_clim(*clim)
-    plat.set_clim(*clim)
+    if plot_contours:
+        plat.set_clim(*clim)
 
     # Colorbar
     cbar = plt.colorbar(plot, cax=caxes, orientation='horizontal',
-        ticks=ticker.MaxNLocator(nbins=5))
+        ticks=ticker.MaxNLocator(nbins=3), format=ticker.FuncFormatter(fmt))
     cbar.outline.set_visible(False)
     caxes.xaxis.set_ticks_position('top')
 

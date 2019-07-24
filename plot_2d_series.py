@@ -37,6 +37,8 @@ rank = comm.Get_rank()
 ###############################################################################
 # Switchboard
 plot_all = False
+print_args = False
+contours = True
 ###############################################################################
 
 # Strings for the parameters
@@ -64,7 +66,7 @@ def latex_exp(num):
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
     # Change the size of the text overall
-    font = {'size' : 16}
+    font = {'size' : 12}
     plt.rc('font', **font)
 
     # Format the dimensionless numbers nicely
@@ -80,7 +82,7 @@ def main(filename, start, count, output):
         nrows, ncols = 2, 2
     else:
         tasks = ['b', 'w']
-        nrows, ncols = 2, 1
+        nrows, ncols = 1, 2
     scale = 2.5
     dpi = 100
     title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l, sim_time)
@@ -88,7 +90,7 @@ def main(filename, start, count, output):
     # Layout
     #   nrows, ncols set above
     image = plot_tools.Box(AR, 1)
-    pad = plot_tools.Frame(0.2, 0.2, 0.1, 0.1)
+    pad = plot_tools.Frame(0.2, 0.2, 0.15, 0.15)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
 
     # Create multifigure
@@ -103,7 +105,7 @@ def main(filename, start, count, output):
                 axes = mfig.add_axes(i, j, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
-                plot_bot_3d_mod(dset, 0, index, y_lims=[-0.5,0.5], axes=axes, title=task, even_scale=True) # clim=(cmin,cmax) # specify constant colorbar limits
+                plot_bot_3d_mod(dset, 0, index, y_lims=[-0.5,0.5], axes=axes, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
             # Add time title
             title = title_func(file['scales/sim_time'][index])
             fig.suptitle(title, fontsize='large')
@@ -133,8 +135,7 @@ if __name__ == "__main__":
 #    R0 = float(args['R0'])
     N0 = float(args['N0'])
     NL = int(args['NL'])
-    print_vals = False
-    if (rank==0 and print_vals):
+    if (rank==0 and print_args):
         print('plot',str_loc)
         print('plot',str_ar,'=',AR)
         print('plot',str_nu,'=',NU)

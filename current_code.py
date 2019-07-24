@@ -136,8 +136,8 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 
 # Boundary forcing parameters
 # Bounds of the forcing window
-fl_edge = -3.0*Lx/12.0
-fr_edge =  -Lx/12.0
+fl_edge = -5.0*Lx/12.0
+fr_edge = -3.0*Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
