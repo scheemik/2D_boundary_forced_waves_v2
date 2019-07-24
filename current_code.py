@@ -56,15 +56,22 @@ logger = logging.getLogger(__name__)
 # For adding arguments when running
 from docopt import docopt
 
+###############################################################################
+###############################################################################
+# Switchboard
+
 # Optional outputs (will not plot if run remotely)
-plot_z_basis = True
-plot_SL = True
-plot_BP = True
+plot_z_basis = False
+plot_SL = False
+plot_BP = False
 print_params = True
 
 # Options for simulation
 use_sponge_layer = True
 set_N_const = False
+
+###############################################################################
+###############################################################################
 
 # Read in parameters from docopt
 if __name__ == '__main__':

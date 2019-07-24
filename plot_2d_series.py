@@ -34,6 +34,11 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 
+###############################################################################
+# Switchboard
+plot_all = False
+###############################################################################
+
 # Strings for the parameters
 str_ar = 'Aspect ratio'
 str_nu = r'$\nu$'
@@ -70,7 +75,6 @@ def main(filename, start, count, output):
     n_l   = NL
 
     # Plot settings
-    plot_all = False
     if plot_all:
         tasks = ['b', 'p', 'u', 'w']
         nrows, ncols = 2, 2
