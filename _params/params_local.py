@@ -6,7 +6,7 @@ n_x = 512
 n_z = 256
 
 # Stop times for the simulation
-sim_time_stop = 35 # time units (t)
+sim_time_stop = 15 # time units (t)
 wall_time_stop = 30 # min
 
 # Determine whether adaptive time stepping is on or off

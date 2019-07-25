@@ -299,10 +299,15 @@ BP['g'] = BP_array
 problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
 
+# Save background N profile to file so plotting function can read in
+vert = np.array(z[0])
+hori = np.array(BP_array[0])
+filename = '_background_profile/current_N_'
+np.save(filename+'x', hori)
+np.save(filename+'y', vert)
+
 # Plots the background profile
 if (plot_BP and rank == 0 and LOC):
-    vert = np.array(z[0])
-    hori = np.array(BP_array[0])
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
         fg, ax = plt.subplots(1,1)
         ax.set_title('Background Profile')

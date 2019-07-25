@@ -38,8 +38,16 @@ rank = comm.Get_rank()
 # Switchboard
 plot_all = False
 print_args = False
-contours = True
+contours = False
+z_b = -0.5      # Bottom plotting extent
+z_t =  0.5      # Top plotting extent
 ###############################################################################
+
+# Data for plotting background stratification profile
+if plot_all==False:
+    filename = '_background_profile/current_N_'
+    hori = np.load(filename+'x.npy')
+    vert = np.load(filename+'y.npy')
 
 # Strings for the parameters
 str_ar = 'Aspect ratio'
@@ -63,6 +71,16 @@ def latex_exp(num):
     else:
         return float_str
 
+def set_title_save(fig, output, file, index, dpi, title_func, savename_func):
+    # Add time title
+    title = title_func(file['scales/sim_time'][index])
+    fig.suptitle(title, fontsize='large')
+    # Save figure
+    savename = savename_func(file['scales/write_number'][index])
+    savepath = output.joinpath(savename)
+    fig.savefig(str(savepath), dpi=dpi)
+    fig.clear()
+
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
     # Change the size of the text overall
@@ -77,12 +95,6 @@ def main(filename, start, count, output):
     n_l   = NL
 
     # Plot settings
-    if plot_all:
-        tasks = ['b', 'p', 'u', 'w']
-        nrows, ncols = 2, 2
-    else:
-        tasks = ['b', 'w']
-        nrows, ncols = 1, 2
     scale = 2.5
     dpi = 100
     title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l, sim_time)
@@ -93,28 +105,57 @@ def main(filename, start, count, output):
     pad = plot_tools.Frame(0.2, 0.2, 0.15, 0.15)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
 
-    # Create multifigure
-    mfig = plot_tools.MultiFigure(nrows, ncols, image, pad, margin, scale)
-    fig = mfig.figure
-    # Plot writes
-    with h5py.File(filename, mode='r') as file:
-        for index in range(start, start+count):
-            for n, task in enumerate(tasks):
-                # Build subfigure axes
-                i, j = divmod(n, ncols)
-                axes = mfig.add_axes(i, j, [0, 0, 1, 1])
+    # Plot settings
+    if plot_all:
+        tasks = ['b', 'p', 'u', 'w']
+        nrows, ncols = 2, 2
+        # Create multifigure
+        mfig = plot_tools.MultiFigure(nrows, ncols, image, pad, margin, scale)
+        fig = mfig.figure
+        # Plot writes
+        with h5py.File(filename, mode='r') as file:
+            for index in range(start, start+count):
+                for n, task in enumerate(tasks):
+                    # Build subfigure axes
+                    i, j = divmod(n, ncols)
+                    axes = mfig.add_axes(i, j, [0, 0, 1, 1])
+                    # Call 3D plotting helper, slicing in time
+                    dset = file['tasks'][task]
+                    plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                set_title_save(fig, output, file, index, dpi, title_func, savename_func)
+        plt.close(fig)
+    else:
+        # Plot data and parameters for background profile
+        dis_ratio = 2.0
+        xleft  = min(hori)
+        xright = max(hori)
+        ybott  = min(vert)
+        ytop   = max(vert)
+        calc_ratio = abs((xright-xleft)/(ybott-ytop))*dis_ratio
+        task = 'w'
+        nrows, ncols = 1, 2
+        # Create multifigure
+        mfig = plot_tools.MultiFigure(nrows, ncols, image, pad, margin, scale)
+        fig = mfig.figure
+        # Plot writes
+        with h5py.File(filename, mode='r') as file:
+            for index in range(start, start+count):
+                # Plot stratification profile on the left
+                axes0 = mfig.add_axes(0, 0, [0, 0, 1, 1])
+                axes0.set_title('Profile')
+                axes0.set_xlabel(r'$N^2$ (s$^{-2}$)')
+                axes0.set_ylabel(r'$z$ (m)')
+                axes0.set_ylim([z_b,z_t])
+                axes0.plot(hori, vert, '-')
+                # Force display aspect ratio
+                axes0.set_aspect(calc_ratio)
+                # Plot vertical velocity animation on right
+                axes1 = mfig.add_axes(0, 1, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
-                plot_bot_3d_mod(dset, 0, index, y_lims=[-0.5,0.5], axes=axes, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
-            # Add time title
-            title = title_func(file['scales/sim_time'][index])
-            fig.suptitle(title, fontsize='large')
-            # Save figure
-            savename = savename_func(file['scales/write_number'][index])
-            savepath = output.joinpath(savename)
-            fig.savefig(str(savepath), dpi=dpi)
-            fig.clear()
-    plt.close(fig)
+                plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes1, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                set_title_save(fig, output, file, index, dpi, title_func, savename_func)
+        plt.close(fig)
 
 # Not sure why, but this block needs to be at the end of the script
 if __name__ == "__main__":
