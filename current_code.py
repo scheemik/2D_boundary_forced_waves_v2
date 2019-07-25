@@ -56,10 +56,6 @@ logger = logging.getLogger(__name__)
 # For adding arguments when running
 from docopt import docopt
 
-###############################################################################
-###############################################################################
-# Switchboard
-
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
@@ -69,9 +65,6 @@ print_params = True
 # Options for simulation
 use_sponge_layer = True
 set_N_const = False
-
-###############################################################################
-###############################################################################
 
 # Read in parameters from docopt
 if __name__ == '__main__':
@@ -136,8 +129,8 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 
 # Boundary forcing parameters
 # Bounds of the forcing window
-fl_edge = -5.0*Lx/12.0
-fr_edge = -3.0*Lx/12.0
+fl_edge = -3.0*Lx/12.0
+fr_edge =  -Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength

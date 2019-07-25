@@ -47,7 +47,7 @@ fi
 #	-> merge and plot energy flux
 
 # Define parameters
-AR=1.0			# [nondim]  Aspect ratio of domain
+AR=3.0			# [nondim]  Aspect ratio of domain
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
 #R0=1.0E+3		# [kg/m^3]  Characteristic density

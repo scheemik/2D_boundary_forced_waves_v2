@@ -14,66 +14,44 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from sympy import *
 
+###############################################################################
 # %%
-# this one is an example from a webpage and it works
-fig, ax = plt.subplots(figsize=(5, 3))
-ax.set(xlim=(-3, 3), ylim=(-1, 1))
-x = np.linspace(-3, 3, 91)
-t = np.linspace(1, 25, 30)
-X2, T2 = np.meshgrid(x, t)
-
-sinT2 = np.sin(2*np.pi*T2/T2.max())
-F = 0.9*sinT2*np.sinc(X2*(1 + sinT2))
-
-line = ax.plot(x, F[0, :], color='k', lw=2)[0]
-
-def animate(i):
-    line.set_ydata(F[i, :])
-
-anim = FuncAnimation(
-    fig, animate, interval=100, frames=len(t)-1)
-
-name = 'test'
-filename = '_boundary_forcing/' + name + '.gif'
-anim.save(filename)# 'imageio')
-
-#plt.draw()
-#plt.show()
-
-# %%
-# this is my own modification
-x_min = -3
-L_x = 6
-x_max = x_min + L_x
-
-omega = .2
+# Boundary forcing parameters
+Lx = 3.0 #m
+x_min = -Lx/2
+x_max =  Lx/2
+# Bounds of the forcing window
+fl_edge = -5.0*Lx/12.0
+fr_edge = -3.0*Lx/12.0
+# Angle of beam w.r.t. the horizontal
+theta = np.pi/4
+# Horizontal wavelength
+lam_x = fr_edge - fl_edge
+# Horizontal wavenumber
+kx    = 2.0*np.pi/lam_x
+# Vertical wavenumber = 2*pi/lam_z, or from trig:
+kz    = kx * np.tan(theta)
+# Other parameters
+A     = 3.0e-4
+N_0 = 1
+omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 period = 2*np.pi/omega
 
 fig, ax = plt.subplots(figsize=(5, 3))
-ax.set(xlim=(x_min, x_max), ylim=(-1, 1))
+ax.set(xlim=(x_min, x_max), ylim=(-1, 1), xlabel='x (m)', ylabel='Amplitude')
+fig.tight_layout()
 x = np.linspace(x_min, x_max, 91)
 t = np.linspace(0, period, 30)
 X2, T2 = np.meshgrid(x, t)
-"""
-# Windowing function (gaussian)
-a = 1.0     # height of peak
-b = 0.0     # center of peak
-# FWHM = 2\sqrt{2*ln{2}}*c
-FWHM = L_x/6
-c = FWHM / (2*np.sqrt(2*np.log(2)))     # RMS width
-win = a*np.exp(-(X2-b)**2/(2.0*c)**2)
-"""
+
 # Windowing function (multiplying tanh's)
 slope = 10
-left_edge = -1
-right_edge = 1
-left_side = 0.5*(np.tanh(slope*(X2-left_edge))+1)
-right_side = 0.5*(np.tanh(slope*(-X2+right_edge))+1)
+left_side = 0.5*(np.tanh(slope*(X2-fl_edge))+1)
+right_side = 0.5*(np.tanh(slope*(-X2+fr_edge))+1)
 win = left_side*right_side
 
+# Pick arbirary z
 z = 0
-kz = right_edge - left_edge
-kx = 1
 
 # Boundary forcing for u
 Fu = -np.sin(kx*X2 + kz*z - omega*T2)*win
@@ -96,16 +74,13 @@ def animate(i):
 anim = FuncAnimation(
     fig, animate, interval=period, frames=len(t)-1)
 
-name = 'test'
+name = 'boundary_forcing'
+#filename = '_boundary_forcing/' + name + '.mp4'
+#anim.save(filename)
 filename = '_boundary_forcing/' + name + '.gif'
-anim.save(filename)
+anim.save(filename, dpi=600, writer='imagemagik')
 
 #plt.draw()
 #plt.show()
-
-# %%
-x, t, z, nu = symbols('x t z nu')
-y = Function('y')
-dsolve(Eq(y(t).diff(t,t) - y(t), exp(t)))
 
 # %%
