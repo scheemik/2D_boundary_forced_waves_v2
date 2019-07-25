@@ -56,6 +56,9 @@ logger = logging.getLogger(__name__)
 # For adding arguments when running
 from docopt import docopt
 
+###############################################################################
+# Switchboard
+
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
@@ -65,6 +68,7 @@ print_params = True
 # Options for simulation
 use_sponge_layer = True
 set_N_const = False
+###############################################################################
 
 # Read in parameters from docopt
 if __name__ == '__main__':
@@ -130,7 +134,7 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 # Boundary forcing parameters
 # Bounds of the forcing window
 fl_edge = -3.0*Lx/12.0
-fr_edge =  -Lx/12.0
+fr_edge = -1.0*Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
@@ -140,6 +144,7 @@ kx    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
 kz    = kx * np.tan(theta)
 # Other parameters
+forcing_slope = 10
 A     = 3.0e-4
 omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
@@ -221,7 +226,7 @@ problem.parameters['omega'] = omega
 problem.parameters['grav'] = g # can't use 'g' because Dedalus already uses that for grid
 
 # Windowing function (multiplying tanh's)
-problem.parameters['slope'] = 10
+problem.parameters['slope'] = forcing_slope
 problem.parameters['left_edge'] = fl_edge
 problem.parameters['right_edge'] = fr_edge
 problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"

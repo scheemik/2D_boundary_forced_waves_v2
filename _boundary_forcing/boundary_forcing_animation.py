@@ -21,8 +21,8 @@ Lx = 3.0 #m
 x_min = -Lx/2
 x_max =  Lx/2
 # Bounds of the forcing window
-fl_edge = -5.0*Lx/12.0
-fr_edge = -3.0*Lx/12.0
+fl_edge = -3.0*Lx/12.0
+fr_edge = -1.0*Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
