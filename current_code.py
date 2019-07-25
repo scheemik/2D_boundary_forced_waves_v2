@@ -386,7 +386,7 @@ solver.stop_wall_time = wall_time_stop * 60.
 solver.stop_iteration = np.inf
 
 # Analysis
-if True:
+if LOC:
     snapshots_path = 'snapshots'
 else:
     snapshots_path = '/scratch/n/ngrisoua/mschee/Dedalus/Vanilla_Dedalus/2D_boundary_forced_waves_v2/snapshots'
@@ -410,7 +410,7 @@ flow.add_property("dx(u)/omega", name='Lin_Criterion')
 # Measuring "energy flux" through a horizontal boundary at some z
 
 # Adding a new file handler
-if True:
+if LOC:
     ef_snapshots_path = 'ef_snapshots'
 else:
     ef_snapshots_path = '/scratch/n/ngrisoua/mschee/Dedalus/Vanilla_Dedalus/2D_boundary_forced_waves_v2/ef_snapshots'
