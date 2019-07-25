@@ -80,6 +80,7 @@ def set_title_save(fig, output, file, index, dpi, title_func, savename_func):
     savepath = output.joinpath(savename)
     fig.savefig(str(savepath), dpi=dpi)
     fig.clear()
+    return savepath
 
 def main(filename, start, count, output):
     """Save plot of specified tasks for given range of analysis writes."""
@@ -125,8 +126,9 @@ def main(filename, start, count, output):
                 set_title_save(fig, output, file, index, dpi, title_func, savename_func)
         plt.close(fig)
     else:
+        from PIL import Image # For cropping
         # Plot data and parameters for background profile
-        dis_ratio = 2.0
+        dis_ratio = 5.0
         xleft  = min(hori)
         xright = max(hori)
         ybott  = min(vert)
@@ -140,21 +142,36 @@ def main(filename, start, count, output):
         # Plot writes
         with h5py.File(filename, mode='r') as file:
             for index in range(start, start+count):
-                # Plot stratification profile on the left
-                axes0 = mfig.add_axes(0, 0, [0, 0, 1, 1])
-                axes0.set_title('Profile')
-                axes0.set_xlabel(r'$N^2$ (s$^{-2}$)')
-                axes0.set_ylabel(r'$z$ (m)')
-                axes0.set_ylim([z_b,z_t])
-                axes0.plot(hori, vert, '-')
-                # Force display aspect ratio
-                axes0.set_aspect(calc_ratio)
                 # Plot vertical velocity animation on right
                 axes1 = mfig.add_axes(0, 1, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
                 plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes1, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
-                set_title_save(fig, output, file, index, dpi, title_func, savename_func)
+                pad = 0.05
+                fig.subplots_adjust(left=pad, wspace=pad)
+
+                # Plot stratification profile on the left
+                axes0 = mfig.add_axes(0, 0, [0, 0, 1.9, 1], sharey=axes1)
+                axes0.set_title('Profile')
+                axes0.set_xlabel(r'$N^2$ (s$^{-2}$)')
+                axes0.set_ylabel(r'$z$ (m)')
+                axes0.set_ylim([z_b,z_t+0.07]) # 0.07 is a fudge factor to line up y axes
+                axes0.plot(hori, vert, 'k-')
+                # Force display aspect ratio
+                axes0.set_aspect(calc_ratio)
+                # save image
+                imagefile = set_title_save(fig, output, file, index, dpi, title_func, savename_func)
+                # crop image
+                im = Image.open(imagefile)
+                width, height = im.size
+                adj_width = width*0.64 # Fudge factor to eliminate whitespace on left
+                new_height = height
+                left = width - adj_width
+                top = (height - new_height)/2
+                right = width # all the way to the right side
+                bottom = (height + new_height)/2
+                cropped_im = im.crop((left, top, right, bottom))
+                cropped_im.save(imagefile)
         plt.close(fig)
 
 # Not sure why, but this block needs to be at the end of the script
