@@ -92,8 +92,8 @@ if __name__ == '__main__':
 
 # Parameters
 aspect_ratio = AR
-Lx, Lz = (aspect_ratio, 1.)
-z_b, z_t = (-Lz/2, Lz/2)
+Lx, Lz = (0.5*aspect_ratio, 0.5)
+z_b, z_t = (-Lz, 0.0)#(-Lz/2, Lz/2)
 # Placeholders for params
 nx = 40*2       # number of grid points in x direction
 nz = 40*1       # number of grid points in z direction in main domain
@@ -126,15 +126,15 @@ adapt_dt = params.adapt_dt
 nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
 kappa = KA          # [m^2/s]   Thermal diffusivity
 Pr    = NU/KA       # [nondim]  Prandtl number, nu/kappa = 7 for water
-if (rank==0): print('Prandtl number =',Pr)
+if (rank==0 and print_params): print('Prandtl number =',Pr)
 #rho_0 = R0          # [kg/m^3]  Characteristic density -> now wrapped into pressure
 N_0   = N0          # [rad/s]   Characteristic stratification
 g     = 9.81        # [m/s^2]   Acceleration due to gravity
 
 # Boundary forcing parameters
 # Bounds of the forcing window
-fl_edge = -3.0*Lx/12.0
-fr_edge = -1.0*Lx/12.0
+fl_edge = -1.0*Lx/12.0
+fr_edge =  1.0*Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
@@ -153,7 +153,7 @@ omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 # Parameters to set a sponge layer at the bottom
 
 nz_sp = 40          # number of grid points in z direction in sponge domain
-sp_slope = -10.     # slope of tanh function in slope
+sp_slope = -20.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
 H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
 z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
@@ -161,7 +161,8 @@ z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
 ###############################################################################
 
 # Create bases and domain
-x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
+x_basis  = de.Fourier('x', nx, interval=(-Lx/3.0, 2.0*Lx/3.0), dealias=3/2)
+#x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
 if use_sponge_layer:
     z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
     z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
@@ -267,7 +268,7 @@ if (plot_SL and rank == 0 and LOC):
         ax.set_xlabel(r'viscosity coefficient')
         ax.set_ylabel(r'depth ($z$)')
         ax.set_ylim([z_sb,z_t])
-        ax.plot(hori, vert, '-')
+        ax.plot(hori, vert, 'k-')
         plt.grid(True)
         plt.show()
 
@@ -275,11 +276,12 @@ if (plot_SL and rank == 0 and LOC):
 
 # Parameters to determine a specific staircase profile
 n_layers = NL - 1
-slope = 100.0*(n_layers+1)
+slope = 200.0*(n_layers+1)
 N_1 = 0.95                  # The stratification value above the staircase
 N_2 = 1.24                  # The stratification value below the staircase
-z_bot = -0.1                # Top of staircase (not domain)
-z_top =  0.1                # Bottom of staircase (not domian)
+z_bot = -0.3 #-0.1                # Top of staircase (not domain)
+z_top = -0.22# 0.1                # Bottom of staircase (not domian)
+print_arrays = False
 
 ###############################################################################
 
@@ -305,6 +307,11 @@ hori = np.array(BP_array[0])
 filename = '_background_profile/current_N_'
 np.save(filename+'x', hori)
 np.save(filename+'y', vert)
+if (rank==0 and print_arrays):
+    print('hori')
+    print(hori)
+    print('vert')
+    print(vert)
 
 # Plots the background profile
 if (plot_BP and rank == 0 and LOC):
@@ -313,8 +320,8 @@ if (plot_BP and rank == 0 and LOC):
         ax.set_title('Background Profile')
         ax.set_xlabel(r'frequency ($N^2$)')
         ax.set_ylabel(r'depth ($z$)')
-        ax.set_ylim([z_sb,z_t])
-        ax.plot(hori, vert, '-')
+        ax.set_ylim([z_b,z_t])
+        ax.plot(hori, vert, 'k-')
         plt.grid(True)
         # Uncomment to save figure
         #plt.savefig('2019_07_10-N2_profile_w_SL.png', facecolor=fg.get_facecolor(), transparent=True)

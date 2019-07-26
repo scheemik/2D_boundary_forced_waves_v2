@@ -23,10 +23,10 @@ from Foran_profile import Foran_profile
 
 # Parameters
 nx = 512
-nz = 128
-aspect_ratio = 4.0
-Lx, Lz = (aspect_ratio, 1.)
-z_b, z_t = (-Lz/2, Lz/2)
+nz = 256
+aspect_ratio = 3.0
+Lx, Lz = (0.5*aspect_ratio, 0.5)
+z_b, z_t = (-Lz, 0.0)#(-Lz/2, Lz/2)
 
 ###############################################################################
 
@@ -42,11 +42,11 @@ z = domain.grid(1)
 
 # Parameters to determine a specific staircase profile
 n_layers = 0
-slope = 100.0*(n_layers+1)
+slope = 200.0*(n_layers+1)
 N_1 = 0.95
 N_2 = 1.24
-z_bot = -0.05 #z_b
-z_top =  0.05 #z_t
+z_bot = -0.3 #z_b
+z_top =  -0.22 #z_t
 
 # Store profile in an array
 bgpf_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
@@ -62,10 +62,9 @@ if (plot_bgpf):
     #plot_N = np.array(bgpf_array2[0])
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
         fg, ax1 = plt.subplots(1,1)
-        #ax2 = ax1.twiny()
 
-        ax1.set_title('Test Profile')
-        ax1.set_xlabel(r'density ($\bar\rho$)')
+        ax1.set_title('Background Profile')
+        ax1.set_xlabel(r'stratification ($N^2$)')
         ax1.set_ylabel(r'depth ($z$)')
         ax1.set_ylim([z_b,z_t])
         ax1.plot(plot_p, plot_z, 'k-')

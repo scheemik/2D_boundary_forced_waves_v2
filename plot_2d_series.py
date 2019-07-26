@@ -40,7 +40,7 @@ plot_all = False
 print_args = False
 contours = False
 z_b = -0.5      # Bottom plotting extent
-z_t =  0.5      # Top plotting extent
+z_t =  0.0#0.5      # Top plotting extent
 ###############################################################################
 
 # Data for plotting background stratification profile
@@ -48,6 +48,12 @@ if plot_all==False:
     filename = '_background_profile/current_N_'
     hori = np.load(filename+'x.npy')
     vert = np.load(filename+'y.npy')
+    print_arrays = False
+    if (rank==0 and print_arrays):
+        print('hori')
+        print(hori)
+        print('vert')
+        print(vert)
 
 # Strings for the parameters
 str_ar = 'Aspect ratio'
@@ -98,7 +104,7 @@ def main(filename, start, count, output):
     # Plot settings
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l, sim_time)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:2.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
@@ -128,7 +134,7 @@ def main(filename, start, count, output):
     else:
         from PIL import Image # For cropping
         # Plot data and parameters for background profile
-        dis_ratio = 5.0
+        dis_ratio = 4.0
         xleft  = min(hori)
         xright = max(hori)
         ybott  = min(vert)
@@ -155,7 +161,7 @@ def main(filename, start, count, output):
                 axes0.set_title('Profile')
                 axes0.set_xlabel(r'$N^2$ (s$^{-2}$)')
                 axes0.set_ylabel(r'$z$ (m)')
-                axes0.set_ylim([z_b,z_t+0.07]) # 0.07 is a fudge factor to line up y axes
+                axes0.set_ylim([z_b,z_t+0.05]) # 0.07 is a fudge factor to line up y axes
                 axes0.plot(hori, vert, 'k-')
                 # Force display aspect ratio
                 axes0.set_aspect(calc_ratio)
@@ -164,7 +170,7 @@ def main(filename, start, count, output):
                 # crop image
                 im = Image.open(imagefile)
                 width, height = im.size
-                adj_width = width*0.64 # Fudge factor to eliminate whitespace on left
+                adj_width = width*0.635 # Fudge factor to eliminate whitespace on left
                 new_height = height
                 left = width - adj_width
                 top = (height - new_height)/2
