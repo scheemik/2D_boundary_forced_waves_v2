@@ -279,7 +279,7 @@ n_layers = NL - 1
 slope = 200.0*(n_layers+1)
 N_1 = 0.95                  # The stratification value above the staircase
 N_2 = 1.24                  # The stratification value below the staircase
-z_bot = -0.3 #-0.1                # Top of staircase (not domain)
+z_bot = -0.38 #-0.1                # Top of staircase (not domain)
 z_top = -0.22# 0.1                # Bottom of staircase (not domian)
 print_arrays = False
 
