@@ -108,7 +108,7 @@ def main(filename, start, count, output):
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
-    image = plot_tools.Box(AR, 1)
+    image = plot_tools.Box(1,1)#AR, 1)
     pad = plot_tools.Frame(0.2, 0.2, 0.15, 0.15)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
 
@@ -134,13 +134,14 @@ def main(filename, start, count, output):
     else:
         from PIL import Image # For cropping
         # Plot data and parameters for background profile
-        dis_ratio = 4.0
+        dis_ratio = 6.0 # Profile plot gets skinnier as this goes up
         xleft  = min(hori)
         xright = max(hori)
         ybott  = min(vert)
         ytop   = max(vert)
         calc_ratio = abs((xright-xleft)/(ybott-ytop))*dis_ratio
         task = 'w'
+        w_title = r'w (m/s)'
         nrows, ncols = 1, 2
         # Create multifigure
         mfig = plot_tools.MultiFigure(nrows, ncols, image, pad, margin, scale)
@@ -152,22 +153,23 @@ def main(filename, start, count, output):
                 axes1 = mfig.add_axes(0, 1, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
-                plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes1, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
-                pad = 0.05
-                fig.subplots_adjust(left=pad, wspace=pad)
+                plot_bot_3d_mod(dset, 0, index, x_lims=[0.0, 0.5], y_lims=[z_b, z_t], axes=axes1, title=w_title, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                #pad = 0.05
+                #fig.subplots_adjust(left=pad, wspace=pad)
 
                 # Plot stratification profile on the left
-                axes0 = mfig.add_axes(0, 0, [0, 0, 1.9, 1], sharey=axes1)
+                axes0 = mfig.add_axes(0, 0, [0, 0, 1.5, 1])#, sharey=axes1)
                 axes0.set_title('Profile')
                 axes0.set_xlabel(r'$N^2$ (s$^{-2}$)')
                 axes0.set_ylabel(r'$z$ (m)')
-                axes0.set_ylim([z_b,z_t+0.05]) # 0.07 is a fudge factor to line up y axes
+                axes0.set_ylim([z_b,z_t+0.04]) # fudge factor to line up y axes
                 axes0.plot(hori, vert, 'k-')
                 # Force display aspect ratio
                 axes0.set_aspect(calc_ratio)
                 # save image
                 imagefile = set_title_save(fig, output, file, index, dpi, title_func, savename_func)
                 # crop image
+                '''
                 im = Image.open(imagefile)
                 width, height = im.size
                 adj_width = width*0.635 # Fudge factor to eliminate whitespace on left
@@ -178,6 +180,7 @@ def main(filename, start, count, output):
                 bottom = (height + new_height)/2
                 cropped_im = im.crop((left, top, right, bottom))
                 cropped_im.save(imagefile)
+                '''
         plt.close(fig)
 
 # Not sure why, but this block needs to be at the end of the script

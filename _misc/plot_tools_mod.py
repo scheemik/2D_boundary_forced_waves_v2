@@ -56,7 +56,7 @@ def fmt(x, pos):
         return r'${} \cdot 10^{{{}}}$'.format(a, b)
 
 
-def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), clim=None, even_scale=False, cmap='RdBu_r', axes=None, figkw={}, title=None, func=None, plot_contours=True):
+def plot_bot(dset, image_axes, data_slices, x_lims=None, y_lims=None, image_scales=(0,0), clim=None, even_scale=False, cmap='RdBu_r', axes=None, figkw={}, title=None, func=None, plot_contours=True):
     """
     Plot a 2d slice of the grid data of a dset/field.
 
@@ -68,6 +68,8 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
         Data axes to use for image x and y axes
     data_slices: tuple of slices, ints
         Slices selecting image data from global data
+    x_lims: [float, float]
+        Lower and upper plotting limits on the horizontal axis
     y_lims: [float, float]
         Lower and upper plotting limits on the vertical axis
     image_scales: tuple of ints or strs (xs, ys)
@@ -168,7 +170,9 @@ def plot_bot(dset, image_axes, data_slices, y_lims=None, image_scales=(0,0), cli
         paxes.set_ylabel(yscale)
     else:
         paxes.set_ylabel(dset.dims[yaxis].label)
-    # Set axis limit
+    # Set axis limits
+    if (x_lims!=None):
+        paxes.set_xlim(x_lims)
     if (y_lims!=None):
         paxes.set_ylim(y_lims)
 
@@ -207,7 +211,7 @@ def plot_bot_2d(dset, transpose=False, **kw):
     return plot_bot(dset, image_axes, data_slices, **kw)
 
 
-def plot_bot_3d_mod(dset, normal_axis, normal_index, y_lims=None, transpose=False, **kw):
+def plot_bot_3d_mod(dset, normal_axis, normal_index, x_lims=None, y_lims=None, transpose=False, **kw):
     """
     Plot a 2d slice of the grid data of a 3d field.
 
@@ -253,7 +257,7 @@ def plot_bot_3d_mod(dset, normal_axis, normal_index, y_lims=None, transpose=Fals
     data_slices = [slice(None), slice(None), slice(None)]
     data_slices[normal_axis] = normal_index
 
-    return plot_bot(dset, image_axes, tuple(data_slices), y_lims, **kw)
+    return plot_bot(dset, image_axes, tuple(data_slices), x_lims, y_lims, **kw)
 
 
 class MultiFigure:

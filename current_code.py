@@ -144,7 +144,7 @@ kx    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
 kz    = kx * np.tan(theta)
 # Other parameters
-forcing_slope = 10
+forcing_slope = 10 # for tanh window
 A     = 3.0e-4
 omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
