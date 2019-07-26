@@ -23,7 +23,8 @@ def cosh2(z, height, slope, center):
     # initialize array of values to be returned
     values = 0*z
     # calculate step
-    values = (height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
+    values = height/(np.cosh(slope*(z-center))**2.0)
+    #values = (height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
     return values
 
 def Foran_profile(z, n, z_b, z_t, slope, N_1, N_2):
@@ -39,9 +40,11 @@ def Foran_profile(z, n, z_b, z_t, slope, N_1, N_2):
     if (n > 0):
         # calculate height of steps
         height = H / float(n)
+        # calculate height of pseudo delta bumps as midpoint between N1 and N2
+        bump_h = max(N_1, N_2) - 0.5*abs(N_1-N_2)
         for i in range(n):
             c_i = z_b + (height/2.0 + i*height)
-            values += cosh2(z, height, slope, c_i)
+            values += cosh2(z, bump_h, slope, c_i)
     return values
 
 # %%

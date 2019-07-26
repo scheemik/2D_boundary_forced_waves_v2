@@ -97,7 +97,7 @@ elif LOC == False:
 t_0 =  0.0
 t_f = params.sim_time_stop
 z_b = -0.5
-z_t =  0.5
+z_t =  0.0
 #ratio = 0.4
 
 ###############################################################################
@@ -116,7 +116,7 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=False)
 
     # Use my modified plotbot to make heat map of EF
-    paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, y_lims=[-0.5,0.5], title='Energy flux', even_scale=True)
+    paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, y_lims=[z_b,z_t], title='Energy flux', even_scale=True)
     # Reshape the ef object to put just the top z in an array
     ef = np.rot90(ef[:, 0, :])
     top_ef = ef[0, :]

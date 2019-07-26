@@ -52,7 +52,7 @@ NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
 #R0=1.0E+3		# [kg/m^3]  Characteristic density
 N0=1.0E+0		# [rad/s]   Characteristic stratification
-NL=1			# [nondim]	Number of interfaces
+NL=2			# [nondim]	Number of interfaces
 
 # If VER = 1 or 2, then the code will run and make snapshots
 # 	Check to see if the frames and snapshots folders exist

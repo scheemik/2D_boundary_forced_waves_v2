@@ -41,7 +41,7 @@ z = domain.grid(1)
 ###############################################################################
 
 # Parameters to determine a specific staircase profile
-n_layers = 0
+n_layers = 1
 slope = 200.0*(n_layers+1)
 N_1 = 0.95
 N_2 = 1.24

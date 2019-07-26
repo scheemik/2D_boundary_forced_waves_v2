@@ -62,7 +62,7 @@ from docopt import docopt
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
-plot_BP = False
+plot_BP = True
 print_params = True
 
 # Options for simulation

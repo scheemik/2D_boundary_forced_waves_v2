@@ -38,7 +38,7 @@ rank = comm.Get_rank()
 # Switchboard
 plot_all = False
 print_args = False
-contours = False
+contours = True
 z_b = -0.5      # Bottom plotting extent
 z_t =  0.0#0.5      # Top plotting extent
 ###############################################################################
