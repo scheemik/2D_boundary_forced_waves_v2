@@ -17,7 +17,7 @@ Arguments:
     NL		# [nondim]	Number of inner interfaces
 
 This script uses a Fourier basis in the x direction with periodic boundary
-conditions. 
+conditions.
 
 This script can be ran serially or in parallel, and uses the built-in analysis
 framework to save data snapshots in HDF5 files.  The `merge.py` script in this
@@ -59,6 +59,11 @@ from docopt import docopt
 ###############################################################################
 # Switchboard
 
+# Reproducing run, or measuring energy flux?
+reproducing_run = False
+# Save just the relevant snapshots, or all?
+save_all_snapshots = True
+
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
@@ -68,6 +73,7 @@ print_params = True
 # Options for simulation
 use_sponge_layer = True
 set_N_const = False
+
 ###############################################################################
 
 # Read in parameters from docopt
@@ -90,28 +96,34 @@ if __name__ == '__main__':
         print('N0 =',N0)
         print('NL =',NL)
 
-# Parameters
-aspect_ratio = AR
-Lx, Lz = (0.5*aspect_ratio, 0.5)
-z_b, z_t = (-Lz, 0.0)#(-Lz/2, Lz/2)
-# Placeholders for params
-nx = 40*2       # number of grid points in x direction
-nz = 40*1       # number of grid points in z direction in main domain
-
 ###############################################################################
 # Fetch parameters from the correct params file
 
-# Add correct path to params files
+# Add path to params files
 sys.path.insert(0, './_params')
 if LOC:
-    import params_local
-    params = params_local
+    if reproducing_run:
+        import params_repro
+        params = params_repro
+    else:
+        import params_ef
+        params = params_ef
 elif LOC == False:
     import params_Niagara
     params = params_Niagara
 
-nx = int(params.n_x)
-nz = int(params.n_z)
+# Number of grid points in each dimension
+nx, nz = int(params.n_x), int(params.n_z)  # doesn't include sponge layer
+# Domain size
+Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer
+x_span = params.x_interval # tuple
+z_b, z_t = float(params.z_b), float(params.z_t) #(-Lz, 0.0) #(-Lz/2, Lz/2)
+# Angle of beam w.r.t. the horizontal
+theta   = float(params.theta)
+# Wavenumbers
+kx, kz = float(params.k_x), float(params.k_z)
+# Forcing amplitude modifier
+A       = float(params.forcing_amp)
 if (rank==0 and print_params):
     print('n_x=',nx)
     print('n_z=',nz)
@@ -120,8 +132,6 @@ wall_time_stop = params.wall_time_stop
 adapt_dt = params.adapt_dt
 
 ###############################################################################
-# Setting parameters
-
 # Physical parameters
 nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
 kappa = KA          # [m^2/s]   Thermal diffusivity
@@ -130,28 +140,10 @@ if (rank==0 and print_params): print('Prandtl number =',Pr)
 #rho_0 = R0          # [kg/m^3]  Characteristic density -> now wrapped into pressure
 N_0   = N0          # [rad/s]   Characteristic stratification
 g     = 9.81        # [m/s^2]   Acceleration due to gravity
-
-# Boundary forcing parameters
-# Bounds of the forcing window
-fl_edge = -1.0*Lx/12.0
-fr_edge =  1.0*Lx/12.0
-# Angle of beam w.r.t. the horizontal
-theta = np.pi/4
-# Horizontal wavelength
-lam_x = fr_edge - fl_edge
-# Horizontal wavenumber
-kx    = 2*np.pi/lam_x
-# Vertical wavenumber = 2*pi/lam_z, or from trig:
-kz    = kx * np.tan(theta)
-# Other parameters
-forcing_slope = 10 # for tanh window
-A     = 3.0e-4
 omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 ###############################################################################
-
 # Parameters to set a sponge layer at the bottom
-
 nz_sp = 40          # number of grid points in z direction in sponge domain
 sp_slope = -20.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
@@ -161,8 +153,7 @@ z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
 ###############################################################################
 
 # Create bases and domain
-x_basis  = de.Fourier('x', nx, interval=(-Lx/3.0, 2.0*Lx/3.0), dealias=3/2)
-#x_basis  = de.Fourier('x', nx, interval=(-Lx/2, Lx/2), dealias=3/2)
+x_basis  = de.Fourier('x', nx, interval=x_span, dealias=3/2)
 if use_sponge_layer:
     z_main   = de.Chebyshev('zm', nz, interval=(z_b, z_t), dealias=3/2)
     z_sponge = de.Chebyshev('zs', nz_sp, interval=(z_sb, z_b), dealias=3/2)
@@ -226,11 +217,18 @@ problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
 problem.parameters['grav'] = g # can't use 'g' because Dedalus already uses that for grid
 
-# Windowing function (multiplying tanh's)
-problem.parameters['slope'] = forcing_slope
-problem.parameters['left_edge'] = fl_edge
-problem.parameters['right_edge'] = fr_edge
-problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"
+if reproducing_run:
+    # Windowing function (multiplying tanh's)
+    # Slope of tanh for forcing window
+    f_slope = float(params.forcing_slope)
+    # Bounds of the forcing window
+    fl_edge, fr_edge = float(params.forcing_left_edge), float(params.forcing_rightedge)
+    problem.parameters['slope'] = f_slope
+    problem.parameters['left_edge'] = fl_edge
+    problem.parameters['right_edge'] = fr_edge
+    problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"
+else:
+    problem.substitutions['window'] = "1"
 
 # Substitutions for boundary forcing (see C-R & B eq 13.7)
 problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z - omega*t)*window"
@@ -245,7 +243,6 @@ problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
 SL = domain.new_field()
 SL.meta['x']['constant'] = True  # means the NCC is constant along x
 # Import the sponge layer function from the sponge layer script
-#import sys
 sys.path.insert(0, './_sponge_layer')
 from sponge_layer import sponge_profile
 # Store profile in an array so it can be used later
@@ -258,45 +255,61 @@ problem.parameters['SL'] = SL  # pass function in as a parameter
 #   Multiply nu by SL in the equations of motion
 del SL
 
-# Plots the sponge layer coefficient profile
-if (plot_SL and rank == 0 and LOC):
-    vert = np.array(z[0])
-    hori = np.array(SL_array[0])
+def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
     with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
         fg, ax = plt.subplots(1,1)
-        ax.set_title('Sponge Profile')
-        ax.set_xlabel(r'viscosity coefficient')
-        ax.set_ylabel(r'depth ($z$)')
-        ax.set_ylim([z_sb,z_t])
+        ax.set_title(plt_title)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        ax.set_ylim(y_lims)
         ax.plot(hori, vert, 'k-')
         plt.grid(True)
         plt.show()
 
-###############################################################################
-
-# Parameters to determine a specific staircase profile
-n_layers = NL - 1
-slope = 200.0*(n_layers+1)
-N_1 = 0.95                  # The stratification value above the staircase
-N_2 = 1.24                  # The stratification value below the staircase
-z_bot = -0.38 #-0.1                # Top of staircase (not domain)
-z_top = -0.22# 0.1                # Bottom of staircase (not domian)
-print_arrays = False
+# Plots the sponge layer coefficient profile
+if (plot_SL and rank == 0 and LOC):
+    vert = np.array(z[0])
+    hori = np.array(SL_array[0])
+    plt_title = 'Sponge Profile'
+    x_label = r'viscosity coefficient'
+    y_label = r'depth ($z$)'
+    y_lims  = [z_sb,z_t]
+    test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
 
 ###############################################################################
 
 # Background Profile (BP) as an NCC
+print_arrays = False
 BP = domain.new_field()
 BP.meta['x']['constant'] = True  # means the NCC is constant along x
-# Import the staircase function from the background profile script
-#import sys
-sys.path.insert(0, './_background_profile')
-from Foran_profile import Foran_profile
-# Store profile in an array so it can be used later
+# Construct profile in an array so it can be used later
 if set_N_const:
     BP_array = z*0 + 1.0
-else:
-    BP_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
+else: # Construct a staircase profile
+    n_layers = NL
+    # Import the staircase function from the background profile script
+    sys.path.insert(0, './_background_profile')
+    if reproducing_run:
+        slope = float(params.profile_slope)#*(n_layers+1)
+        N_1 = float(params.N_1)                  # Stratification value above staircase
+        N_2 = float(params.N_2)                  # Stratification value below staircase
+        if n_layers == 1:                        # Top of staircase (not domain)
+            st_bot = float(params.stair_bot_1)
+        elif n_layers == 2:
+            st_bot = float(params.stair_bot_2)
+        else:
+            print("NL must be 1 or 2 for reproduction run")
+        st_top = float(params.stair_top)         # Bottom of staircase (not domian)
+        from Foran_profile import Foran_profile
+        BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
+    else:
+        slope = 100
+        st_buffer = 0.1
+        bump = 1.3
+        st_bot = z_b + st_buffer
+        st_top = z_t - st_buffer
+        from background_profile import N2_profile
+        BP_array = N2_profile(z, n_layers, st_bot, st_top, slope, bump)
 BP['g'] = BP_array
 problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
@@ -315,17 +328,11 @@ if (rank==0 and print_arrays):
 
 # Plots the background profile
 if (plot_BP and rank == 0 and LOC):
-    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
-        fg, ax = plt.subplots(1,1)
-        ax.set_title('Background Profile')
-        ax.set_xlabel(r'frequency ($N^2$)')
-        ax.set_ylabel(r'depth ($z$)')
-        ax.set_ylim([z_b,z_t])
-        ax.plot(hori, vert, 'k-')
-        plt.grid(True)
-        # Uncomment to save figure
-        #plt.savefig('2019_07_10-N2_profile_w_SL.png', facecolor=fg.get_facecolor(), transparent=True)
-        plt.show()
+    plt_title = 'Background Profile'
+    x_label = r'frequency ($N^2$)'
+    y_label = r'depth ($z$)'
+    y_lims  = [z_b,z_t]
+    test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
 
 ###############################################################################
 
@@ -403,12 +410,10 @@ solver.stop_wall_time = wall_time_stop * 60.
 solver.stop_iteration = np.inf
 
 # Analysis
-if LOC:
+if (save_all_snapshots or reproducing_run):
     snapshots_path = 'snapshots'
-else:
-    snapshots_path = '/scratch/n/ngrisoua/mschee/Dedalus/Vanilla_Dedalus/2D_boundary_forced_waves_v2/snapshots'
-snapshots = solver.evaluator.add_file_handler(snapshots_path, sim_dt=0.25, max_writes=50)
-snapshots.add_system(solver.state)
+    snapshots = solver.evaluator.add_file_handler(snapshots_path, sim_dt=0.25, max_writes=50)
+    snapshots.add_system(solver.state)
 
 # CFL - adapts time step as the code runs depending on stiffness
 #       implemented in 'while solver.ok' loop
@@ -418,8 +423,6 @@ CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
-# Reduced Richardson number
-#flow.add_property("(4*((N0*BP)**2 + bz) - (uz**2))/N0**2", name='Ri_red')
 # Some other criterion
 flow.add_property("dx(u)/omega", name='Lin_Criterion')
 
@@ -427,14 +430,12 @@ flow.add_property("dx(u)/omega", name='Lin_Criterion')
 # Measuring "energy flux" through a horizontal boundary at some z
 
 # Adding a new file handler
-if LOC:
+if (save_all_snapshots or reproducing_run==False):
     ef_snapshots_path = 'ef_snapshots'
-else:
-    ef_snapshots_path = '/scratch/n/ngrisoua/mschee/Dedalus/Vanilla_Dedalus/2D_boundary_forced_waves_v2/ef_snapshots'
-ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
-# Adding a task to integrate energy flux across x for values of z
-ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
-#ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
+    ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
+    # Adding a task to integrate energy flux across x for values of z
+    ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
+    #ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
 
 ###############################################################################
 
@@ -453,13 +454,6 @@ try:
             logger.info('Max linear criterion = {0:f}'.format(flow.max('Lin_Criterion')))
             if np.isnan(flow.max('Lin_Criterion')):
                 raise NameError('Code blew up it seems')
-            '''
-            logger.info('Min reduced Ri = {0:f}'.format(flow.min('Ri_red')))
-            if np.isnan(flow.min('Ri_red')):
-                raise NameError('Code blew up it seems')
-            '''
-
-
 except:
     logger.error('Exception raised, triggering end of main loop.')
     raise

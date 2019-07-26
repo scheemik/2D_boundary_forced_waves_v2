@@ -8,14 +8,21 @@ import numpy as np
 ###############################################################################
 # Functions to define an arbitrary density staircase profile
 
-def tanh_(z, bottom, top, slope, center):
+def tanh_(z, height, slope, center):
     # initialize array of values to be returned
     values = 0*z
-    # calculate height of step
-    height = top - bottom
     # calculate step
-    values = 0.5*height*(np.tanh(slope*(z-center))+1)+bottom
+    values = 0.5*height*(np.tanh(slope*(z-center))+1)
     return values
+
+def cosh2(z, height, slope, center):
+    # initialize array of values to be returned
+    values = 0*z
+    # calculate step
+    values = height/(np.cosh(slope*(z-center))**2.0)
+    #values = (height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
+    return values
+
 def rho_profile(z, n, bottom, top, slope, left, right):
     # initialize array of values to be returned
     values = 0*z
@@ -37,25 +44,20 @@ def rho_profile(z, n, bottom, top, slope, left, right):
 ###############################################################################
 # Functions to define an arbitrary N^2 staircase profile
 
-def cosh2(z, height, slope, center):
+def N2_profile(z, n, stair_bot, stair_top, slope, bump):
     # initialize array of values to be returned
     values = 0*z
-    # calculate step
-    values = -(height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
-    return values
-
-def N2_profile(z, n, bottom, top, slope, left, right):
-    # initialize array of values to be returned
-    values = 0*z
-    # calculate height of domain
-    H = top - bottom # don't take absolute value, this lets staircase flip
-    # calculate height of steps
-    height = H / float(n)
-    # calculate width of domain
-    W = abs(right - left)
-    # calculate width of steps
-    width = W / float(n)
-    for i in range(n):
-        c_i = right - (width/2.0 + i*width)
-        values += cosh2(z, height, slope, c_i)
+    # Add upper stratification
+    values += tanh_(z, 1.0, slope, stair_top)
+    # Add lower stratification
+    values += tanh_(z, 1.0, -slope, stair_bot)
+    # Find height of staircase region
+    H = stair_top - stair_bot
+    # If there are steps to be added...
+    if (n > 0):
+        # calculate height of steps
+        height = H / float(n+1)
+        for i in range(n):
+            c_i = stair_bot + (i+1)*height
+            values += cosh2(z, bump, slope, c_i)
     return values
