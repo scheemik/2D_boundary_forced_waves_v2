@@ -17,7 +17,7 @@ Arguments:
     NL		# [nondim]	Number of inner interfaces
 
 This script uses a Fourier basis in the x direction with periodic boundary
-conditions.  The equations have been non-dimensionalized.
+conditions. 
 
 This script can be ran serially or in parallel, and uses the built-in analysis
 framework to save data snapshots in HDF5 files.  The `merge.py` script in this
