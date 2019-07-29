@@ -27,6 +27,17 @@ def cosh2(z, height, slope, center):
     #values = (height*slope)/(2.0*(np.cosh(slope*(z-center)))**2.0)
     return values
 
+def tanh_bump(z, height, slope, center, width):
+    # initialize array of values to be returned
+    values = 0*z
+    # calculate sides of bump
+    c_l, c_r = (center-width/2.0), (center+width/2.0)
+    # add left side
+    values += tanh_(z, height, slope, c_l)
+    # add right side
+    values += tanh_(z, height, -slope, c_r)
+    return values
+
 def Foran_profile(z, n, z_b, z_t, slope, N_1, N_2):
     # initialize array of values to be returned
     values = 0*z
@@ -44,7 +55,8 @@ def Foran_profile(z, n, z_b, z_t, slope, N_1, N_2):
         bump_h = max(N_1, N_2) - 0.5*abs(N_1-N_2)
         for i in range(n):
             c_i = z_b + (height/2.0 + i*height)
-            values += cosh2(z, bump_h, slope, c_i)
+            values += tanh_bump(z, bump_h, slope, c_i, 0.05)
+            #values += cosh2(z, bump_h, slope, c_i)
     return values
 
 # %%

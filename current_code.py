@@ -66,7 +66,7 @@ save_all_snapshots = True
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
-plot_BP = False
+plot_BP = True
 print_params = True
 
 # Options for simulation
@@ -224,9 +224,6 @@ if reproducing_run:
     f_slope = float(params.forcing_slope)
     # Bounds of the forcing window
     fl_edge, fr_edge = float(params.forcing_left_edge), float(params.forcing_rightedge)
-    print('f_slope =', f_slope)
-    print('fl_edge =', fl_edge)
-    print('fr_edge =', fr_edge)
     problem.parameters['slope'] = f_slope
     problem.parameters['left_edge'] = fl_edge
     problem.parameters['right_edge'] = fr_edge
