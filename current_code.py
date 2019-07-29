@@ -16,8 +16,7 @@ Arguments:
     N0		# [rad/s]   Characteristic stratification
     NL		# [nondim]	Number of inner interfaces
 
-This script uses a Fourier basis in the x direction with periodic boundary
-conditions.
+This script uses a Fourier basis in the x direction with periodic boundary conditions.
 
 This script can be ran serially or in parallel, and uses the built-in analysis
 framework to save data snapshots in HDF5 files.  The `merge.py` script in this
@@ -60,14 +59,14 @@ from docopt import docopt
 # Switchboard
 
 # Reproducing run, or measuring energy flux?
-reproducing_run = False
+reproducing_run = True
 # Save just the relevant snapshots, or all?
 save_all_snapshots = True
 
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
-plot_BP = True
+plot_BP = False
 print_params = True
 
 # Options for simulation
@@ -103,9 +102,11 @@ if __name__ == '__main__':
 sys.path.insert(0, './_params')
 if LOC:
     if reproducing_run:
+        print('Reproducing results from Ghaemsaidi')
         import params_repro
         params = params_repro
     else:
+        print('Measuring energy flux')
         import params_ef
         params = params_ef
 elif LOC == False:
@@ -223,6 +224,9 @@ if reproducing_run:
     f_slope = float(params.forcing_slope)
     # Bounds of the forcing window
     fl_edge, fr_edge = float(params.forcing_left_edge), float(params.forcing_rightedge)
+    print('f_slope =', f_slope)
+    print('fl_edge =', fl_edge)
+    print('fr_edge =', fr_edge)
     problem.parameters['slope'] = f_slope
     problem.parameters['left_edge'] = fl_edge
     problem.parameters['right_edge'] = fr_edge

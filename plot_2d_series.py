@@ -38,7 +38,7 @@ rank = comm.Get_rank()
 # Switchboard
 plot_all = False
 print_args = False
-contours = True
+contours = False
 z_b = -0.5      # Bottom plotting extent
 z_t =  0.0#0.5      # Top plotting extent
 ###############################################################################
@@ -108,12 +108,12 @@ def main(filename, start, count, output):
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
-    image = plot_tools.Box(1,1)#AR, 1)
     pad = plot_tools.Frame(0.2, 0.2, 0.15, 0.15)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
 
     # Plot settings
     if plot_all:
+        image = plot_tools.Box(AR, 1)
         tasks = ['b', 'p', 'u', 'w']
         nrows, ncols = 2, 2
         # Create multifigure
@@ -132,6 +132,7 @@ def main(filename, start, count, output):
                 set_title_save(fig, output, file, index, dpi, title_func, savename_func)
         plt.close(fig)
     else:
+        image = plot_tools.Box(1, 1)
         from PIL import Image # For cropping
         # Plot data and parameters for background profile
         dis_ratio = 6.0 # Profile plot gets skinnier as this goes up

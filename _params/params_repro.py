@@ -4,7 +4,7 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_time_stop = 5 # time units (t)
+sim_time_stop = 25 # time units (t)
 wall_time_stop = 60 # min
 
 # Determine whether adaptive time stepping is on or off
@@ -15,7 +15,7 @@ n_x = 256
 n_z = 512
 
 # Domain size
-L_x = 3.0 # m
+L_x = 1.5 # m
 L_z = 0.5 # m, not including the sponge layer
 x_interval = (-L_x/3.0, 2.0*L_x/3.0)
 z_b, z_t = -L_z, 0.0
