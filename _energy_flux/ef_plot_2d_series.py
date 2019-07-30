@@ -35,6 +35,8 @@ rank = comm.Get_rank()
 
 ###############################################################################
 
+reproducing_run = False
+
 # Strings for the parameters
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
@@ -85,17 +87,24 @@ if __name__ == "__main__":
 ###############################################################################
 # Fetch parameters from the correct params file
 
-# Add correct path to params files
+# Add path to params files
 sys.path.insert(0, './_params')
 if LOC:
-    import params_local
-    params = params_local
+    if reproducing_run:
+        print('Reproducing results from Ghaemsaidi')
+        import params_repro
+        params = params_repro
+    else:
+        print('Measuring energy flux')
+        import params_ef
+        params = params_ef
 elif LOC == False:
     import params_Niagara
     params = params_Niagara
 
 t_0 =  0.0
 t_f = params.sim_time_stop
+print('end time=', t_f)
 z_b = -0.5
 z_t =  0.0
 #ratio = 0.4
@@ -122,13 +131,17 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     top_ef = ef[0, :]
     n_t = len(top_ef)
     t = np.linspace(t_0, t_f, n_t)
+    omega = np.cos(np.pi/4)
+    t_p = t*omega/(2*np.pi)
+    t_0p = t_0*omega/(2*np.pi)
+    t_fp = t_f*omega/(2*np.pi)
 
-    ax1.plot(t, top_ef)
+    ax1.plot(t_p, top_ef)
     ax1.set_title('Top boundary energy flux', fontsize='medium')
-    ax1.set_xlabel(r't')
-    y_label = r'\overline{F_z}(z)'
+    ax1.set_xlabel(r'Oscilation periods $(t/T)$')
+    y_label = r'Vertical energy flux $<F_z(z)>$'
     ax1.set_ylabel(y_label)
-    ax1.set_xlim(t_0, t_f)
+    ax1.set_xlim(t_0p, t_fp)
     ax1.get_shared_x_axes().join(ax0, ax1)
 
     title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l)

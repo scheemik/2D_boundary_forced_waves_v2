@@ -80,18 +80,14 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
     LOC = int(arguments['LOC'])
     LOC = bool(LOC)
-    AR = float(arguments['AR'])
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
-    #R0 = float(arguments['R0'])
     N0 = float(arguments['N0'])
     NL = int(arguments['NL'])
     if (rank == 0 and print_params):
         print('LOC=',LOC)
-        print('AR =',AR)
         print('NU =',NU)
         print('KA =',KA)
-        #print('R0=',R0)
         print('N0 =',N0)
         print('NL =',NL)
 
@@ -114,7 +110,7 @@ elif LOC == False:
     params = params_Niagara
 
 # Aspect ratio of domain of interest
-AR = float(params.aspect_ratio)
+#AR = float(params.aspect_ratio)
 # Number of layers in background profile
 NL = int(params.n_layers)
 # Number of grid points in each dimension
@@ -195,7 +191,6 @@ problem.meta['p','bz','uz','wz']['z']['dirichlet'] = False
 # Parameters for the equations of motion
 problem.parameters['NU'] = nu
 problem.parameters['KA'] = kappa
-#problem.parameters['R0'] = rho_0
 problem.parameters['N0'] = N_0
 
 ###############################################################################
@@ -340,10 +335,10 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) -SL*NU*dx(dx(u)) -SL*NU*dz(uz) + dx(p)" #/R0"
+problem.add_equation("dt(u) -SL*NU*dx(dx(u)) - NU*dz(uz) + dx(p)"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) -SL*NU*dx(dx(w)) -SL*NU*dz(wz) + dz(p) - b" #/R0"
+problem.add_equation("dt(w) -SL*NU*dx(dx(w)) - NU*dz(wz) + dz(p) - b"
                     + "= - (u*dx(w) + w*wz)")
 #problem.add_equation("dt(w) - NU*dz(wz) + dz(p) - b" #/R0"
 #                    + "= SL*NU*dx(dx(w)) - (u*dx(w) + w*wz)")

@@ -145,7 +145,7 @@ def main(filename, start, count, output):
         ybott  = min(vert)
         ytop   = max(vert)
         if (xright-xleft == 0):
-            print('whoops')
+            #print('whoops')
             dis_ratio = 0.4
             xleft  =  0.0
             xright =  1.5
