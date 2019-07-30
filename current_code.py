@@ -59,7 +59,7 @@ from docopt import docopt
 # Switchboard
 
 # Reproducing run, or measuring energy flux?
-reproducing_run = True
+reproducing_run = False
 # Save just the relevant snapshots, or all?
 save_all_snapshots = True
 
@@ -71,7 +71,7 @@ print_params = True
 
 # Options for simulation
 use_sponge_layer = True
-set_N_const = False
+set_N_const = True
 
 ###############################################################################
 
@@ -113,6 +113,10 @@ elif LOC == False:
     import params_Niagara
     params = params_Niagara
 
+# Aspect ratio of domain of interest
+AR = float(params.aspect_ratio)
+# Number of layers in background profile
+NL = int(params.n_layers)
 # Number of grid points in each dimension
 nx, nz = int(params.n_x), int(params.n_z)  # doesn't include sponge layer
 # Domain size
@@ -238,6 +242,18 @@ problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
 #problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
 
 ###############################################################################
+# Plotting function for sponge layer, background profile, etc.
+def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
+    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
+        fg, ax = plt.subplots(1,1)
+        ax.set_title(plt_title)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        ax.set_ylim(y_lims)
+        ax.plot(hori, vert, 'k-')
+        plt.grid(True)
+        plt.show()
+###############################################################################
 
 # Sponge Layer (SL) as an NCC
 #   Check state of `use_sponge_layer` above
@@ -255,17 +271,6 @@ SL['g'] = SL_array
 problem.parameters['SL'] = SL  # pass function in as a parameter
 #   Multiply nu by SL in the equations of motion
 del SL
-
-def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
-    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
-        fg, ax = plt.subplots(1,1)
-        ax.set_title(plt_title)
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y_label)
-        ax.set_ylim(y_lims)
-        ax.plot(hori, vert, 'k-')
-        plt.grid(True)
-        plt.show()
 
 # Plots the sponge layer coefficient profile
 if (plot_SL and rank == 0 and LOC):

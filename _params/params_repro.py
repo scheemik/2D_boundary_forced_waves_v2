@@ -10,6 +10,12 @@ wall_time_stop = 60 # min
 # Determine whether adaptive time stepping is on or off
 adapt_dt = False
 
+# Aspect ratio of display domain
+aspect_ratio = 1.0
+
+# number of layers
+n_layers = 2
+
 # Number of points in each dimension
 n_x = 256
 n_z = 512
