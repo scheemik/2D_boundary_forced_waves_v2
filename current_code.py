@@ -66,7 +66,7 @@ save_all_snapshots = True
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
-plot_BP = True
+plot_BP = False
 print_params = True
 
 # Options for simulation
@@ -320,27 +320,17 @@ BP['g'] = BP_array
 problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
 
-# Save background N profile to file so plotting function can read in
-vert = np.array(z[0])
-hori = np.array(BP_array[0])
-'''
-filename = '_background_profile/current_N_'
-np.save(filename+'x', hori)
-np.save(filename+'y', vert)
-if (rank==0 and print_arrays):
-    print('hori')
-    print(hori)
-    print('vert')
-    print(vert)
-'''
 # Plots the background profile
 if (plot_BP and rank == 0 and LOC):
+    vert = np.array(z[0])
+    hori = np.array(BP_array[0])
     plt_title = 'Background Profile'
     x_label = r'frequency ($N^2$)'
     y_label = r'depth ($z$)'
     y_lims  = [z_b,z_t]
     test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
 
+###############################################################################
 ###############################################################################
 
 # Equations of motion (non-linear terms on RHS)
@@ -383,6 +373,7 @@ problem.add_bc("right(b) = right(fb)") #0")
 # Sets gauge pressure to zero in the constant mode
 problem.add_bc("left(p) = 0", condition="(nx == 0)") # required because of above redundancy
 
+###############################################################################
 ###############################################################################
 
 # Build solver
@@ -439,7 +430,7 @@ flow.add_property("dx(u)/omega", name='Lin_Criterion')
 # Outputting background profile structure to file
 
 current_bgpf_path = '_background_profile/current_bgpf'
-current_bgpf = solver.evaluator.add_file_handler(current_bgpf_path, sim_dt=10.0, max_writes=100)
+current_bgpf = solver.evaluator.add_file_handler(current_bgpf_path, sim_dt=sim_time_stop, max_writes=100)
 # Adding a task to record the background profile for the current simulation
 current_bgpf.add_task("N0*BP", layout='g', name='N')
 

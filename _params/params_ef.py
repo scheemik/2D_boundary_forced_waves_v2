@@ -4,7 +4,7 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_time_stop = 15 # time units (t)
+sim_time_stop = 5 # time units (t)
 wall_time_stop = 15 # min
 
 # Determine whether adaptive time stepping is on or off
@@ -25,15 +25,7 @@ L_x = 0.5 # m
 L_z = 0.5 # m, not including the sponge layer
 x_interval = (0.0, L_x)
 z_b, z_t = -L_z, 0.0
-'''
-# Background profile parameters
-profile_slope = 200.0
-N_1 = 0.95                  # The stratification value above the staircase
-N_2 = 1.24                  # The stratification value below the staircase
-stair_bot_1 = -0.30         # Bottom of staircase (not domain) for 1 layer
-stair_bot_2 = -0.38         # Bottom of staircase (not domain) for 2 layer
-stair_top   = -0.22         # Top of staircase (not domian)
-'''
+
 # Boundary forcing parameters
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4

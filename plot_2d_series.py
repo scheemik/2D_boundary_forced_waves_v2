@@ -36,19 +36,23 @@ rank = comm.Get_rank()
 
 ###############################################################################
 # Switchboard
-plot_all = True
+plot_all = False
 print_args = False
 contours = False
+print_arrays = False
 z_b = -0.5      # Bottom plotting extent
 z_t =  0.0#0.5      # Top plotting extent
 ###############################################################################
 
 # Data for plotting background stratification profile
 if plot_all==False:
-    filename = '_background_profile/current_N_'
-    hori = np.load(filename+'x.npy')
-    vert = np.load(filename+'y.npy')
-    print_arrays = False
+    bgpf_filepath = "_background_profile/current_bgpf/current_bgpf_s1.h5"
+    with h5py.File(bgpf_filepath, mode='r') as file:
+        bgpf = file['tasks']['N']
+        temp = bgpf[()]
+        hori = temp[0][0]
+        z_ = file['scales']['z']['1.0']
+        vert = z_[()]
     if (rank==0 and print_arrays):
         print('hori')
         print(hori)
@@ -140,6 +144,13 @@ def main(filename, start, count, output):
         xright = max(hori)
         ybott  = min(vert)
         ytop   = max(vert)
+        if (xright-xleft == 0):
+            print('whoops')
+            dis_ratio = 0.4
+            xleft  =  0.0
+            xright =  1.5
+            #ybott  = -0.5
+            #ytop   =  0.0
         calc_ratio = abs((xright-xleft)/(ybott-ytop))*dis_ratio
         task = 'w'
         w_title = r'w (m/s)'
@@ -161,7 +172,7 @@ def main(filename, start, count, output):
                 # Plot stratification profile on the left
                 axes0 = mfig.add_axes(0, 0, [0, 0, 1.5, 1])#, sharey=axes1)
                 axes0.set_title('Profile')
-                axes0.set_xlabel(r'$N^2$ (s$^{-2}$)')
+                axes0.set_xlabel(r'$N$ (s$^{-1}$)')
                 axes0.set_ylabel(r'$z$ (m)')
                 axes0.set_ylim([z_b,z_t+0.04]) # fudge factor to line up y axes
                 axes0.plot(hori, vert, 'k-')
@@ -170,18 +181,6 @@ def main(filename, start, count, output):
                 # save image
                 imagefile = set_title_save(fig, output, file, index, dpi, title_func, savename_func)
                 # crop image
-                '''
-                im = Image.open(imagefile)
-                width, height = im.size
-                adj_width = width*0.635 # Fudge factor to eliminate whitespace on left
-                new_height = height
-                left = width - adj_width
-                top = (height - new_height)/2
-                right = width # all the way to the right side
-                bottom = (height + new_height)/2
-                cropped_im = im.crop((left, top, right, bottom))
-                cropped_im.save(imagefile)
-                '''
         plt.close(fig)
 
 # Not sure why, but this block needs to be at the end of the script
