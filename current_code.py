@@ -323,6 +323,7 @@ del BP
 # Save background N profile to file so plotting function can read in
 vert = np.array(z[0])
 hori = np.array(BP_array[0])
+'''
 filename = '_background_profile/current_N_'
 np.save(filename+'x', hori)
 np.save(filename+'y', vert)
@@ -331,7 +332,7 @@ if (rank==0 and print_arrays):
     print(hori)
     print('vert')
     print(vert)
-
+'''
 # Plots the background profile
 if (plot_BP and rank == 0 and LOC):
     plt_title = 'Background Profile'
@@ -435,6 +436,14 @@ flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 flow.add_property("dx(u)/omega", name='Lin_Criterion')
 
 ###############################################################################
+# Outputting background profile structure to file
+
+current_bgpf_path = '_background_profile/current_bgpf'
+current_bgpf = solver.evaluator.add_file_handler(current_bgpf_path, sim_dt=10.0, max_writes=100)
+# Adding a task to record the background profile for the current simulation
+current_bgpf.add_task("N0*BP", layout='g', name='N')
+
+###############################################################################
 # Measuring "energy flux" through a horizontal boundary at some z
 
 # Adding a new file handler
@@ -443,7 +452,6 @@ if (save_all_snapshots or reproducing_run==False):
     ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
     # Adding a task to integrate energy flux across x for values of z
     ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
-    #ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + grav*z*w, 'x')", layout='g', name='<ef>')
 
 ###############################################################################
 

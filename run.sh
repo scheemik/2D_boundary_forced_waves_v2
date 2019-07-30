@@ -50,7 +50,6 @@ fi
 AR=1.0			# [nondim]  Aspect ratio of domain
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
-#R0=1.0E+3		# [kg/m^3]  Characteristic density
 N0=1.0E+0		# [rad/s]   Characteristic stratification
 NL=2			# [nondim]	Number of interfaces
 
@@ -73,6 +72,11 @@ then
 	then
 		echo "Removing energy flux snapshots"
 		rm -r ef_snapshots
+	fi
+	if [ -e _background_profile/current_bgpf ]
+	then
+		echo "Removing background profile snapshot"
+		rm -r _background_profile/current_bgpf
 	fi
 fi
 
@@ -115,6 +119,13 @@ then
 		echo "Merging snapshots"
 		mpiexec -n $CORES python3 merge.py snapshots
 	fi
+	if [ -e _background_profile/current_bgpf/current_bgpf_s1.h5 ]
+	then
+		echo "Background profile snapshot already merged"
+	else
+		echo "Merging background profile snapshot"
+		mpiexec -n $CORES python3 merge.py _background_profile/current_bgpf
+	fi
 	echo ""
 	if [ -e frames ]
 	then
@@ -151,7 +162,7 @@ then
 		echo "Energy flux snapshots already merged"
 	else
 		echo "Merging energy flux snapshots"
-		mpiexec -n $CORES python3 _energy_flux/ef_merge.py ef_snapshots
+		mpiexec -n $CORES python3 merge.py ef_snapshots
 	fi
 	echo "Plotting EF for z vs. t"
 	mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $NU $KA $N0 $NL ef_snapshots/*.h5
