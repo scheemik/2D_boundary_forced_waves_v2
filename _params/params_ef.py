@@ -4,7 +4,7 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_time_stop = 25 # time units (t)
+sim_time_stop = 15 # time units (t)
 wall_time_stop = 15 # min
 
 # Determine whether adaptive time stepping is on or off

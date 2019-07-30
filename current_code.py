@@ -349,13 +349,15 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) - SL*NU*(dx(dx(u)) + dz(uz)) + dx(p)" #/R0"
+problem.add_equation("dt(u) -SL*NU*dx(dx(u)) -SL*NU*dz(uz) + dx(p)" #/R0"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) - SL*NU*(dx(dx(w)) + dz(wz)) + dz(p) - b" #/R0"
+problem.add_equation("dt(w) -SL*NU*dx(dx(w)) -SL*NU*dz(wz) + dz(p) - b" #/R0"
                     + "= - (u*dx(w) + w*wz)")
+#problem.add_equation("dt(w) - NU*dz(wz) + dz(p) - b" #/R0"
+#                    + "= SL*NU*dx(dx(w)) - (u*dx(w) + w*wz)")
 
-# Required for differential equation solving in Chebyshev dimension
+# Required for solving differential equations in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")
 problem.add_equation("uz - dz(u) = 0")
 problem.add_equation("wz - dz(w) = 0")
@@ -429,7 +431,7 @@ CFL.add_velocities(('u', 'w'))
 
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
-# Some other criterion
+# Some other linear criterion
 flow.add_property("dx(u)/omega", name='Lin_Criterion')
 
 ###############################################################################
