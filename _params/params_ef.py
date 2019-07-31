@@ -33,8 +33,10 @@ k_x    = 2*np.pi/lam_x
 k_z    = k_x * np.tan(theta)
 # Oscillation frequency = N_0 * cos(theta), from dispersion relation
 omega = N_0 * np.cos(theta) # [s^-1]
+# Oscillation period = 2pi / omega
+T = 2*np.pi / omega
 # Other parameters
 forcing_amp   = 1.0e-4
 
 # Calculate stop time
-sim_time_stop = sim_period_stop * 2*np.pi / omega # time units (t)
+sim_time_stop = sim_period_stop * T # time units (t)

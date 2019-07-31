@@ -49,12 +49,14 @@ sim_time_stop  = params.sim_time_stop
 nx, nz = int(params.n_x), int(params.n_z)  # doesn't include sponge layer
 # Domain size
 Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer
-x_span = params.x_interval # tuple
-z_b, z_t = float(params.z_b), float(params.z_t) #(-Lz, 0.0) #(-Lz/2, Lz/2)
 # Angle of beam w.r.t. the horizontal
 theta   = float(params.theta)
 # Wavenumbers
 kx, kz = float(params.k_x), float(params.k_z)
+# Forcing oscillation frequency
+omega  = float(params.omega)
+# Forcing oscillation period
+T      = float(params.T)
 # Forcing amplitude modifier
 A       = float(params.forcing_amp)
 
@@ -63,7 +65,6 @@ A       = float(params.forcing_amp)
 
 # Name of log file
 logfile = '_experiments/' + NAME + '/LOG_' + NAME + '.txt'
-print('logfile = ', logfile)
 # Write params to log file
 with open(logfile, 'a') as the_file:
     the_file.write('\n')
@@ -78,8 +79,9 @@ with open(logfile, 'a') as the_file:
     the_file.write('Horizontal extent (m):        L_x = ' + str(Lx) + '\n')
     the_file.write('Vertical extent (m):          L_z = ' + str(Lz) + '\n')
     the_file.write('\n')
-    the_file.write('Forcing angle (rad):        theta = ' + str(theta) + '\n')
     the_file.write('Forcing frequency (s^-1):   omega = ' + str(omega) + '\n')
+    the_file.write('Forcing period (s):             T = ' + str(T) + '\n')
+    the_file.write('Forcing angle (rad):        theta = ' + str(theta) + '\n')
     the_file.write('Forcing amplitude:              A = ' + str(A) + '\n')
     the_file.write('\n')
     the_file.write('Horizontal wavenumber:        k_x = ' + str(kx) + '\n')

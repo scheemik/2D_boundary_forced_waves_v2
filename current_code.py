@@ -119,13 +119,15 @@ kx, kz = float(params.k_x), float(params.k_z)
 omega  = float(params.omega)
 # Forcing amplitude modifier
 A      = float(params.forcing_amp)
-if (rank==0 and print_params):
-    print('n_x=',nx)
-    print('n_z=',nz)
-    print('')
+
 sim_time_stop  = params.sim_time_stop
 wall_time_stop = params.wall_time_stop
 adapt_dt = params.adapt_dt
+if (rank==0 and print_params):
+    print('n_x =',nx)
+    print('n_z =',nz)
+    print('simulation stop time (s) =', sim_time_stop)
+    print('')
 
 ###############################################################################
 # Physical parameters
