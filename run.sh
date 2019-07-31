@@ -75,7 +75,7 @@ then
 fi
 if [ -z "$KEEP" ]
 then
-	KEEP=1
+	KEEP=0
 	echo "No 'keep' preference specified, using KEEP=$KEEP"
 fi
 
@@ -243,7 +243,7 @@ then
 		cd frames/
 		ffmpeg -framerate 10 -i write_%06d.png -c:v libx264 -pix_fmt yuv420p test.mp4
 		cd ..
-		mv frames/test.mp4 mp4s/
+		mv frames/test.mp4 ./
 	else
 		echo "No frames found"
 	fi
@@ -251,5 +251,78 @@ fi
 
 ###############################################################################
 # keep - rename outputs to archive simulation in separate folder
+#	if (KEEP = 1 and VER != 4)
+
+if [ $KEEP -eq 1 ] && [ $VER -ne 4 ]
+then
+	# Make a new directory under the experiments folder
+	mkdir ./_experiments/$NAME
+	# New snapshots if (VER = 0, 1, 2, 3)
+	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ] || [ $VER -eq 3 ]
+	then
+		# Check if snapshots exist
+		if [ -e snapshots ]
+		then
+			# Move snapshots to new directory
+			mv -r snapshots/ _experiments/$NAME/
+			# Copy `merge.py` script to new directory
+			cp merge.py _experiments/$NAME/
+		else
+			echo "No snapshots found to archive. Aborting script"
+			exit 0
+		fi
+		# Check if background profile snapshots exist
+		if [ -e _background_profile/current_bgpf ]
+		then
+			# Move snapshots to new directory
+			mv -r _background_profile/current_bgpf/ _experiments/$NAME/
+		fi
+		# Check if energy flux snapshots exist
+		if [ -e ef_snapshots ]
+		then
+			# Move snapshots to new directory
+			mv -r ef_snapshots/ _experiments/$NAME/
+		fi
+	fi
+	# Plot of EF if (VER = 0, 1, 3)
+	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 3 ]
+	then
+		# Check if energy flux plot exists
+		if [ -e _energy_flux/ef_test.png ]
+		then
+			# Move energy flux plot to new directory
+			mv _energy_flux/ef_test.png _experiments/$NAME/ef_plot.png
+		fi
+	fi
+	# Plotted frames and made gif if (VER = 0, 3)
+	if [ $VER -eq 0 ] || [ $VER -eq 3 ]
+	then
+		# Check if frames exist
+		files=/frames/*
+		if [ -e frames ] && [ ${#files[@]} -gt 0 ]
+		then
+			# Move frames to new directory
+			mv frames/ _experiments/$NAME/
+		fi
+		# Check if gif exists
+		if [ -e gifs/test.gif ]
+		then
+			# Move gif to new directory
+			mv gifs/test.gif _experiments/$NAME/${NAME}.gif
+		fi
+	fi
+	# Created mp4 if (VER = 0)
+	if [ $VER -eq 0 ]
+	then
+		# Check if mp4 exists
+		if [ -e test.mp4 ]
+		then
+			# Move mp4 to new directory
+			mv test.mp4 _experiments/$NAME/${NAME}.mp4
+		fi
+	fi
+	# Create experiment log file
+	touch _experiments/$NAME/LOG_${NAME}.txt
+fi
 
 echo "Done"
