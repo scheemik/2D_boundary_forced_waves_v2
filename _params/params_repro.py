@@ -4,8 +4,8 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_time_stop = 5 # time units (t)
-wall_time_stop = 60 # min
+sim_period_stop = 2 # oscillation periods, time in seconds calculated below
+wall_time_stop = 35 # min
 
 # Determine whether adaptive time stepping is on or off
 adapt_dt = False
@@ -32,6 +32,8 @@ stair_bot_2 = -0.38         # Bottom of staircase (not domain) for 2 layer
 stair_top   = -0.22         # Top of staircase (not domian)
 
 # Boundary forcing parameters
+# Characteristic stratification
+N_0 = 1.0 # [rad/s]
 #   Bounds of the forcing window
 forcing_left_edge = -1.0*L_x/12.0
 forcing_rightedge =  1.0*L_x/12.0
@@ -43,6 +45,11 @@ lam_x = forcing_rightedge - forcing_left_edge
 k_x    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
 k_z    = k_x * np.tan(theta)
+# Oscillation frequency = N_0 * cos(theta), from dispersion relation
+omega = N_0 * np.cos(theta) # [s^-1]
 # Other parameters
 forcing_slope = 10 # for tanh window
 forcing_amp   = 3.0e-4
+
+# Calculate stop time
+sim_time_stop = sim_period_stop * 2*np.pi / omega # time units (t)

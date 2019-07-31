@@ -2,14 +2,13 @@
 Plot planes from joint energy flux analysis files.
 
 Usage:
-    ef_plot_2d_series.py LOC NU KA N0 NL <files>... [--output=<dir>]
+    ef_plot_2d_series.py LOC NU KA NL <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
     LOC                 # 1 if local, 0 if on Niagara
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
-    N0		            # [rad/s]   Characteristic stratification
     NL		            # [nondim]	Number of inner interfaces
 
 """
@@ -17,7 +16,6 @@ Options:
 import h5py
 import numpy as np
 import matplotlib
-#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.ioff()
 from dedalus.extras import plot_tools
@@ -29,7 +27,6 @@ from plot_tools_mod import plot_bot_3d_mod
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
-#print("thread %d of %d" % (comm.Get_rank(), comm.Get_size()))
 size = comm.Get_size()
 rank = comm.Get_rank()
 
@@ -40,7 +37,6 @@ reproducing_run = False
 # Strings for the parameters
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
-str_n0 = r'$N_0$'
 str_nl = r'$n_{layers}$'
 
 # Expects numbers in the format 7.0E+2
@@ -73,14 +69,12 @@ if __name__ == "__main__":
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     NU = float(args['NU'])
     KA = float(args['KA'])
-    N0 = float(args['N0'])
     NL = int(args['NL'])
     print_vals = False
     if (rank==0 and print_vals):
         print('plot',str_loc)
         print('plot',str_nu,'=',NU)
         print('plot',str_ka,'=',KA)
-        print('plot',str_n0,'=',N0)
         print('plot',str_nl,'=',NL)
     output_path = pathlib.Path(args['--output']).absolute()
 
@@ -91,11 +85,13 @@ if __name__ == "__main__":
 sys.path.insert(0, './_params')
 if LOC:
     if reproducing_run:
-        print('Reproducing results from Ghaemsaidi')
+        if rank==0:
+            print('Reproducing results from Ghaemsaidi')
         import params_repro
         params = params_repro
     else:
-        print('Measuring energy flux')
+        if rank==0:
+            print('Measuring energy flux')
         import params_ef
         params = params_ef
 elif LOC == False:
@@ -107,7 +103,6 @@ t_f = params.sim_time_stop
 #print('end time=', t_f)
 z_b = -0.5
 z_t =  0.0
-#ratio = 0.4
 
 ###############################################################################
 
@@ -115,7 +110,6 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
     Ka    = latex_exp(KA)
-    N_0   = latex_exp(N0)
     n_l   = NL
 
     ef = file['tasks']['<ef>']
@@ -144,7 +138,7 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     ax1.set_xlim(t_0p, t_fp)
     ax1.get_shared_x_axes().join(ax0, ax1)
 
-    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l)
+    title = r'{:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_nl, n_l)
     fig.suptitle(title, fontsize='large')
     fig.savefig('./_energy_flux/ef_test.png', dpi=100)
 # add plot of top boundary ef in subplot side by side

@@ -21,10 +21,9 @@
 # VER = 4
 #	-> create mp4 from frames
 
-# Define parameters
+# Define physical parameters
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
-N0=1.0E+0		# [rad/s]   Characteristic stratification
 
 while getopts c:e:i:l:v:k: option
 do
@@ -58,7 +57,7 @@ then
 fi
 if [ -z "$NI" ]
 then
-	NI=2
+	NI=1
 	echo "-i, No number of interfaces specified, using NI=$NI"
 fi
 if [ -z "$LOC" ]
@@ -95,7 +94,7 @@ then
 	# Create experiment log file
 	LOG_FILE=_experiments/$NAME/LOG_${NAME}.txt
 	touch $LOG_FILE
-	echo "Run options:" >> $LOG_FILE
+	echo "--Run options:" >> $LOG_FILE
 	echo "" >> $LOG_FILE
 	echo "-n, Experiment name = ${NAME}" >> $LOG_FILE
 	echo "-c, Number of cores = ${CORES}" >> $LOG_FILE
@@ -113,6 +112,10 @@ then
 		echo "-l, (${LOC}) Simulation run on Niagara" >> $LOG_FILE
 	fi
 	echo "-v, Version of run = ${VER}" >> $LOG_FILE
+	echo "" >> $LOG_FILE
+
+	# Write out from parameter file
+	python3 write_out_params.py $LOC $NAME $SIM_TYPE
 fi
 
 ###############################################################################
@@ -152,7 +155,7 @@ then
 	then
 		echo "Running Dedalus script for local pc"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3 current_code.py $LOC $NU $KA $N0 $NI
+	    mpiexec -n $CORES python3 current_code.py $LOC $NU $KA $NI
 	    echo ""
 	fi
 	# If running on Niagara
@@ -160,7 +163,7 @@ then
 	then
 		echo "Running Dedalus script for Niagara"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3.6 current_code.py $LOC $NU $KA $N0 $NI
+	    mpiexec -n $CORES python3.6 current_code.py $LOC $NU $KA $NI
 		echo ""
 	fi
 fi
@@ -212,7 +215,7 @@ then
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"
-		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $NU $KA $N0 $NI ef_snapshots/*.h5
+		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $NU $KA $NI ef_snapshots/*.h5
 	fi
 fi
 
@@ -231,7 +234,7 @@ then
 		rm -rf frames
 	fi
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py $LOC $NU $KA $N0 $NI snapshots/*.h5
+	mpiexec -n $CORES python3 plot_2d_series.py $LOC $NU $KA $NI snapshots/*.h5
 fi
 
 ###############################################################################

@@ -2,14 +2,13 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py LOC NU KA N0 NI <files>... [--output=<dir>]
+    plot_2d_series.py LOC NU KA NI <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./frames]
     LOC                 # 1 if local, 0 if on Niagara
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
-    N0		            # [rad/s]   Characteristic stratification
     NI		            # [nondim]	Number of inner interfaces
 
 """
@@ -62,8 +61,6 @@ if plot_all==False:
 str_ar = 'Aspect ratio'
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
-#str_r0 = r'$\rho_0$'
-str_n0 = r'$N_0$'
 str_nl = r'$n_{layers}$'
 
 # Expects numbers in the format 7.0E+2
@@ -100,13 +97,12 @@ def main(filename, start, count, output):
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
     Ka    = latex_exp(KA)
-    N_0   = latex_exp(N0)
     n_l   = NI
 
     # Plot settings
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t={:2.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_n0, N_0, str_nl, n_l, sim_time)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, t={:2.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_nl, n_l, sim_time)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
@@ -169,8 +165,6 @@ def main(filename, start, count, output):
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
                 plot_bot_3d_mod(dset, 0, index, x_lims=[0.0, 0.5], y_lims=[z_b, z_t], axes=axes1, title=w_title, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
-                #pad = 0.05
-                #fig.subplots_adjust(left=pad, wspace=pad)
 
                 # Plot stratification profile on the left
                 axes0 = mfig.add_axes(0, 0, [0, 0, 1.5, 1])#, sharey=axes1)
@@ -201,13 +195,11 @@ if __name__ == "__main__":
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     NU = float(args['NU'])
     KA = float(args['KA'])
-    N0 = float(args['N0'])
     NI = int(args['NI'])
     if (rank==0 and print_args):
         print('plot',str_loc)
         print('plot',str_nu,'=',NU)
         print('plot',str_ka,'=',KA)
-        print('plot',str_n0,'=',N0)
         print('plot',str_nl,'=',NI)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed

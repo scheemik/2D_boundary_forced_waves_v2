@@ -6,13 +6,12 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC NU KA N0 NI
+    current_code.py LOC NU KA NI
 
 Arguments:
     LOC     # 1 if local, 0 if on Niagara
     NU		# [m^2/s]   Viscosity (momentum diffusivity)
     KA		# [m^2/s]   Thermal diffusivity
-    N0		# [rad/s]   Characteristic stratification
     NI		# [nondim]	Number of inner interfaces
 
 This script uses a Fourier basis in the x direction with periodic boundary conditions.
@@ -81,13 +80,11 @@ if __name__ == '__main__':
     LOC = bool(LOC)
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
-    N0 = float(arguments['N0'])
     NI = int(arguments['NI'])
     if (rank == 0 and print_params):
         print('LOC=',LOC)
         print('NU =',NU)
         print('KA =',KA)
-        print('N0 =',N0)
         print('NI =',NI)
 
 ###############################################################################
@@ -95,31 +92,33 @@ if __name__ == '__main__':
 
 # Add path to params files
 sys.path.insert(0, './_params')
-if LOC:
-    if reproducing_run:
-        print('Reproducing results from Ghaemsaidi') if (rank==0) else print('')
-        import params_repro
-        params = params_repro
-    else:
-        print('Measuring energy flux') if (rank==0) else print('')
-        import params_ef
-        params = params_ef
-elif LOC == False:
-    import params_Niagara
-    params = params_Niagara
+if reproducing_run:
+    if rank==0:
+        print('Reproducing results from Ghaemsaidi')
+    import params_repro
+    params = params_repro
+else:
+    if rank==0:
+        print('Measuring energy flux')
+    import params_ef
+    params = params_ef
 
 # Number of grid points in each dimension
 nx, nz = int(params.n_x), int(params.n_z)  # doesn't include sponge layer
 # Domain size
 Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer
 x_span = params.x_interval # tuple
-z_b, z_t = float(params.z_b), float(params.z_t) #(-Lz, 0.0) #(-Lz/2, Lz/2)
+z_b,z_t= float(params.z_b), float(params.z_t) #(-Lz, 0.0) #(-Lz/2, Lz/2)
+# Characteristic stratification [rad/s]
+N0     = float(params.N_0)
 # Angle of beam w.r.t. the horizontal
-theta   = float(params.theta)
+theta  = float(params.theta)
 # Wavenumbers
 kx, kz = float(params.k_x), float(params.k_z)
+# Forcing oscillation frequency
+omega  = float(params.omega)
 # Forcing amplitude modifier
-A       = float(params.forcing_amp)
+A      = float(params.forcing_amp)
 if (rank==0 and print_params):
     print('n_x=',nx)
     print('n_z=',nz)
@@ -134,10 +133,7 @@ nu    = NU          # [m^2/s]   Viscosity (momentum diffusivity)
 kappa = KA          # [m^2/s]   Thermal diffusivity
 Pr    = NU/KA       # [nondim]  Prandtl number, nu/kappa = 7 for water
 if (rank==0 and print_params): print('Prandtl number =',Pr)
-#rho_0 = R0          # [kg/m^3]  Characteristic density -> now wrapped into pressure
-N_0   = N0          # [rad/s]   Characteristic stratification
 g     = 9.81        # [m/s^2]   Acceleration due to gravity
-omega = N_0 * np.cos(theta) # [s^-1], from dispersion relation
 
 ###############################################################################
 # Parameters to set a sponge layer at the bottom
@@ -187,15 +183,15 @@ problem.meta['p','bz','uz','wz']['z']['dirichlet'] = False
 # Parameters for the equations of motion
 problem.parameters['NU'] = nu
 problem.parameters['KA'] = kappa
-problem.parameters['N0'] = N_0
+problem.parameters['N0'] = N0
 
 ###############################################################################
 # Forcing from the boundary
 
 # Polarization relation from Cushman-Roisin and Beckers eq (13.7)
 #   (signs implemented later)
-PolRel = {'u': A*(g*omega*kz)/(N_0**2*kx),
-          'w': A*(g*omega)/(N_0**2),
+PolRel = {'u': A*(g*omega*kz)/(N0**2*kx),
+          'w': A*(g*omega)/(N0**2),
           'b': A*g}#,
           #'p': A*(g*rho_0*kz)/(kx**2+kz**2)} # relation for p not used
 
@@ -224,7 +220,7 @@ if reproducing_run:
     problem.parameters['right_edge'] = fr_edge
     problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"
 else:
-    problem.substitutions['window'] = "1"
+    problem.substitutions['window'] = "1" # effectively, no window
 
 # Substitutions for boundary forcing (see C-R & B eq 13.7)
 problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z - omega*t)*window"
