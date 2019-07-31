@@ -6,15 +6,14 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC AR NU KA N0 NL
+    current_code.py LOC NU KA N0 NI
 
 Arguments:
     LOC     # 1 if local, 0 if on Niagara
-    AR		# [nondim]  Aspect ratio of domain
     NU		# [m^2/s]   Viscosity (momentum diffusivity)
     KA		# [m^2/s]   Thermal diffusivity
     N0		# [rad/s]   Characteristic stratification
-    NL		# [nondim]	Number of inner interfaces
+    NI		# [nondim]	Number of inner interfaces
 
 This script uses a Fourier basis in the x direction with periodic boundary conditions.
 
@@ -71,7 +70,7 @@ print_params = True
 
 # Options for simulation
 use_sponge_layer = True
-set_N_const = True
+set_N_const = False
 
 ###############################################################################
 
@@ -83,13 +82,13 @@ if __name__ == '__main__':
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
     N0 = float(arguments['N0'])
-    NL = int(arguments['NL'])
+    NI = int(arguments['NI'])
     if (rank == 0 and print_params):
         print('LOC=',LOC)
         print('NU =',NU)
         print('KA =',KA)
         print('N0 =',N0)
-        print('NL =',NL)
+        print('NI =',NI)
 
 ###############################################################################
 # Fetch parameters from the correct params file
@@ -98,21 +97,17 @@ if __name__ == '__main__':
 sys.path.insert(0, './_params')
 if LOC:
     if reproducing_run:
-        print('Reproducing results from Ghaemsaidi')
+        print('Reproducing results from Ghaemsaidi') if (rank==0) else print('')
         import params_repro
         params = params_repro
     else:
-        print('Measuring energy flux')
+        print('Measuring energy flux') if (rank==0) else print('')
         import params_ef
         params = params_ef
 elif LOC == False:
     import params_Niagara
     params = params_Niagara
 
-# Aspect ratio of domain of interest
-#AR = float(params.aspect_ratio)
-# Number of layers in background profile
-NL = int(params.n_layers)
 # Number of grid points in each dimension
 nx, nz = int(params.n_x), int(params.n_z)  # doesn't include sponge layer
 # Domain size
@@ -128,6 +123,7 @@ A       = float(params.forcing_amp)
 if (rank==0 and print_params):
     print('n_x=',nx)
     print('n_z=',nz)
+    print('')
 sim_time_stop  = params.sim_time_stop
 wall_time_stop = params.wall_time_stop
 adapt_dt = params.adapt_dt
@@ -287,7 +283,7 @@ BP.meta['x']['constant'] = True  # means the NCC is constant along x
 if set_N_const:
     BP_array = z*0 + 1.0
 else: # Construct a staircase profile
-    n_layers = NL
+    n_layers = NI
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
     if reproducing_run:
@@ -299,7 +295,7 @@ else: # Construct a staircase profile
         elif n_layers == 2:
             st_bot = float(params.stair_bot_2)
         else:
-            print("NL must be 1 or 2 for reproduction run")
+            print("NI must be 1 or 2 for reproduction run")
         st_top = float(params.stair_top)         # Bottom of staircase (not domian)
         from Foran_profile import Foran_profile
         BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)

@@ -104,7 +104,7 @@ elif LOC == False:
 
 t_0 =  0.0
 t_f = params.sim_time_stop
-print('end time=', t_f)
+#print('end time=', t_f)
 z_b = -0.5
 z_t =  0.0
 #ratio = 0.4
@@ -119,8 +119,8 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     n_l   = NL
 
     ef = file['tasks']['<ef>']
-    print(ef.shape)
-    print(ef)
+    #print(ef.shape)
+    #print(ef)
     # set up multifigure
     fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=False)
 

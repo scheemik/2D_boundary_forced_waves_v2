@@ -2,16 +2,15 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py LOC AR NU KA N0 NL <files>... [--output=<dir>]
+    plot_2d_series.py LOC NU KA N0 NI <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./frames]
     LOC                 # 1 if local, 0 if on Niagara
-    AR		            # [nondim]  Aspect ratio of domain
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
     N0		            # [rad/s]   Characteristic stratification
-    NL		            # [nondim]	Number of inner interfaces
+    NI		            # [nondim]	Number of inner interfaces
 
 """
 
@@ -101,9 +100,8 @@ def main(filename, start, count, output):
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
     Ka    = latex_exp(KA)
-#    rho_0 = latex_exp(R0)
     N_0   = latex_exp(N0)
-    n_l   = NL
+    n_l   = NI
 
     # Plot settings
     scale = 2.5
@@ -117,7 +115,12 @@ def main(filename, start, count, output):
 
     # Plot settings
     if plot_all:
+        # Find aspect ratio from params file
+        sys.path.insert(0, './_params')
+        import params_repro
+        AR = float(params_repro.aspect_ratio)
         image = plot_tools.Box(AR, 1)
+        # Specify tasks to plot
         tasks = ['b', 'p', 'u', 'w']
         nrows, ncols = 2, 2
         # Create multifigure
@@ -196,20 +199,16 @@ if __name__ == "__main__":
 
     LOC = int(args['LOC'])
     str_loc = 'Local' if bool(LOC) else 'Niagara'
-    AR = float(args['AR'])
     NU = float(args['NU'])
     KA = float(args['KA'])
-#    R0 = float(args['R0'])
     N0 = float(args['N0'])
-    NL = int(args['NL'])
+    NI = int(args['NI'])
     if (rank==0 and print_args):
         print('plot',str_loc)
-        print('plot',str_ar,'=',AR)
         print('plot',str_nu,'=',NU)
         print('plot',str_ka,'=',KA)
-#        print('plot',str_r0,'=',R0)
         print('plot',str_n0,'=',N0)
-        print('plot',str_nl,'=',NL)
+        print('plot',str_nl,'=',NI)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:

@@ -4,7 +4,7 @@
 #	$ sh run.sh -n <name of particular run>
 #				-c <cores>
 #				-e <EF(1) or reproducing run(0)>
-#				-i <interfaces in background profile>
+#				-i <number of interfaces in background profile>
 #				-l <local(1) or Niagara(0)>
 #				-v <version: what scripts to run>
 #				-k <keep(1) or allow overwriting(0)>
@@ -22,11 +22,9 @@
 #	-> create mp4 from frames
 
 # Define parameters
-AR=1.0			# [nondim]  Aspect ratio of domain
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
 N0=1.0E+0		# [rad/s]   Characteristic stratification
-NL=0			# [nondim]	Number of interfaces
 
 while getopts c:e:i:l:v:k: option
 do
@@ -35,7 +33,7 @@ do
 		n) NAME=${OPTARG};;
 		c) CORES=${OPTARG};;
 		e) SIM_TYPE=${OPTARG};;
-		i) INTERF=${OPTARG};;
+		i) NI=${OPTARG};;
 		l) LOC=${OPTARG};;
 		v) VER=${OPTARG};;
 		k) KEEP=${OPTARG};;
@@ -46,37 +44,75 @@ done
 if [ -z "$NAME" ]
 then
 	NAME=`date +"%m-%d_%Hh%M"`
-	echo "No name specified, using $NAME"
+	echo "-n, No name specified, using $NAME"
 fi
 if [ -z "$CORES" ]
 then
 	CORES=2
-	echo "No number of cores specified, using CORES=$CORES"
+	echo "-c, No number of cores specified, using CORES=$CORES"
 fi
 if [ -z "$SIM_TYPE" ]
 then
-	echo "No simulation type specified, running energy flux measurements"
+	echo "-e, No simulation type specified, running energy flux measurements"
 	SIM_TYPE=1
 fi
-if [ -z "$INTERF" ]
+if [ -z "$NI" ]
 then
-	INTERF=2
-	echo "No number of interfaces specified, using INTERF=$INTERF"
+	NI=2
+	echo "-i, No number of interfaces specified, using NI=$NI"
 fi
 if [ -z "$LOC" ]
 then
 	LOC=1 # 1 if local, 0 if on Niagara
-	echo "No version specified, using LOC=$LOC"
+	echo "-l, No version specified, using LOC=$LOC"
 fi
 if [ -z "$VER" ]
 then
 	VER=1
-	echo "No version specified, using VER=$VER"
+	echo "-v, No version specified, using VER=$VER"
 fi
 if [ -z "$KEEP" ]
 then
 	KEEP=0
-	echo "No 'keep' preference specified, using KEEP=$KEEP"
+	echo "-k, No 'keep' preference specified, using KEEP=$KEEP"
+fi
+
+###############################################################################
+# keep - create archive directory for experiment
+#	if (KEEP = 1 and VER != 4)
+
+if [ $KEEP -eq 1 ] && [ $VER -ne 4 ]
+then
+	# Check if experiments folder exists
+	if [ -e _experiments ]
+	then
+		continue
+	else
+		mkdir ./_experiments
+	fi
+	# Make a new directory under the experiments folder
+	mkdir ./_experiments/$NAME
+	# Create experiment log file
+	LOG_FILE=_experiments/$NAME/LOG_${NAME}.txt
+	touch $LOG_FILE
+	echo "Run options:" >> $LOG_FILE
+	echo "" >> $LOG_FILE
+	echo "-n, Experiment name = ${NAME}" >> $LOG_FILE
+	echo "-c, Number of cores = ${CORES}" >> $LOG_FILE
+	if [ $SIM_TYPE -eq 1 ]
+	then
+		echo "-e, (${SIM_TYPE}) Simulation for measuring energy flux" >> $LOG_FILE
+	else
+		echo "-e, (${SIM_TYPE}) Simulation for reproducing resluts" >> $LOG_FILE
+	fi
+	echo "-i, Number of interfaces = ${NI}" >> $LOG_FILE
+	if [ $LOC -eq 1 ]
+	then
+		echo "-l, (${LOC}) Simulation run on local pc" >> $LOG_FILE
+	else
+		echo "-l, (${LOC}) Simulation run on Niagara" >> $LOG_FILE
+	fi
+	echo "-v, Version of run = ${VER}" >> $LOG_FILE
 fi
 
 ###############################################################################
@@ -116,7 +152,7 @@ then
 	then
 		echo "Running Dedalus script for local pc"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3 current_code.py $LOC $AR $NU $KA $N0 $NL
+	    mpiexec -n $CORES python3 current_code.py $LOC $NU $KA $N0 $NI
 	    echo ""
 	fi
 	# If running on Niagara
@@ -124,7 +160,7 @@ then
 	then
 		echo "Running Dedalus script for Niagara"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3.6 current_code.py $LOC $AR $NU $KA $N0 $NL
+	    mpiexec -n $CORES python3.6 current_code.py $LOC $NU $KA $N0 $NI
 		echo ""
 	fi
 fi
@@ -176,7 +212,7 @@ then
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"
-		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $NU $KA $N0 $NL ef_snapshots/*.h5
+		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $NU $KA $N0 $NI ef_snapshots/*.h5
 	fi
 fi
 
@@ -195,7 +231,7 @@ then
 		rm -rf frames
 	fi
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py $LOC $AR $NU $KA $N0 $NL snapshots/*.h5
+	mpiexec -n $CORES python3 plot_2d_series.py $LOC $NU $KA $N0 $NI snapshots/*.h5
 fi
 
 ###############################################################################
@@ -218,7 +254,7 @@ then
 	files=/frames/*
 	if [ -e frames ] && [ ${#files[@]} -gt 0 ]
 	then
-		echo "Creating gif"
+		echo "Executing gif script"
 		python3 create_gif.py gifs/test.gif
 	else
 		echo "No frames found"
@@ -229,7 +265,7 @@ fi
 # create mp4
 #	if (VER = 0, 4)
 echo ''
-echo '--Creating gif--'
+echo '--Creating mp4--'
 echo ''
 
 if [ $VER -eq 0 ] || [ $VER -eq 4 ]
@@ -239,7 +275,7 @@ then
 	files=/frames/*
 	if [ -e frames ] && [ ${#files[@]} -gt 0 ]
 	then
-		echo "Creating mp4"
+		echo "Executing mp4 command"
 		cd frames/
 		ffmpeg -framerate 10 -i write_%06d.png -c:v libx264 -pix_fmt yuv420p test.mp4
 		cd ..
@@ -255,8 +291,14 @@ fi
 
 if [ $KEEP -eq 1 ] && [ $VER -ne 4 ]
 then
-	# Make a new directory under the experiments folder
-	mkdir ./_experiments/$NAME
+	# Check if experiment folder exists
+	if [ -e _experiments/$NAME ]
+	then
+		continue
+	else
+		echo "Archive directory not found. Aborting script"
+		exit 1
+	fi
 	# New snapshots if (VER = 0, 1, 2, 3)
 	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ] || [ $VER -eq 3 ]
 	then
@@ -264,7 +306,7 @@ then
 		if [ -e snapshots ]
 		then
 			# Move snapshots to new directory
-			mv -r snapshots/ _experiments/$NAME/
+			mv snapshots/ _experiments/$NAME/
 			# Copy `merge.py` script to new directory
 			cp merge.py _experiments/$NAME/
 		else
@@ -275,13 +317,13 @@ then
 		if [ -e _background_profile/current_bgpf ]
 		then
 			# Move snapshots to new directory
-			mv -r _background_profile/current_bgpf/ _experiments/$NAME/
+			mv _background_profile/current_bgpf/ _experiments/$NAME/
 		fi
 		# Check if energy flux snapshots exist
 		if [ -e ef_snapshots ]
 		then
 			# Move snapshots to new directory
-			mv -r ef_snapshots/ _experiments/$NAME/
+			mv ef_snapshots/ _experiments/$NAME/
 		fi
 	fi
 	# Plot of EF if (VER = 0, 1, 3)
@@ -293,6 +335,10 @@ then
 			# Move energy flux plot to new directory
 			mv _energy_flux/ef_test.png _experiments/$NAME/ef_plot.png
 		fi
+	else
+		# Copy the energy flux plotting script to new directory
+		mkdir _experiments/$NAME/_energy_flux
+		cp _energy_flux/ef_plot_2d_series.py _experiments/$NAME/_energy_flux/
 	fi
 	# Plotted frames and made gif if (VER = 0, 3)
 	if [ $VER -eq 0 ] || [ $VER -eq 3 ]
@@ -310,6 +356,10 @@ then
 			# Move gif to new directory
 			mv gifs/test.gif _experiments/$NAME/${NAME}.gif
 		fi
+	else
+		# Copy the plotting and creating gif scripts to new directory
+		cp plot_2d_series.py _experiments/$NAME/
+		cp create_gif.py _experiments/$NAME/
 	fi
 	# Created mp4 if (VER = 0)
 	if [ $VER -eq 0 ]
@@ -320,9 +370,10 @@ then
 			# Move mp4 to new directory
 			mv test.mp4 _experiments/$NAME/${NAME}.mp4
 		fi
+	else
+		# Copy this run script to new directory
+		cp run.sh _experiments/$NAME/
 	fi
-	# Create experiment log file
-	touch _experiments/$NAME/LOG_${NAME}.txt
 fi
 
 echo "Done"

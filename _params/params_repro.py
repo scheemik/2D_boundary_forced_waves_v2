@@ -11,10 +11,7 @@ wall_time_stop = 60 # min
 adapt_dt = False
 
 # Aspect ratio of display domain
-aspect_ratio = 1.0
-
-# number of layers
-n_layers = 2
+aspect_ratio = 3.0
 
 # Number of points in each dimension
 n_x = 256

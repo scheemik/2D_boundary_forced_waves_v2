@@ -13,9 +13,6 @@ adapt_dt = False
 # Aspect ratio of display domain
 aspect_ratio = 3.0
 
-# number of layers
-n_layers = 0
-
 # Number of points in each dimension
 n_x = 256
 n_z = 512
