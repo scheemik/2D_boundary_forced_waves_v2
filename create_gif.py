@@ -2,10 +2,11 @@
 Creates a gif of a set of png images in the stated directory.
 
 Usage:
-    create_gif.py FILENAME
+    create_gif.py FILENAME FRAMES_PATH
 
 Arguments:
     FILENAME        name for gif file
+    FRAMES_PATH     path to frames of animation
 
 Script created: 2019/03/19, Mikhail Schee
 
@@ -34,9 +35,9 @@ gif_file = 'uh_oh.gif'
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     gif_file = arguments.get('FILENAME')
+    png_dir = arguments.get('FRAMES_PATH')
     print('Gif saving to ', gif_file)
 
-png_dir = 'frames/'
 images = []
 # need to sort because os.listdir returns a list of arbitrary order
 for file_name in sorted(os.listdir(png_dir)):

@@ -6,13 +6,14 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC NU KA NI
+    current_code.py LOC SIM_TYPE NU KA NI
 
 Arguments:
-    LOC     # 1 if local, 0 if on Niagara
-    NU		# [m^2/s]   Viscosity (momentum diffusivity)
-    KA		# [m^2/s]   Thermal diffusivity
-    NI		# [nondim]	Number of inner interfaces
+    LOC         # 1 if local, 0 if on Niagara
+    SIM_TYPE    # -e, Simulation type: (1)Energy flux or (0) reproducing run
+    NU		    # [m^2/s]   Viscosity (momentum diffusivity)
+    KA		    # [m^2/s]   Thermal diffusivity
+    NI		    # [nondim]	Number of inner interfaces
 
 This script uses a Fourier basis in the x direction with periodic boundary conditions.
 
@@ -56,8 +57,6 @@ from docopt import docopt
 ###############################################################################
 # Switchboard
 
-# Reproducing run, or measuring energy flux?
-reproducing_run = False
 # Save just the relevant snapshots, or all?
 save_all_snapshots = True
 
@@ -78,11 +77,13 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
     LOC = int(arguments['LOC'])
     LOC = bool(LOC)
+    SIM_TYPE = int(arguments['SIM_TYPE'])
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
     NI = int(arguments['NI'])
     if (rank == 0 and print_params):
         print('LOC=',LOC)
+        print('SIM_TYPE=,',SIM_TYPE)
         print('NU =',NU)
         print('KA =',KA)
         print('NI =',NI)
@@ -92,7 +93,7 @@ if __name__ == '__main__':
 
 # Add path to params files
 sys.path.insert(0, './_params')
-if reproducing_run:
+if SIM_TYPE==0:
     if rank==0:
         print('Reproducing results from Ghaemsaidi')
     import params_repro
@@ -211,7 +212,7 @@ problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
 problem.parameters['grav'] = g # can't use 'g' because Dedalus already uses that for grid
 
-if reproducing_run:
+if SIM_TYPE==0:
     # Windowing function (multiplying tanh's)
     # Slope of tanh for forcing window
     f_slope = float(params.forcing_slope)
@@ -284,7 +285,7 @@ else: # Construct a staircase profile
     n_layers = NI
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
-    if reproducing_run:
+    if SIM_TYPE==0:
         slope = float(params.profile_slope)#*(n_layers+1)
         N_1 = float(params.N_1)                  # Stratification value above staircase
         N_2 = float(params.N_2)                  # Stratification value below staircase
@@ -399,7 +400,7 @@ solver.stop_wall_time = wall_time_stop * 60.
 solver.stop_iteration = np.inf
 
 # Analysis
-if (save_all_snapshots or reproducing_run):
+if (save_all_snapshots or SIM_TYPE==0):
     snapshots_path = 'snapshots'
     snapshots = solver.evaluator.add_file_handler(snapshots_path, sim_dt=0.25, max_writes=50)
     snapshots.add_system(solver.state)
@@ -427,7 +428,7 @@ current_bgpf.add_task("N0*BP", layout='g', name='N')
 # Measuring "energy flux" through a horizontal boundary at some z
 
 # Adding a new file handler
-if (save_all_snapshots or reproducing_run==False):
+if (save_all_snapshots or SIM_TYPE==1):
     ef_snapshots_path = 'ef_snapshots'
     ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
     # Adding a task to integrate energy flux across x for values of z

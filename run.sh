@@ -25,7 +25,7 @@
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
 
-while getopts c:e:i:l:v:k: option
+while getopts n:c:e:i:l:v:k: option
 do
 	case "${option}"
 		in
@@ -80,14 +80,25 @@ fi
 # keep - create archive directory for experiment
 #	if (KEEP = 1 and VER != 4)
 
-if [ $KEEP -eq 1 ] && [ $VER -ne 4 ]
+if [ $KEEP -eq 1 ] && [ $VER -ne 3 ] && [ $VER -ne 4 ]
 then
+	echo ''
+	echo '--Preparing archive directory--'
+	echo ''
 	# Check if experiments folder exists
 	if [ -e _experiments ]
 	then
 		continue
 	else
 		mkdir ./_experiments
+	fi
+	# Check if this experiment was run before
+	if [ -e _experiments/$NAME ]
+	then
+		echo 'Experiment run previously. Overwriting data'
+		rm -rf _experiments/$NAME
+	else
+		continue
 	fi
 	# Make a new directory under the experiments folder
 	mkdir ./_experiments/$NAME
@@ -102,7 +113,7 @@ then
 	then
 		echo "-e, (${SIM_TYPE}) Simulation for measuring energy flux" >> $LOG_FILE
 	else
-		echo "-e, (${SIM_TYPE}) Simulation for reproducing resluts" >> $LOG_FILE
+		echo "-e, (${SIM_TYPE}) Simulation for reproducing results" >> $LOG_FILE
 	fi
 	echo "-i, Number of interfaces = ${NI}" >> $LOG_FILE
 	if [ $LOC -eq 1 ]
@@ -121,12 +132,12 @@ fi
 ###############################################################################
 # run the script
 #	if (VER = 0, 1, 2)
-echo ''
-echo '--Running script--'
-echo ''
 
 if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ]
 then
+	echo ''
+	echo '--Running script--'
+	echo ''
 	# 	Check to see if the frames and snapshots folders exist
 	#	If so, remove them before running the dedalus script
 	if [ -e frames ]
@@ -155,7 +166,7 @@ then
 	then
 		echo "Running Dedalus script for local pc"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3 current_code.py $LOC $NU $KA $NI
+	    mpiexec -n $CORES python3 current_code.py $LOC $SIM_TYPE $NU $KA $NI
 	    echo ""
 	fi
 	# If running on Niagara
@@ -163,22 +174,39 @@ then
 	then
 		echo "Running Dedalus script for Niagara"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3.6 current_code.py $LOC $NU $KA $NI
+	    mpiexec -n $CORES python3.6 current_code.py $LOC $SIM_TYPE $NU $KA $NI
 		echo ""
 	fi
 fi
 
 ###############################################################################
+# Setting paths to outputs
+
+# If VER = 3, change paths to snapshot directories
+if [ $VER -eq 3 ]
+then
+	snapshot_path=_experiments/$NAME/snapshots
+	background_snapshot_path=_experiments/$NAME/current_bgpf
+	ef_snapshot_path=_experiments/$NAME/ef_snapshots
+	frames_path=_experiments/$NAME/frames
+else
+	snapshot_path=snapshots
+	background_snapshot_path=_background_profile/current_bgpf
+	ef_snapshot_path=ef_snapshots
+	frames_path=frames
+fi
+
+###############################################################################
 # merge and plot EF if relevant
 #	if (VER = 0, 1, 3)
-echo ''
-echo '--Merging--'
-echo ''
 
 if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 3 ]
 then
+	echo ''
+	echo '--Merging--'
+	echo ''
 	# Check to make sure snapshots folder exists
-	if [ -e snapshots ]
+	if [ -e $snapshot_path ]
 	then
 		continue
 	else
@@ -186,28 +214,28 @@ then
 		exit 1
 	fi
 	# Check if snapshots have already been merged
-	if [ -e snapshots/snapshots_s1.h5 ]
+	if [ -e $snapshot_path/snapshots_s1.h5 ]
 	then
 		echo "Snapshots already merged"
 	else
 		echo "Merging snapshots"
-		mpiexec -n $CORES python3 merge.py snapshots
+		mpiexec -n $CORES python3 merge.py $snapshot_path
 	fi
 	# Check if background profile snapshots have already been merged
-	if [ -e _background_profile/current_bgpf/current_bgpf_s1.h5 ]
+	if [ -e $background_snapshot_path/current_bgpf_s1.h5 ]
 	then
 		echo "Background profile snapshot already merged"
 	else
 		echo "Merging background profile snapshot"
-		mpiexec -n $CORES python3 merge.py _background_profile/current_bgpf
+		mpiexec -n $CORES python3 merge.py $background_snapshot_path
 	fi
 	# Check if energy flux snapshots have already been merged
-	if [ -e ef_snapshots/ef_snapshots_s1.h5 ]
+	if [ -e $ef_snapshot_path/ef_snapshots_s1.h5 ]
 	then
 		echo "Energy flux snapshots already merged"
 	else
 		echo "Merging energy flux snapshots"
-		mpiexec -n $CORES python3 merge.py ef_snapshots
+		mpiexec -n $CORES python3 merge.py $ef_snapshot_path
 	fi
 
 	# Check if plotting energy flux if relevant
@@ -215,37 +243,37 @@ then
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"
-		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $NU $KA $NI ef_snapshots/*.h5
+		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $ef_snapshot_path/*.h5
 	fi
 fi
 
 ###############################################################################
 # plot frames
 #	if (VER = 0, 3)
-echo ''
-echo '--Plotting frames--'
-echo ''
 
 if [ $VER -eq 0 ] || [ $VER -eq 3 ]
 then
+	echo ''
+	echo '--Plotting frames--'
+	echo ''
 	if [ -e frames ]
 	then
 		echo "Removing old frames"
 		rm -rf frames
 	fi
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py $LOC $NU $KA $NI snapshots/*.h5
+	mpiexec -n $CORES python3 plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $background_snapshot_path $snapshot_path/*.h5
 fi
 
 ###############################################################################
 # create gif
 #	if (VER = 0, 3)
-echo ''
-echo '--Creating gif--'
-echo ''
 
 if [ $VER -eq 0 ] || [ $VER -eq 3 ]
 then
+	echo ''
+	echo '--Creating gif--'
+	echo ''
 	# Delete old test gif if it exists
 	if [ -e gifs/test.gif ]
 	then
@@ -254,11 +282,11 @@ then
 		echo ""
 	fi
 	echo 'Checking frames'
-	files=/frames/*
-	if [ -e frames ] && [ ${#files[@]} -gt 0 ]
+	files=/$frames_path/*
+	if [ -e $frames_path ] && [ ${#files[@]} -gt 0 ]
 	then
 		echo "Executing gif script"
-		python3 create_gif.py gifs/test.gif
+		python3 create_gif.py gifs/test.gif $frames_path
 	else
 		echo "No frames found"
 	fi
@@ -267,22 +295,22 @@ fi
 ###############################################################################
 # create mp4
 #	if (VER = 0, 4)
-echo ''
-echo '--Creating mp4--'
-echo ''
 
 if [ $VER -eq 0 ] || [ $VER -eq 4 ]
 then
+	echo ''
+	echo '--Creating mp4--'
+	echo ''
 	# Check if frames exist
 	echo 'Checking frames'
-	files=/frames/*
-	if [ -e frames ] && [ ${#files[@]} -gt 0 ]
+	files=/$frames_path/*
+	if [ -e $frames_path ] && [ ${#files[@]} -gt 0 ]
 	then
 		echo "Executing mp4 command"
-		cd frames/
+		cd $frames_path/
 		ffmpeg -framerate 10 -i write_%06d.png -c:v libx264 -pix_fmt yuv420p test.mp4
 		cd ..
-		mv frames/test.mp4 ./
+		mv $frames_path/test.mp4 ./
 	else
 		echo "No frames found"
 	fi
@@ -294,6 +322,9 @@ fi
 
 if [ $KEEP -eq 1 ] && [ $VER -ne 4 ]
 then
+	echo ''
+	echo '--Archiving outputs--'
+	echo ''
 	# Check if experiment folder exists
 	if [ -e _experiments/$NAME ]
 	then
@@ -306,10 +337,10 @@ then
 	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ] || [ $VER -eq 3 ]
 	then
 		# Check if snapshots exist
-		if [ -e snapshots ]
+		if [ -e $snapshot_path ]
 		then
 			# Move snapshots to new directory
-			mv snapshots/ _experiments/$NAME/
+			mv $snapshot_path/ _experiments/$NAME/
 			# Copy `merge.py` script to new directory
 			cp merge.py _experiments/$NAME/
 		else
@@ -317,16 +348,16 @@ then
 			exit 0
 		fi
 		# Check if background profile snapshots exist
-		if [ -e _background_profile/current_bgpf ]
+		if [ -e $background_snapshot_path ]
 		then
 			# Move snapshots to new directory
-			mv _background_profile/current_bgpf/ _experiments/$NAME/
+			mv $background_snapshot_path _experiments/$NAME/
 		fi
 		# Check if energy flux snapshots exist
-		if [ -e ef_snapshots ]
+		if [ -e $ef_snapshot_path ]
 		then
 			# Move snapshots to new directory
-			mv ef_snapshots/ _experiments/$NAME/
+			mv $ef_snapshot_path/ _experiments/$NAME/
 		fi
 	fi
 	# Plot of EF if (VER = 0, 1, 3)
@@ -347,11 +378,11 @@ then
 	if [ $VER -eq 0 ] || [ $VER -eq 3 ]
 	then
 		# Check if frames exist
-		files=/frames/*
-		if [ -e frames ] && [ ${#files[@]} -gt 0 ]
+		files=/$frames_path/*
+		if [ -e $frames_path ] && [ ${#files[@]} -gt 0 ]
 		then
 			# Move frames to new directory
-			mv frames/ _experiments/$NAME/
+			mv $frames_path/ _experiments/$NAME/
 		fi
 		# Check if gif exists
 		if [ -e gifs/test.gif ]

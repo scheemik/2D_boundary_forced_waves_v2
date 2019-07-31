@@ -25,14 +25,13 @@ if __name__ == '__main__':
     LOC = bool(LOC)
     NAME = str(arguments['NAME'])
     SIM_TYPE = int(arguments['SIM_TYPE'])
-    reproducing_run = bool(SIM_TYPE)
 
 ###############################################################################
 # Fetch parameters from the correct params file
 
 # Add path to params files
 sys.path.insert(0, './_params')
-if reproducing_run:
+if SIM_TYPE==0:
     # Reproducing results from Ghaemsaidi
     import params_repro
     params = params_repro

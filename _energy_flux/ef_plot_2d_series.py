@@ -2,11 +2,12 @@
 Plot planes from joint energy flux analysis files.
 
 Usage:
-    ef_plot_2d_series.py LOC NU KA NL <files>... [--output=<dir>]
+    ef_plot_2d_series.py LOC SIM_TYPE NU KA NL <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
     LOC                 # 1 if local, 0 if on Niagara
+    SIM_TYPE            # -e, Simulation type: (1)Energy flux or (0) reproducing run
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
     NL		            # [nondim]	Number of inner interfaces
@@ -31,8 +32,6 @@ size = comm.Get_size()
 rank = comm.Get_rank()
 
 ###############################################################################
-
-reproducing_run = False
 
 # Strings for the parameters
 str_nu = r'$\nu$'
@@ -67,6 +66,7 @@ if __name__ == "__main__":
 
     LOC = int(args['LOC'])
     str_loc = 'Local' if bool(LOC) else 'Niagara'
+    SIM_TYPE = int(args['SIM_TYPE'])
     NU = float(args['NU'])
     KA = float(args['KA'])
     NL = int(args['NL'])
@@ -83,20 +83,14 @@ if __name__ == "__main__":
 
 # Add path to params files
 sys.path.insert(0, './_params')
-if LOC:
-    if reproducing_run:
-        if rank==0:
-            print('Reproducing results from Ghaemsaidi')
-        import params_repro
-        params = params_repro
-    else:
-        if rank==0:
-            print('Measuring energy flux')
-        import params_ef
-        params = params_ef
-elif LOC == False:
-    import params_Niagara
-    params = params_Niagara
+if SIM_TYPE==0:
+    # Reproducing results from Ghaemsaidi
+    import params_repro
+    params = params_repro
+else:
+    # Measuring energy flux
+    import params_ef
+    params = params_ef
 
 t_0 =  0.0
 t_f = params.sim_time_stop

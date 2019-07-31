@@ -2,14 +2,16 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py LOC NU KA NI <files>... [--output=<dir>]
+    plot_2d_series.py LOC SIM_TYPE NU KA NI BGPF <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./frames]
     LOC                 # 1 if local, 0 if on Niagara
+    SIM_TYPE            # -e, Simulation type: (1)Energy flux or (0) reproducing run
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
     NI		            # [nondim]	Number of inner interfaces
+    BGPF            # path to background profile snapshots
 
 """
 
@@ -41,21 +43,6 @@ print_arrays = False
 z_b = -0.5      # Bottom plotting extent
 z_t =  0.0#0.5      # Top plotting extent
 ###############################################################################
-
-# Data for plotting background stratification profile
-if plot_all==False:
-    bgpf_filepath = "_background_profile/current_bgpf/current_bgpf_s1.h5"
-    with h5py.File(bgpf_filepath, mode='r') as file:
-        bgpf = file['tasks']['N']
-        temp = bgpf[()]
-        hori = temp[0][0]
-        z_ = file['scales']['z']['1.0']
-        vert = z_[()]
-    if (rank==0 and print_arrays):
-        print('hori')
-        print(hori)
-        print('vert')
-        print(vert)
 
 # Strings for the parameters
 str_ar = 'Aspect ratio'
@@ -89,6 +76,21 @@ def set_title_save(fig, output, file, index, dpi, title_func, savename_func):
     return savepath
 
 def main(filename, start, count, output):
+    # Data for plotting background stratification profile
+    if plot_all==False:
+        bgpf_filepath = bgpf_dir + "/current_bgpf_s1.h5"
+        with h5py.File(bgpf_filepath, mode='r') as file:
+            bgpf = file['tasks']['N']
+            temp = bgpf[()]
+            hori = temp[0][0]
+            z_ = file['scales']['z']['1.0']
+            vert = z_[()]
+        if (rank==0 and print_arrays):
+            print('hori')
+            print(hori)
+            print('vert')
+            print(vert)
+
     """Save plot of specified tasks for given range of analysis writes."""
     # Change the size of the text overall
     font = {'size' : 12}
@@ -111,11 +113,14 @@ def main(filename, start, count, output):
 
     # Plot settings
     if plot_all:
-        # Find aspect ratio from params file
-        sys.path.insert(0, './_params')
-        import params_repro
-        AR = float(params_repro.aspect_ratio)
-        image = plot_tools.Box(AR, 1)
+        if SIM_TYPE==0:
+            # Find aspect ratio from params file
+            sys.path.insert(0, './_params')
+            import params_repro
+            AR = float(params_repro.aspect_ratio)
+            image = plot_tools.Box(AR, 1)
+        else:
+            image = plot_tools.Box(1, 1)
         # Specify tasks to plot
         tasks = ['b', 'p', 'u', 'w']
         nrows, ncols = 2, 2
@@ -135,8 +140,17 @@ def main(filename, start, count, output):
                 set_title_save(fig, output, file, index, dpi, title_func, savename_func)
         plt.close(fig)
     else:
-        image = plot_tools.Box(1, 1)
-        from PIL import Image # For cropping
+        if SIM_TYPE==0:
+            # Find aspect ratio from params file
+            sys.path.insert(0, './_params')
+            import params_repro
+            AR = float(params_repro.aspect_ratio)
+            x_left = float(params_repro.forcing_left_edge)
+            image = plot_tools.Box(2, 1)
+            x_limits=[x_left, x_left+1.0]
+        else:
+            image = plot_tools.Box(1, 1)
+            x_limits=[0.0, 0.5]
         # Plot data and parameters for background profile
         dis_ratio = 6.0 # Profile plot gets skinnier as this goes up
         xleft  = min(hori)
@@ -164,7 +178,7 @@ def main(filename, start, count, output):
                 axes1 = mfig.add_axes(0, 1, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
-                plot_bot_3d_mod(dset, 0, index, x_lims=[0.0, 0.5], y_lims=[z_b, z_t], axes=axes1, title=w_title, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=w_title, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
 
                 # Plot stratification profile on the left
                 axes0 = mfig.add_axes(0, 0, [0, 0, 1.5, 1])#, sharey=axes1)
@@ -193,9 +207,11 @@ if __name__ == "__main__":
 
     LOC = int(args['LOC'])
     str_loc = 'Local' if bool(LOC) else 'Niagara'
+    SIM_TYPE = int(args['SIM_TYPE'])
     NU = float(args['NU'])
     KA = float(args['KA'])
     NI = int(args['NI'])
+    bgpf_dir = str(args['BGPF'])
     if (rank==0 and print_args):
         print('plot',str_loc)
         print('plot',str_nu,'=',NU)
