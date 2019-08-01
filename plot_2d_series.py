@@ -11,7 +11,7 @@ Options:
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
     NI		            # [nondim]	Number of inner interfaces
-    BGPF            # path to background profile snapshots
+    BGPF                # path to background profile snapshots
 
 """
 
@@ -49,6 +49,8 @@ str_ar = 'Aspect ratio'
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
 str_nl = r'$n_{layers}$'
+str_om = r'$\omega$'
+str_am = r'$A$'
 
 # Expects numbers in the format 7.0E+2
 def latex_exp(num):
@@ -96,15 +98,32 @@ def main(filename, start, count, output):
     font = {'size' : 12}
     plt.rc('font', **font)
 
+    # Fetched parameters from correct params file
+    # Add path to params files
+    sys.path.insert(0, './_params')
+    if SIM_TYPE==0:
+        # Reproducing results from Ghaemsaidi
+        import params_repro
+        params = params_repro
+    else:
+        # Measuring energy flux
+        import params_ef
+        params = params_ef
+    omega = params.omega
+    A = params.forcing_amp
+    T = params.T
+
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
     Ka    = latex_exp(KA)
     n_l   = NI
+    Om    = latex_exp(omega)
+    Am    = latex_exp(A)
 
     # Plot settings
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, t={:2.3f}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_nl, n_l, sim_time)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, t/T={:2.3f}'.format(str_loc, str_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
@@ -115,9 +134,7 @@ def main(filename, start, count, output):
     if plot_all:
         if SIM_TYPE==0:
             # Find aspect ratio from params file
-            sys.path.insert(0, './_params')
-            import params_repro
-            AR = float(params_repro.aspect_ratio)
+            AR = float(params.aspect_ratio)
             image = plot_tools.Box(AR, 1)
         else:
             image = plot_tools.Box(1, 1)
@@ -142,10 +159,8 @@ def main(filename, start, count, output):
     else:
         if SIM_TYPE==0:
             # Find aspect ratio from params file
-            sys.path.insert(0, './_params')
-            import params_repro
-            AR = float(params_repro.aspect_ratio)
-            x_left = float(params_repro.forcing_left_edge)
+            AR = float(params.aspect_ratio)
+            x_left = float(params.forcing_left_edge)
             image = plot_tools.Box(2, 1)
             x_limits=[x_left, x_left+1.0]
         else:
