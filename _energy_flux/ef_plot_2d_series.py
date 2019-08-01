@@ -2,7 +2,7 @@
 Plot planes from joint energy flux analysis files.
 
 Usage:
-    ef_plot_2d_series.py LOC SIM_TYPE NU KA NL <files>... [--output=<dir>]
+    ef_plot_2d_series.py LOC SIM_TYPE NU KA NL SNAPSHOT_PATH <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
@@ -11,6 +11,7 @@ Options:
     NU		            # [m^2/s]   Viscosity (momentum diffusivity)
     KA		            # [m^2/s]   Thermal diffusivity
     NL		            # [nondim]	Number of inner interfaces
+    SNAPSHOT_PATH       # Path to where the ef_snapshots are held
 
 """
 
@@ -37,6 +38,8 @@ rank = comm.Get_rank()
 str_nu = r'$\nu$'
 str_ka = r'$\kappa$'
 str_nl = r'$n_{layers}$'
+str_om = r'$\omega$'
+str_am = r'$A$'
 
 # Expects numbers in the format 7.0E+2
 def latex_exp(num):
@@ -70,12 +73,15 @@ if __name__ == "__main__":
     NU = float(args['NU'])
     KA = float(args['KA'])
     NL = int(args['NL'])
+    ef_snapshot_path = str(args['SNAPSHOT_PATH'])
     print_vals = False
     if (rank==0 and print_vals):
         print('plot',str_loc)
         print('plot',str_nu,'=',NU)
         print('plot',str_ka,'=',KA)
         print('plot',str_nl,'=',NL)
+        print('plot',str_om,'=',Om)
+        print('plot',str_am,'=',Am)
     output_path = pathlib.Path(args['--output']).absolute()
 
 ###############################################################################
@@ -92,19 +98,23 @@ else:
     import params_ef
     params = params_ef
 
-t_0 =  0.0
-t_f = params.sim_time_stop
-#print('end time=', t_f)
-z_b = -0.5
-z_t =  0.0
+t_0  = 0.0
+t_f  = params.sim_time_stop     #[seconds]
+t_fp = params.sim_period_stop   #[t/T]
+z_b, z_t =  params.z_b, params.z_t
+omega = params.omega
+A = params.forcing_amp
 
 ###############################################################################
 
-with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
+merged_snapshots = ef_snapshot_path + "/ef_snapshots_s1.h5"
+with h5py.File(merged_snapshots, mode='r') as file:
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
     Ka    = latex_exp(KA)
     n_l   = NL
+    Om    = latex_exp(omega)
+    Am    = latex_exp(A)
 
     ef = file['tasks']['<ef>']
     #print(ef.shape)
@@ -113,26 +123,25 @@ with h5py.File("ef_snapshots/ef_snapshots_s1.h5", mode='r') as file:
     fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=False)
 
     # Use my modified plotbot to make heat map of EF
-    paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, y_lims=[z_b,z_t], title='Energy flux', even_scale=True)
+    paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, x_lims=[t_0,t_f], y_lims=[z_b,z_t], title='Energy flux', even_scale=True)
     # Reshape the ef object to put just the top z in an array
     ef = np.rot90(ef[:, 0, :])
     top_ef = ef[0, :]
     n_t = len(top_ef)
     t = np.linspace(t_0, t_f, n_t)
-    omega = np.cos(np.pi/4)
+    #omega = np.cos(np.pi/4)
     t_p = t*omega/(2*np.pi)
-    t_0p = t_0*omega/(2*np.pi)
-    t_fp = t_f*omega/(2*np.pi)
+    #t_0p = t_0*omega/(2*np.pi)
+    #t_fp = t_f*omega/(2*np.pi)
 
-    ax1.plot(t_p, top_ef)
+    ax1.plot(t_p[1:], top_ef[1:]) # initial value doesn't make sense, so skip it
     ax1.set_title('Top boundary energy flux', fontsize='medium')
     ax1.set_xlabel(r'Oscilation periods $(t/T)$')
     y_label = r'Vertical energy flux $<F_z(z)>$'
     ax1.set_ylabel(y_label)
-    ax1.set_xlim(t_0p, t_fp)
+    ax1.set_xlim(0.0, t_fp)
     ax1.get_shared_x_axes().join(ax0, ax1)
 
-    title = r'{:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nu, Nu, str_ka, Ka, str_nl, n_l)
+    title = r'{:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nl, n_l, str_om, Om, str_am, Am)
     fig.suptitle(title, fontsize='large')
     fig.savefig('./_energy_flux/ef_test.png', dpi=100)
-# add plot of top boundary ef in subplot side by side

@@ -68,7 +68,7 @@ print_params = True
 
 # Options for simulation
 use_sponge_layer = True
-set_N_const = False
+set_N_const = True
 
 ###############################################################################
 
@@ -82,8 +82,8 @@ if __name__ == '__main__':
     KA = float(arguments['KA'])
     NI = int(arguments['NI'])
     if (rank == 0 and print_params):
-        print('LOC=',LOC)
-        print('SIM_TYPE=,',SIM_TYPE)
+        print('LOC =',LOC)
+        print('SIM_TYPE =',SIM_TYPE)
         print('NU =',NU)
         print('KA =',KA)
         print('NI =',NI)

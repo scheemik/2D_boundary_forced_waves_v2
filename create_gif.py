@@ -10,7 +10,7 @@ Arguments:
 
 Script created: 2019/03/19, Mikhail Schee
 
-Last updated: 2019/05/14, Mikhail Schee
+Last updated: 2019/07/31, Mikhail Schee
 """
 
 """

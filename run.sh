@@ -9,6 +9,8 @@
 #				-v <version: what scripts to run>
 #				-k <keep(1) or allow overwriting(0)>
 
+Running_directory=~/Documents/Dedalus_Projects/2D_boundary_forced_waves_v2
+
 # if:
 # VER = 0 (Full)
 #	-> run the script, merge, plot EF if relevant, plot frames, create gif, create mp4
@@ -72,7 +74,7 @@ then
 fi
 if [ -z "$KEEP" ]
 then
-	KEEP=0
+	KEEP=1
 	echo "-k, No 'keep' preference specified, using KEEP=$KEEP"
 fi
 
@@ -127,6 +129,7 @@ then
 
 	# Write out from parameter file
 	python3 write_out_params.py $LOC $NAME $SIM_TYPE
+	echo 'Done'
 fi
 
 ###############################################################################
@@ -188,11 +191,15 @@ then
 	snapshot_path=_experiments/$NAME/snapshots
 	background_snapshot_path=_experiments/$NAME/current_bgpf
 	ef_snapshot_path=_experiments/$NAME/ef_snapshots
-	frames_path=_experiments/$NAME/frames
 else
 	snapshot_path=snapshots
 	background_snapshot_path=_background_profile/current_bgpf
 	ef_snapshot_path=ef_snapshots
+fi
+if [ $VER -eq 4 ]
+then
+	frames_path=_experiments/$NAME/frames
+else
 	frames_path=frames
 fi
 
@@ -206,6 +213,7 @@ then
 	echo '--Merging--'
 	echo ''
 	# Check to make sure snapshots folder exists
+	echo "Checking for snapshots in $snapshot_path"
 	if [ -e $snapshot_path ]
 	then
 		continue
@@ -243,7 +251,7 @@ then
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"
-		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $ef_snapshot_path/*.h5
+		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $ef_snapshot_path $ef_snapshot_path/*.h5
 	fi
 fi
 
@@ -302,14 +310,14 @@ then
 	echo '--Creating mp4--'
 	echo ''
 	# Check if frames exist
-	echo 'Checking frames'
+	echo "Checking frames in ${frames_path}"
 	files=/$frames_path/*
 	if [ -e $frames_path ] && [ ${#files[@]} -gt 0 ]
 	then
 		echo "Executing mp4 command"
 		cd $frames_path/
 		ffmpeg -framerate 10 -i write_%06d.png -c:v libx264 -pix_fmt yuv420p test.mp4
-		cd ..
+		cd $Running_directory
 		mv $frames_path/test.mp4 ./
 	else
 		echo "No frames found"
@@ -333,16 +341,15 @@ then
 		echo "Archive directory not found. Aborting script"
 		exit 1
 	fi
-	# New snapshots if (VER = 0, 1, 2, 3)
-	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ] || [ $VER -eq 3 ]
+	# New snapshots if (VER = 0, 1, 2)
+	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ]
 	then
 		# Check if snapshots exist
 		if [ -e $snapshot_path ]
 		then
 			# Move snapshots to new directory
 			mv $snapshot_path/ _experiments/$NAME/
-			# Copy `merge.py` script to new directory
-			cp merge.py _experiments/$NAME/
+			echo 'Archived snapshots'
 		else
 			echo "No snapshots found to archive. Aborting script"
 			exit 0
@@ -352,12 +359,14 @@ then
 		then
 			# Move snapshots to new directory
 			mv $background_snapshot_path _experiments/$NAME/
+			echo 'Archived background snapshots'
 		fi
 		# Check if energy flux snapshots exist
 		if [ -e $ef_snapshot_path ]
 		then
 			# Move snapshots to new directory
 			mv $ef_snapshot_path/ _experiments/$NAME/
+			echo 'Archived energy flux snapshots'
 		fi
 	fi
 	# Plot of EF if (VER = 0, 1, 3)
@@ -368,6 +377,7 @@ then
 		then
 			# Move energy flux plot to new directory
 			mv _energy_flux/ef_test.png _experiments/$NAME/ef_plot.png
+			echo 'Archived energy flux plot'
 		fi
 	else
 		# Copy the energy flux plotting script to new directory
@@ -377,36 +387,48 @@ then
 	# Plotted frames and made gif if (VER = 0, 3)
 	if [ $VER -eq 0 ] || [ $VER -eq 3 ]
 	then
+		# Check if old frames exist
+		if [ -e _experiments/$NAME/frames ]
+		then
+			echo "Removing frames from last run"
+			rm -rf _experiments/$NAME/frames
+		fi
 		# Check if frames exist
-		files=/$frames_path/*
-		if [ -e $frames_path ] && [ ${#files[@]} -gt 0 ]
+		files=/frames/*
+		if [ -e frames ] && [ ${#files[@]} -gt 0 ]
 		then
 			# Move frames to new directory
-			mv $frames_path/ _experiments/$NAME/
+			mv frames/ _experiments/$NAME/
+			echo 'Archived frames'
 		fi
 		# Check if gif exists
 		if [ -e gifs/test.gif ]
 		then
 			# Move gif to new directory
 			mv gifs/test.gif _experiments/$NAME/${NAME}.gif
+			echo 'Archived gif'
 		fi
 	else
 		# Copy the plotting and creating gif scripts to new directory
-		cp plot_2d_series.py _experiments/$NAME/
-		cp create_gif.py _experiments/$NAME/
+		#cp plot_2d_series.py _experiments/$NAME/
+		#cp create_gif.py _experiments/$NAME/
+		continue
 	fi
-	# Created mp4 if (VER = 0)
-	if [ $VER -eq 0 ]
+fi
+if [ $KEEP -eq 1 ]
+then
+	# Created mp4 if (VER = 0, 4)
+	if [ $VER -eq 0 ] || [ $VER -eq 4 ]
 	then
 		# Check if mp4 exists
 		if [ -e test.mp4 ]
 		then
 			# Move mp4 to new directory
 			mv test.mp4 _experiments/$NAME/${NAME}.mp4
+			echo 'Archived mp4'
 		fi
 	else
-		# Copy this run script to new directory
-		cp run.sh _experiments/$NAME/
+		continue
 	fi
 fi
 
