@@ -18,15 +18,15 @@ def tanh_(z, height, slope, center):
     values = 0.5*height*(np.tanh(slope*(z-center))+1)
     return values
 
-def sponge_profile(z, z_bottom, z_top, slope, max_coeff, H_sl):
+def sponge_profile(z, z_spbot, z_bottom, slope, max_coeff):
     # initialize array of values to be returned
     values = 0*z
-    # Find height of domain
-    H = z_top - z_bottom
-    # Find middle of sponge layer
-    sp_t = z_bottom + H*H_sl/2
+    # Find height of sponge layer
+    H = z_bottom - z_spbot
+    # Find 2/3 down the sponge layer
+    sp_c = z_bottom - 2.0*H/3.0
     # Add upper stratification
-    values += 1 + tanh_(z, max_coeff-1, slope, sp_t)
+    values += 1 + tanh_(z, max_coeff-1, slope, sp_c)
     return values
 
 # %%

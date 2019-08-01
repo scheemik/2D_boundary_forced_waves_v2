@@ -141,10 +141,9 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 ###############################################################################
 # Parameters to set a sponge layer at the bottom
 nz_sp = 40          # number of grid points in z direction in sponge domain
-sp_slope = -20.     # slope of tanh function in slope
+sp_slope = -10.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
-H_sl     =  0.5     # height of sponge layer = 2 * H_sl * Lz
-z_sb     = z_b-2*H_sl*Lz      # bottom of sponge layer
+z_sb     = -1.5     # bottom of sponge layer
 
 ###############################################################################
 
@@ -254,7 +253,7 @@ sys.path.insert(0, './_sponge_layer')
 from sponge_layer import sponge_profile
 # Store profile in an array so it can be used later
 if use_sponge_layer:
-    SL_array = sponge_profile(z, z_sb, z_t, sp_slope, max_sp, H_sl)
+    SL_array = sponge_profile(z, z_sb, z_b, sp_slope, max_sp)
 else:
     SL_array = z*0.0 + 1.0
 SL['g'] = SL_array

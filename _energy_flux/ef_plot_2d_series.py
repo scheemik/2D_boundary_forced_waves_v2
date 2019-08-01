@@ -107,7 +107,7 @@ A = params.forcing_amp
 
 ###############################################################################
 
-merged_snapshots = ef_snapshot_path + "/ef_snapshots_s1.h5"
+merged_snapshots = ef_snapshot_path + "/ef_snapshots.h5"
 with h5py.File(merged_snapshots, mode='r') as file:
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)

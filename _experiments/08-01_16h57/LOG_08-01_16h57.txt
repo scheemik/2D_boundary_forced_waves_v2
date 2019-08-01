@@ -1,17 +1,17 @@
 --Run options:
 
--n, Experiment name = 08-01_12h03
+-n, Experiment name = 08-01_16h57
 -c, Number of cores = 2
 -e, (1) Simulation for measuring energy flux
--i, Number of interfaces = 1
+-i, Number of interfaces = 0
 -l, (1) Simulation run on local pc
 -v, Version of run = 0
 
 
 --Experiment Parameters:
 
-Sim Runtime (periods):              5
-Sim Runtime (seconds):              44.42882938158366
+Sim Runtime (periods):              25
+Sim Runtime (seconds):              222.1441469079183
 
 Horizontal grid points:       n_x = 256
 Vertical grid points:         n_z = 512
