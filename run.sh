@@ -41,10 +41,12 @@ do
 	esac
 done
 
+DATETIME=`date +"%m-%d_%Hh%M"`
+
 # check to see if arguments were passed
 if [ -z "$NAME" ]
 then
-	NAME=`date +"%m-%d_%Hh%M"`
+	NAME=$DATETIME
 	echo "-n, No name specified, using $NAME"
 fi
 if [ -z "$CORES" ]
@@ -107,6 +109,8 @@ then
 	# Create experiment log file
 	LOG_FILE=_experiments/$NAME/LOG_${NAME}.txt
 	touch $LOG_FILE
+	echo "Log created: ${DATETIME}"
+	echo ""
 	echo "--Run options:" >> $LOG_FILE
 	echo "" >> $LOG_FILE
 	echo "-n, Experiment name = ${NAME}" >> $LOG_FILE
@@ -251,6 +255,7 @@ then
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"
+		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path
 		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $ef_snapshot_path $ef_snapshot_path/*.h5
 	fi
 fi
