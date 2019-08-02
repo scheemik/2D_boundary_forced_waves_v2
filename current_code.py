@@ -36,6 +36,7 @@ The simulation should take a few process-minutes to run.
 """
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import time
 import sys
@@ -47,6 +48,7 @@ rank = comm.Get_rank()
 
 from dedalus import public as de
 from dedalus.extras import flow_tools
+from dedalus.extras import plot_tools
 
 import logging
 logger = logging.getLogger(__name__)
@@ -232,16 +234,25 @@ problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
 
 ###############################################################################
 # Plotting function for sponge layer, background profile, etc.
+#   Only plots the part handled by rank==0
 def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
-    with plt.rc_context({'axes.edgecolor':'white', 'text.color':'white', 'axes.labelcolor':'white', 'xtick.color':'white', 'ytick.color':'white', 'figure.facecolor':'black'}):
-        fg, ax = plt.subplots(1,1)
-        ax.set_title(plt_title)
-        ax.set_xlabel(x_label)
-        ax.set_ylabel(y_label)
-        ax.set_ylim(y_lims)
-        ax.plot(hori, vert, 'k-')
-        plt.grid(True)
-        plt.show()
+    matplotlib.use('Agg')
+    scale = 2.5
+    image = plot_tools.Box(1, 2)
+    pad = plot_tools.Frame(0.2, 0.2, 0.15, 0.15)
+    margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
+    # Create multifigure
+    mfig = plot_tools.MultiFigure(1, 1, image, pad, margin, scale)
+    fig = mfig.figure
+    ax = mfig.add_axes(0, 0, [0, 0, 1, 1])
+    #fg, ax = plt.subplots(1,1)
+    ax.set_title(plt_title)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_ylim(y_lims)
+    ax.plot(hori, vert, 'k-')
+    plt.grid(True)
+    return fig
 ###############################################################################
 
 # Sponge Layer (SL) as an NCC
@@ -262,15 +273,17 @@ problem.parameters['SL'] = SL  # pass function in as a parameter
 del SL
 
 # Plots the sponge layer coefficient profile
+plt.ioff()
+vert = np.array(z[0])
+hori = np.array(SL_array[0])
+plt_title = 'Sponge Profile'
+x_label = r'Horizontal viscosity ($\nu_x$)'
+y_label = r'Depth ($z$)'
+y_lims  = [z_sb,z_t]
+fg = test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
+fg.savefig('sp_layer.png')
 if (plot_SL and rank == 0 and LOC):
-    vert = np.array(z[0])
-    hori = np.array(SL_array[0])
-    plt_title = 'Sponge Profile'
-    x_label = r'viscosity coefficient'
-    y_label = r'depth ($z$)'
-    y_lims  = [z_sb,z_t]
-    test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
-
+    plt.show()
 ###############################################################################
 
 # Background Profile (BP) as an NCC
@@ -310,14 +323,16 @@ problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP
 
 # Plots the background profile
+vert = np.array(z[0])
+hori = np.array(BP_array[0])
+plt_title = 'Background Profile'
+x_label = r'Frequency ($N^2$)'
+y_label = r'Depth ($z$)'
+y_lims  = [z_b,z_t]
+fg = test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
+fg.savefig('bgpf.png')
 if (plot_BP and rank == 0 and LOC):
-    vert = np.array(z[0])
-    hori = np.array(BP_array[0])
-    plt_title = 'Background Profile'
-    x_label = r'frequency ($N^2$)'
-    y_label = r'depth ($z$)'
-    y_lims  = [z_b,z_t]
-    test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
+    plt.show()
 
 ###############################################################################
 ###############################################################################

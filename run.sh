@@ -359,6 +359,18 @@ then
 			echo "No snapshots found to archive. Aborting script"
 			exit 0
 		fi
+		# Check if background profile image exists
+		if [ -e bgpf.png ]
+		then
+			# Move background profile image to new directory
+			mv bgpf.png _experiments/$NAME/${NAME}_BP.png
+		fi
+		# Check if sponge layer profile image exists
+		if [ -e sp_layer.png ]
+		then
+			# Move sponge layer image to new directory
+			mv sp_layer.png _experiments/$NAME/${NAME}_SL.png
+		fi
 		# Check if background profile snapshots exist
 		if [ -e $background_snapshot_path ]
 		then
@@ -381,7 +393,7 @@ then
 		if [ -e _energy_flux/ef_test.png ]
 		then
 			# Move energy flux plot to new directory
-			mv _energy_flux/ef_test.png _experiments/$NAME/${NAME}_ef.png
+			mv _energy_flux/ef_test.png _experiments/$NAME/${NAME}_EF.png
 			echo 'Archived energy flux plot'
 		fi
 	else

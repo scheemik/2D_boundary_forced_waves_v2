@@ -40,8 +40,6 @@ plot_all = False
 print_args = False
 contours = False
 print_arrays = False
-z_b = -0.5      # Bottom plotting extent
-z_t =  0.0#0.5      # Top plotting extent
 ###############################################################################
 
 # Strings for the parameters
@@ -112,6 +110,7 @@ def main(filename, start, count, output):
     omega = params.omega
     A = params.forcing_amp
     T = params.T
+    z_b, z_t = params.z_b, params.z_t
 
     # Format the dimensionless numbers nicely
     Nu    = latex_exp(NU)
@@ -156,7 +155,7 @@ def main(filename, start, count, output):
                     plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
                 set_title_save(fig, output, file, index, dpi, title_func, savename_func)
         plt.close(fig)
-    else:
+    else: # Just plotting background profile and w
         if SIM_TYPE==0:
             # Find aspect ratio from params file
             AR = float(params.aspect_ratio)
