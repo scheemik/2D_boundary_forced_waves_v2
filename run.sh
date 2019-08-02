@@ -381,7 +381,7 @@ then
 		if [ -e _energy_flux/ef_test.png ]
 		then
 			# Move energy flux plot to new directory
-			mv _energy_flux/ef_test.png _experiments/$NAME/ef_plot.png
+			mv _energy_flux/ef_test.png _experiments/$NAME/${NAME}_ef.png
 			echo 'Archived energy flux plot'
 		fi
 	else
