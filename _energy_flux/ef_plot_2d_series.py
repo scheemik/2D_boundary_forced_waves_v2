@@ -2,7 +2,7 @@
 Plot planes from joint energy flux analysis files.
 
 Usage:
-    ef_plot_2d_series.py LOC SIM_TYPE NU KA NL SNAPSHOT_PATH <files>... [--output=<dir>]
+    ef_plot_2d_series.py LOC SIM_TYPE NU KA NL SNAPSHOT_PATH [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
@@ -117,8 +117,8 @@ with h5py.File(merged_snapshots, mode='r') as file:
     Am    = latex_exp(A)
 
     ef = file['tasks']['<ef>']
-    #print(ef.shape)
-    #print(ef)
+    st = file['scales']['sim_time']
+    t  = st[()]
     # set up multifigure
     fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=False)
 
@@ -128,7 +128,7 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ef = np.rot90(ef[:, 0, :])
     top_ef = ef[0, :]
     n_t = len(top_ef)
-    t = np.linspace(t_0, t_f, n_t)
+    #t = np.linspace(t_0, t_f, n_t)
     #omega = np.cos(np.pi/4)
     t_p = t*omega/(2*np.pi)
     #t_0p = t_0*omega/(2*np.pi)

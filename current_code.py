@@ -143,7 +143,7 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 ###############################################################################
 # Parameters to set a sponge layer at the bottom
 nz_sp = 40          # number of grid points in z direction in sponge domain
-sp_slope = -10.     # slope of tanh function in slope
+sp_slope = -5.     # slope of tanh function in slope
 max_sp   =  50.     # max coefficient for nu at bottom of sponge
 z_sb     = -1.5     # bottom of sponge layer
 
@@ -238,7 +238,7 @@ problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
 def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
     matplotlib.use('Agg')
     scale = 2.5
-    image = plot_tools.Box(1, 2)
+    image = plot_tools.Box(1, 1) # aspect ratio of figure
     pad = plot_tools.Frame(0.2, 0.2, 0.15, 0.15)
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
     # Create multifigure
@@ -450,13 +450,12 @@ if (save_all_snapshots or SIM_TYPE==1):
 
 ###############################################################################
 
-# Adaptive time stepping turned on/off in params file
-
 # Main loop
 try:
     logger.info('Starting loop')
     start_time = time.time()
     while solver.ok:
+        # Adaptive time stepping turned on/off in params file
         if (adapt_dt == True):
             dt = CFL.compute_dt()
         dt = solver.step(dt)
