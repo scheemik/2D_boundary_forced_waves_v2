@@ -8,6 +8,7 @@
 #				-l <local(1) or Niagara(0)>
 #				-v <version: what scripts to run>
 #				-k <keep(1) or allow overwriting(0)>
+#				-t <test parameter>
 
 Running_directory=~/Documents/Dedalus_Projects/2D_boundary_forced_waves_v2
 
@@ -27,7 +28,7 @@ Running_directory=~/Documents/Dedalus_Projects/2D_boundary_forced_waves_v2
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
 KA=1.4E-7		# [m^2/s]   Thermal diffusivity
 
-while getopts n:c:e:i:l:v:k: option
+while getopts n:c:e:i:l:v:k:t: option
 do
 	case "${option}"
 		in
@@ -38,6 +39,7 @@ do
 		l) LOC=${OPTARG};;
 		v) VER=${OPTARG};;
 		k) KEEP=${OPTARG};;
+		t) TEST_P=${OPTARG};;
 	esac
 done
 
@@ -78,6 +80,11 @@ if [ -z "$KEEP" ]
 then
 	KEEP=1
 	echo "-k, No 'keep' preference specified, using KEEP=$KEEP"
+fi
+if [ -z "$TEST_P" ]
+then
+	TEST_P=2
+	echo "-t, No test parameter specified, using TEST_P=$TEST_P"
 fi
 
 ###############################################################################
@@ -129,6 +136,7 @@ then
 		echo "-l, (${LOC}) Simulation run on Niagara" >> $LOG_FILE
 	fi
 	echo "-v, Version of run = ${VER}" >> $LOG_FILE
+	echo "-t, Test parameter = ${TEST_P}" >> $LOG_FILE
 	echo "" >> $LOG_FILE
 
 	# Write out from parameter file
@@ -173,7 +181,7 @@ then
 	then
 		echo "Running Dedalus script for local pc"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3 current_code.py $LOC $SIM_TYPE $NU $KA $NI
+	    mpiexec -n $CORES python3 current_code.py $LOC $SIM_TYPE $NU $KA $NI $TEST_P
 	    echo ""
 	fi
 	# If running on Niagara
@@ -181,7 +189,7 @@ then
 	then
 		echo "Running Dedalus script for Niagara"
 		# mpiexec uses -n flag for number of processes to use
-	    mpiexec -n $CORES python3.6 current_code.py $LOC $SIM_TYPE $NU $KA $NI
+	    mpiexec -n $CORES python3.6 current_code.py $LOC $SIM_TYPE $NU $KA $NI $TEST_P
 		echo ""
 	fi
 fi
@@ -256,7 +264,7 @@ then
 		echo ''
 		echo "Plotting EF for z vs. t"
 		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path
-		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $ef_snapshot_path $ef_snapshot_path/*.h5
+		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NI $TEST_P $ef_snapshot_path
 	fi
 fi
 
@@ -275,7 +283,7 @@ then
 		rm -rf frames
 	fi
 	echo "Plotting 2d series"
-	mpiexec -n $CORES python3 plot_2d_series.py $LOC $SIM_TYPE $NU $KA $NI $background_snapshot_path $snapshot_path/*.h5
+	mpiexec -n $CORES python3 plot_2d_series.py $LOC $SIM_TYPE $NI $TEST_P $background_snapshot_path $snapshot_path/*.h5
 fi
 
 ###############################################################################

@@ -2,15 +2,14 @@
 Plot planes from joint analysis files.
 
 Usage:
-    plot_2d_series.py LOC SIM_TYPE NU KA NI BGPF <files>... [--output=<dir>]
+    plot_2d_series.py LOC SIM_TYPE NI TEST_P BGPF <files>... [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./frames]
     LOC                 # 1 if local, 0 if on Niagara
     SIM_TYPE            # -e, Simulation type: (1)Energy flux or (0) reproducing run
-    NU		            # [m^2/s]   Viscosity (momentum diffusivity)
-    KA		            # [m^2/s]   Thermal diffusivity
     NI		            # [nondim]	Number of inner interfaces
+    TEST_P	            # Test parameter
     BGPF                # path to background profile snapshots
 
 """
@@ -44,9 +43,8 @@ print_arrays = False
 
 # Strings for the parameters
 str_ar = 'Aspect ratio'
-str_nu = r'$\nu$'
-str_ka = r'$\kappa$'
 str_nl = r'$n_{layers}$'
+str_test = r'Testing ramp nT'
 str_om = r'$\omega$'
 str_am = r'$A$'
 
@@ -113,16 +111,15 @@ def main(filename, start, count, output):
     z_b, z_t = params.z_b, params.z_t
 
     # Format the dimensionless numbers nicely
-    Nu    = latex_exp(NU)
-    Ka    = latex_exp(KA)
     n_l   = NI
     Om    = latex_exp(omega)
     Am    = latex_exp(A)
+    testp = latex_exp(TEST_P)
 
     # Plot settings
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, t/T={:2.3f}'.format(str_loc, str_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t/T={:2.3f}'.format(str_loc, str_test, testp, r_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
@@ -222,15 +219,13 @@ if __name__ == "__main__":
     LOC = int(args['LOC'])
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     SIM_TYPE = int(args['SIM_TYPE'])
-    NU = float(args['NU'])
-    KA = float(args['KA'])
     NI = int(args['NI'])
+    TEST_P = float(args['TEST_P'])
     bgpf_dir = str(args['BGPF'])
     if (rank==0 and print_args):
         print('plot',str_loc)
-        print('plot',str_nu,'=',NU)
-        print('plot',str_ka,'=',KA)
         print('plot',str_nl,'=',NI)
+        print('plot',str_test,'=',TEST_P)
     output_path = pathlib.Path(args['--output']).absolute()
     # Create output directory if needed
     with Sync() as sync:

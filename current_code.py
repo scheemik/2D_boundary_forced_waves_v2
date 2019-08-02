@@ -6,7 +6,7 @@ Originally for 2D Rayleigh-Benard convection.
 Modified by Mikhail Schee, June 2019
 
 Usage:
-    current_code.py LOC SIM_TYPE NU KA NI
+    current_code.py LOC SIM_TYPE NU KA NI TEST_P
 
 Arguments:
     LOC         # 1 if local, 0 if on Niagara
@@ -14,6 +14,7 @@ Arguments:
     NU		    # [m^2/s]   Viscosity (momentum diffusivity)
     KA		    # [m^2/s]   Thermal diffusivity
     NI		    # [nondim]	Number of inner interfaces
+    TEST_P	    # Test parameter
 
 This script uses a Fourier basis in the x direction with periodic boundary conditions.
 
@@ -83,12 +84,14 @@ if __name__ == '__main__':
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
     NI = int(arguments['NI'])
+    TEST_P = float(arguments['TEST_P'])
     if (rank == 0 and print_params):
         print('LOC =',LOC)
         print('SIM_TYPE =',SIM_TYPE)
         print('NU =',NU)
         print('KA =',KA)
         print('NI =',NI)
+        print('TEST_P =',TEST_P)
 
 ###############################################################################
 # Fetch parameters from the correct params file
@@ -120,8 +123,12 @@ theta  = float(params.theta)
 kx, kz = float(params.k_x), float(params.k_z)
 # Forcing oscillation frequency
 omega  = float(params.omega)
+# Oscillation period = 2pi / omega
+T = float(params.T)
 # Forcing amplitude modifier
 A      = float(params.forcing_amp)
+# Forcing amplitude ramp (number of oscillations)
+nT = TEST_P
 
 sim_time_stop  = params.sim_time_stop
 wall_time_stop = params.wall_time_stop
@@ -212,7 +219,10 @@ problem.parameters['kx'] = kx
 problem.parameters['kz'] = kz
 problem.parameters['omega'] = omega
 problem.parameters['grav'] = g # can't use 'g' because Dedalus already uses that for grid
+problem.parameters['T'] = T # period of oscillation
+problem.parameters['nT'] = nT # number of periods for the ramp
 
+# Windowing
 if SIM_TYPE==0:
     # Windowing function (multiplying tanh's)
     # Slope of tanh for forcing window
@@ -226,11 +236,14 @@ if SIM_TYPE==0:
 else:
     problem.substitutions['window'] = "1" # effectively, no window
 
+# Ramp in time
+problem.substitutions['ramp'] = "(1/2)*(tanh(4*t/(nT*T) - 2) + 1)"
+
 # Substitutions for boundary forcing (see C-R & B eq 13.7)
-problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z - omega*t)*window"
-problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z - omega*t)*window"
-problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window"
-#problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window"
+problem.substitutions['fu'] = "-BFu*sin(kx*x + kz*z - omega*t)*window*ramp"
+problem.substitutions['fw'] = " BFw*sin(kx*x + kz*z - omega*t)*window*ramp"
+problem.substitutions['fb'] = "-BFb*cos(kx*x + kz*z - omega*t)*window*ramp"
+#problem.substitutions['fp'] = "-BFp*sin(kx*x + kz*z - omega*t)*window*ramp"
 
 ###############################################################################
 # Plotting function for sponge layer, background profile, etc.

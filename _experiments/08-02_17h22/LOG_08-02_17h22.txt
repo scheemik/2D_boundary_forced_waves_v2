@@ -1,0 +1,29 @@
+--Run options:
+
+-n, Experiment name = 08-02_17h22
+-c, Number of cores = 2
+-e, (1) Simulation for measuring energy flux
+-i, Number of interfaces = 0
+-l, (1) Simulation run on local pc
+-v, Version of run = 0
+-t, Test parameter = 2
+
+
+--Experiment Parameters:
+
+Sim Runtime (periods):              3
+Sim Runtime (seconds):              26.657297628950197
+
+Horizontal grid points:       n_x = 256
+Vertical grid points:         n_z = 512
+
+Horizontal extent (m):        L_x = 0.5
+Vertical extent (m):          L_z = 0.5
+
+Forcing frequency (s^-1):   omega = 0.7071067811865476
+Forcing period (s):             T = 8.885765876316732
+Forcing angle (rad):        theta = 0.7853981633974483
+Forcing amplitude:              A = 0.0001
+
+Horizontal wavenumber:        k_x = 12.566370614359172
+Vertical wavenumber:          k_z = 12.56637061435917

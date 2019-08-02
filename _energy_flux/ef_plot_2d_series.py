@@ -2,15 +2,14 @@
 Plot planes from joint energy flux analysis files.
 
 Usage:
-    ef_plot_2d_series.py LOC SIM_TYPE NU KA NL SNAPSHOT_PATH [--output=<dir>]
+    ef_plot_2d_series.py LOC SIM_TYPE NI TEST_P SNAPSHOT_PATH [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
     LOC                 # 1 if local, 0 if on Niagara
     SIM_TYPE            # -e, Simulation type: (1)Energy flux or (0) reproducing run
-    NU		            # [m^2/s]   Viscosity (momentum diffusivity)
-    KA		            # [m^2/s]   Thermal diffusivity
-    NL		            # [nondim]	Number of inner interfaces
+    NI		            # [nondim]	Number of interfaces
+    TEST_P	            # Test parameter
     SNAPSHOT_PATH       # Path to where the ef_snapshots are held
 
 """
@@ -35,8 +34,7 @@ rank = comm.Get_rank()
 ###############################################################################
 
 # Strings for the parameters
-str_nu = r'$\nu$'
-str_ka = r'$\kappa$'
+str_test = r'Testing ramp nT'
 str_nl = r'$n_{layers}$'
 str_om = r'$\omega$'
 str_am = r'$A$'
@@ -70,16 +68,14 @@ if __name__ == "__main__":
     LOC = int(args['LOC'])
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     SIM_TYPE = int(args['SIM_TYPE'])
-    NU = float(args['NU'])
-    KA = float(args['KA'])
-    NL = int(args['NL'])
+    NI = int(args['NI'])
+    TEST_P = float(args['TEST_P'])
     ef_snapshot_path = str(args['SNAPSHOT_PATH'])
     print_vals = False
     if (rank==0 and print_vals):
         print('plot',str_loc)
-        print('plot',str_nu,'=',NU)
-        print('plot',str_ka,'=',KA)
-        print('plot',str_nl,'=',NL)
+        print('plot',str_test,'=',TEST_P)
+        print('plot',str_nl,'=',NI)
         print('plot',str_om,'=',Om)
         print('plot',str_am,'=',Am)
     output_path = pathlib.Path(args['--output']).absolute()
@@ -110,9 +106,8 @@ A = params.forcing_amp
 merged_snapshots = ef_snapshot_path + "/ef_snapshots.h5"
 with h5py.File(merged_snapshots, mode='r') as file:
     # Format the dimensionless numbers nicely
-    Nu    = latex_exp(NU)
-    Ka    = latex_exp(KA)
-    n_l   = NL
+    testp = latex_exp(TEST_P)
+    n_l   = NI
     Om    = latex_exp(omega)
     Am    = latex_exp(A)
 
@@ -142,6 +137,6 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ax1.set_xlim(0.0, t_fp)
     ax1.get_shared_x_axes().join(ax0, ax1)
 
-    title = r'{:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_nl, n_l, str_om, Om, str_am, Am)
+    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, r_nl, n_l, str_om, Om, str_am, Am)
     fig.suptitle(title, fontsize='large')
     fig.savefig('./_energy_flux/ef_test.png', dpi=100)
