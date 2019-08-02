@@ -137,6 +137,6 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ax1.set_xlim(0.0, t_fp)
     ax1.get_shared_x_axes().join(ax0, ax1)
 
-    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, r_nl, n_l, str_om, Om, str_am, Am)
+    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)
     fig.suptitle(title, fontsize='large')
     fig.savefig('./_energy_flux/ef_test.png', dpi=100)

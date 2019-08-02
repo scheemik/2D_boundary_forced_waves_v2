@@ -119,7 +119,7 @@ def main(filename, start, count, output):
     # Plot settings
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t/T={:2.3f}'.format(str_loc, str_test, testp, r_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t/T={:2.3f}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
