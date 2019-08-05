@@ -11,6 +11,7 @@
 #				-t <test parameter>
 
 Running_directory=~/Documents/Dedalus_Projects/2D_boundary_forced_waves_v2
+SAVE_SNAPSHOTS=0
 
 # if:
 # VER = 0 (Full)
@@ -358,7 +359,7 @@ then
 	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ]
 	then
 		# Check if snapshots exist
-		if [ -e $snapshot_path ]
+		if [ -e $snapshot_path ] && [ $SAVE_SNAPSHOTS -eq 1 ]
 		then
 			# Move snapshots to new directory
 			mv $snapshot_path/ _experiments/$NAME/

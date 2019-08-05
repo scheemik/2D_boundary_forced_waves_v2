@@ -124,11 +124,11 @@ kx, kz = float(params.k_x), float(params.k_z)
 # Forcing oscillation frequency
 omega  = float(params.omega)
 # Oscillation period = 2pi / omega
-T = float(params.T)
+T      = float(params.T)
 # Forcing amplitude modifier
-A      = float(params.forcing_amp)
+A      = TEST_P #float(params.forcing_amp)
 # Forcing amplitude ramp (number of oscillations)
-nT = TEST_P
+nT     = float(params.nT)
 
 sim_time_stop  = params.sim_time_stop
 wall_time_stop = params.wall_time_stop

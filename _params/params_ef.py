@@ -4,7 +4,7 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_period_stop = 10 # oscillation periods, time in seconds calculated below
+sim_period_stop = 20 # oscillation periods, time in seconds calculated below
 wall_time_stop = 60 # min
 
 # Determine whether adaptive time stepping is on or off
@@ -35,8 +35,10 @@ k_z    = k_x * np.tan(theta)
 omega = N_0 * np.cos(theta) # [s^-1]
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
-# Other parameters
-forcing_amp   = 1.0e-4
+# Forcing amplitude modifier
+forcing_amp = 1.0e-4
+# Forcing amplitude ramp (number of oscillations)
+nT = 3.0
 
 # Calculate stop time
 sim_time_stop = sim_period_stop * T # time units (t)

@@ -44,7 +44,7 @@ print_arrays = False
 # Strings for the parameters
 str_ar = 'Aspect ratio'
 str_nl = r'$n_{layers}$'
-str_test = r'Testing ramp nT'
+str_test = r'Test param'
 str_om = r'$\omega$'
 str_am = r'$A$'
 
