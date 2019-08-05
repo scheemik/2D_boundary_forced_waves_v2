@@ -359,11 +359,14 @@ then
 	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 2 ]
 	then
 		# Check if snapshots exist
-		if [ -e $snapshot_path ] && [ $SAVE_SNAPSHOTS -eq 1 ]
+		if [ -e $snapshot_path ]
 		then
-			# Move snapshots to new directory
-			mv $snapshot_path/ _experiments/$NAME/
-			echo 'Archived snapshots'
+			if [ $SAVE_SNAPSHOTS -eq 1 ]
+			then
+				# Move snapshots to new directory
+				mv $snapshot_path/ _experiments/$NAME/
+				echo 'Archived snapshots'
+			fi
 		else
 			echo "No snapshots found to archive. Aborting script"
 			exit 0
