@@ -23,10 +23,9 @@
 #	-> create mp4 from frames
 
 echo 'Test parameter currently set to oscillation periods for BF ramp'
-sh run.sh -v 0 -i 0 -k 1 -t 0.5
-sh run.sh -v 0 -i 0 -k 1 -t 1.0
-sh run.sh -v 0 -i 0 -k 1 -t 1.5
-sh run.sh -v 0 -i 0 -k 1 -t 2.0
 sh run.sh -v 0 -i 0 -k 1 -t 2.5
+sh run.sh -v 0 -i 0 -k 1 -t 3.0
+sh run.sh -v 0 -i 0 -k 1 -t 3.5
+sh run.sh -v 0 -i 0 -k 1 -t 4.0
 
-echo "Done"
+echo "Many runs script done"

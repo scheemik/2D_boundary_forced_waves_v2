@@ -4,7 +4,7 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_period_stop = 25 # oscillation periods, time in seconds calculated below
+sim_period_stop = 10 # oscillation periods, time in seconds calculated below
 wall_time_stop = 60 # min
 
 # Determine whether adaptive time stepping is on or off
