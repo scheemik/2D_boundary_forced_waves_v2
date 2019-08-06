@@ -22,9 +22,9 @@
 # VER = 4
 #	-> create mp4 from frames
 
-echo 'Test parameter currently set to BF amplitude modifier'
-sh run.sh -v 0 -i 0 -k 1 -t 2.0E-4
-sh run.sh -v 0 -i 0 -k 1 -t 2.1E-4
-sh run.sh -v 0 -i 0 -k 1 -t 2.2E-4
+echo 'Test parameter currently set to max sponge layer modifier'
+sh run.sh -v 0 -i 0 -k 1 -t 40.0
+sh run.sh -v 0 -i 0 -k 1 -t 50.0
+sh run.sh -v 0 -i 0 -k 1 -t 60.0
 
 echo "Many runs script done"

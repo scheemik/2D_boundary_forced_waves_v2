@@ -32,13 +32,23 @@ k_x    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
 k_z    = k_x * np.tan(theta)
 # Oscillation frequency = N_0 * cos(theta), from dispersion relation
-omega = N_0 * np.cos(theta) # [s^-1]
+omega  = N_0 * np.cos(theta) # [s^-1]
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
 # Forcing amplitude modifier
 forcing_amp = 2.0e-4
 # Forcing amplitude ramp (number of oscillations)
 nT = 3.0
+
+# Sponge layer parameters
+# Number of grid points in z direction in sponge domain
+nz_sp    =  40
+# Slope of tanh function in slope
+sp_slope = -5.0
+# Max coefficient for nu at bottom of sponge
+max_sp   =  50.0
+# Bottom of sponge layer
+z_sb     = -1.5
 
 # Calculate stop time
 sim_time_stop = sim_period_stop * T # time units (t)
