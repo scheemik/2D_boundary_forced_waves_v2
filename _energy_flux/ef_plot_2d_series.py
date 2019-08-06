@@ -99,7 +99,7 @@ t_f  = params.sim_time_stop     #[seconds]
 t_fp = params.sim_period_stop   #[t/T]
 z_b, z_t =  params.z_b, params.z_t
 omega = params.omega
-A = params.forcing_amp
+A = TEST_P #params.forcing_amp
 
 ###############################################################################
 

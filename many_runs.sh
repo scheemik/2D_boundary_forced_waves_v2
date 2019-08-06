@@ -23,8 +23,8 @@
 #	-> create mp4 from frames
 
 echo 'Test parameter currently set to BF amplitude modifier'
-sh run.sh -v 0 -i 0 -k 1 -t 1.3E-4
-sh run.sh -v 0 -i 0 -k 1 -t 1.6E-4
-sh run.sh -v 0 -i 0 -k 1 -t 1.9E-4
+sh run.sh -v 0 -i 0 -k 1 -t 2.0E-4
+sh run.sh -v 0 -i 0 -k 1 -t 2.1E-4
+sh run.sh -v 0 -i 0 -k 1 -t 2.2E-4
 
 echo "Many runs script done"

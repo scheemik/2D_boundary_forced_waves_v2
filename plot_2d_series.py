@@ -106,7 +106,7 @@ def main(filename, start, count, output):
         import params_ef
         params = params_ef
     omega = params.omega
-    A = params.forcing_amp
+    A = TEST_P #params.forcing_amp
     T = params.T
     z_b, z_t = params.z_b, params.z_t
 

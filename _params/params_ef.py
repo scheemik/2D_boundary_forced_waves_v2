@@ -36,7 +36,7 @@ omega = N_0 * np.cos(theta) # [s^-1]
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
 # Forcing amplitude modifier
-forcing_amp = 1.0e-4
+forcing_amp = 2.0e-4
 # Forcing amplitude ramp (number of oscillations)
 nT = 3.0
 
