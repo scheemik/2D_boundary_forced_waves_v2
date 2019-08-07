@@ -87,8 +87,12 @@ if __name__ == "__main__":
 sys.path.insert(0, './_params')
 if SIM_TYPE==0:
     # Reproducing results from Ghaemsaidi
-    import params_repro
-    params = params_repro
+    if NI==1:
+        import params_repro1
+        params = params_repro1
+    if NI==2:
+        import params_repro2
+        params = params_repro2
 else:
     # Measuring energy flux
     import params_ef

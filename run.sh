@@ -251,12 +251,22 @@ then
 		mpiexec -n $CORES python3 merge.py $background_snapshot_path
 	fi
 	# Check if energy flux snapshots have already been merged
-	if [ -e $ef_snapshot_path/ef_snapshots_s1.h5 ]
+	if [ -e $ef_snapshot_path/ef_snapshots.h5 ]
 	then
 		echo "Energy flux snapshots already merged"
 	else
 		echo "Merging energy flux snapshots"
 		mpiexec -n $CORES python3 merge.py $ef_snapshot_path
+		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path ef_snapshots
+	fi
+	# Check if p_ef_k snapshots have already been merged
+	if [ -e $ef_snapshot_path/p_ef_k/p_ef_k.h5 ]
+	then
+		echo "Prescribed kinetic energy flux snapshots already merged"
+	else
+		echo "Merging prescribed kinetic energy flux snapshots"
+		mpiexec -n $CORES python3 merge.py $ef_snapshot_path/p_ef_k
+		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path/p_ef_k p_ef_k
 	fi
 
 	# Check if plotting energy flux if relevant
@@ -264,7 +274,6 @@ then
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"
-		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path
 		mpiexec -n $CORES python3 _energy_flux/ef_plot_2d_series.py $LOC $SIM_TYPE $NI $TEST_P $ef_snapshot_path
 	fi
 fi
@@ -461,4 +470,5 @@ then
 	fi
 fi
 
-echo "Done"
+echo "Run script completed"
+echo ""

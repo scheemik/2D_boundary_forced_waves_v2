@@ -22,10 +22,10 @@
 # VER = 4
 #	-> create mp4 from frames
 
-echo 'Test parameter currently set to max sponge layer modifier'
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 10.0
+echo 'Test parameter currently set to forcing window slope'
+sh run.sh -v 0 -e 0 -i 2 -k 1 -t 20.0
 sh run.sh -v 0 -e 0 -i 1 -k 1 -t 20.0
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 30.0
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 40.0
+#sh run.sh -v 0 -e 0 -i 1 -k 1 -t 30.0
+#sh run.sh -v 0 -e 0 -i 1 -k 1 -t 35.0
 
 echo "Many runs script done"

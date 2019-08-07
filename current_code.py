@@ -101,8 +101,12 @@ sys.path.insert(0, './_params')
 if SIM_TYPE==0:
     if rank==0:
         print('Reproducing results from Ghaemsaidi')
-    import params_repro
-    params = params_repro
+    if NI==1:
+        import params_repro1
+        params = params_repro1
+    if NI==2:
+        import params_repro2
+        params = params_repro2
 else:
     if rank==0:
         print('Measuring energy flux')
@@ -225,6 +229,7 @@ problem.parameters['omega'] = omega
 problem.parameters['grav'] = g # can't use 'g' because Dedalus already uses that for grid
 problem.parameters['T'] = T # period of oscillation
 problem.parameters['nT'] = nT # number of periods for the ramp
+problem.parameters['z_top'] = z_t
 
 # Windowing
 if SIM_TYPE==0:
@@ -315,7 +320,7 @@ else: # Construct a staircase profile
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
     if SIM_TYPE==0:
-        slope = float(params.profile_slope)#*(n_layers+1)
+        slope = float(params.profile_slope)
         N_1 = float(params.N_1)                  # Stratification value above staircase
         N_2 = float(params.N_2)                  # Stratification value below staircase
         st_top = float(params.stair_top)         # Bottom of staircase (not domian)
@@ -461,12 +466,23 @@ current_bgpf.add_task("N0*BP", layout='g', name='N')
 ###############################################################################
 # Measuring "energy flux" through a horizontal boundary at some z
 
-# Adding a new file handler
+# Top level path for all energy flux snapshots
+ef_snapshots_path = 'ef_snapshots'
+
+# Adding new file handlers
 if (save_all_snapshots or SIM_TYPE==1):
-    ef_snapshots_path = 'ef_snapshots'
+    # Total energy flux measurement
     ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
     # Adding a task to integrate energy flux across x for values of z
+    #ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3), 'x')", layout='g', name='<ef>')
     ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
+
+    # Prescribed kinetic energy flux
+    p_ef_k_path = ef_snapshots_path + '/p_ef_k'
+    p_ef_k = solver.evaluator.add_file_handler(p_ef_k_path, sim_dt=0.25, max_writes=100)
+    # Adding a task to integrate prescribed energy flux across x at the top z
+    #problem.parameters['z_top'] = z_t
+    p_ef_k.add_task("integ(0.5*(BFw**3)*((kx/kz)**2 + 1)*sin(kx*x + kz*z_top - omega*t)*ramp, 'x')", layout='g', name='<p_ef_k>')
 
 ###############################################################################
 

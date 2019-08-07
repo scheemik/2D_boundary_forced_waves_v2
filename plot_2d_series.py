@@ -109,8 +109,12 @@ def main(filename, start, count, output):
     sys.path.insert(0, './_params')
     if SIM_TYPE==0:
         # Reproducing results from Ghaemsaidi
-        import params_repro
-        params = params_repro
+        if NI==1:
+            import params_repro1
+            params = params_repro1
+        if NI==2:
+            import params_repro2
+            params = params_repro2
     else:
         # Measuring energy flux
         import params_ef
@@ -209,6 +213,7 @@ def main(filename, start, count, output):
                 axes0.set_xlabel(r'$N$ (s$^{-1}$)')
                 axes0.set_ylabel(r'$z$ (m)')
                 axes0.set_ylim([z_b,z_t+0.04]) # fudge factor to line up y axes
+                axes0.set_xlim([xleft,xright+0.04])
                 axes0.plot(hori, vert, 'k-')
                 # Force display aspect ratio
                 axes0.set_aspect(calc_ratio)

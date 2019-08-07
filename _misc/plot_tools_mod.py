@@ -163,14 +163,17 @@ def plot_bot(dset, image_axes, data_slices, x_lims=None, y_lims=None, image_scal
     caxes.xaxis.set_label_position('top')
     if isinstance(xscale, str):
         paxes.set_xlabel(xscale)
+        x_label_str = xscale
     else:
         paxes.set_xlabel(dset.dims[xaxis].label)
+        x_label_str = dset.dims[xaxis].label
     if isinstance(yscale, str):
         paxes.set_ylabel(yscale)
     else:
         paxes.set_ylabel(dset.dims[yaxis].label)
     # Hardcoding x and y labels
-    paxes.set_xlabel(r'$x$ (m)')
+    if x_label_str == 'x':
+        paxes.set_xlabel(r'$x$ (m)')
     paxes.set_ylabel(r'$z$ (m)')
     # Set axis limits
     if (x_lims!=None):
