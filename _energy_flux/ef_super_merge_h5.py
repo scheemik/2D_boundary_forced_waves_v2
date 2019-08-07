@@ -2,11 +2,12 @@
 Merges merged energy flux analysis files into one file.
 
 Usage:
-    ef_super_merge_h5.py SNAPSHOT_PATH [--output=<dir>]
+    ef_super_merge_h5.py SNAPSHOT_PATH SNAPSHOT_NAME [--output=<dir>]
 
 Options:
     --output=<dir>      # Output directory [default: ./_energy_flux]
     SNAPSHOT_PATH       # Path to where the ef_snapshots are held
+    SNAPSHOT_NAME       # Name of the type of snapshot (i.e. 'p_ef_k')
 
 """
 
@@ -33,16 +34,18 @@ from dedalus.tools import post
 args = docopt(__doc__)
 
 ef_snapshot_path = str(args['SNAPSHOT_PATH'])
+ef_snapshot_name = str(args['SNAPSHOT_NAME'])
 
 #output_path = pathlib.Path(args['--output']).absolute()
 
 ###############################################################################
 
 # Merge all ef_snapshots into one file
-merged_snapshots = ef_snapshot_path + "/ef_snapshots.h5"
+merged_snapshots = ef_snapshot_path + "/" + ef_snapshot_name + ".h5"
 if os.path.exists(merged_snapshots):
     os.remove(merged_snapshots)
-set_paths = list(pathlib.Path(ef_snapshot_path).glob("ef_snapshots_s*.h5"))
+wild_card = ef_snapshot_name + "_s*.h5"
+set_paths = list(pathlib.Path(ef_snapshot_path).glob(wild_card))
 post.merge_sets(merged_snapshots, set_paths, cleanup=False)
 
 ###############################################################################
