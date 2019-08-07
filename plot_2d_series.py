@@ -39,6 +39,7 @@ plot_all = False
 print_args = False
 contours = False
 print_arrays = False
+normalize_values = True
 ###############################################################################
 
 # Strings for the parameters
@@ -72,6 +73,15 @@ def set_title_save(fig, output, file, index, dpi, title_func, savename_func):
     fig.savefig(str(savepath), dpi=dpi)
     fig.clear()
     return savepath
+
+def normalize(xmesh, ymesh, data, paramsfile):
+    if paramsfile is not None:
+        A = paramsfile.forcing_amp
+        omega = paramsfile.omega
+        return_data = data / (A*omega)
+    else:
+        return_data = data
+    return xmesh, ymesh, return_data
 
 def main(filename, start, count, output):
     # Data for plotting background stratification profile
@@ -119,7 +129,7 @@ def main(filename, start, count, output):
     # Plot settings
     scale = 2.5
     dpi = 100
-    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, t/T={:2.3f}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
+    title_func = lambda sim_time: r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}, $t/T$={:2.3f}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am, sim_time/T)
     savename_func = lambda write: 'write_{:06}.png'.format(write)
     # Layout
     #   nrows, ncols set above
@@ -177,7 +187,6 @@ def main(filename, start, count, output):
             #ytop   =  0.0
         calc_ratio = abs((xright-xleft)/(ybott-ytop))*dis_ratio
         task = 'w'
-        w_title = r'w (m/s)'
         nrows, ncols = 1, 2
         # Create multifigure
         mfig = plot_tools.MultiFigure(nrows, ncols, image, pad, margin, scale)
@@ -189,7 +198,10 @@ def main(filename, start, count, output):
                 axes1 = mfig.add_axes(0, 1, [0, 0, 1, 1])
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
-                plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=w_title, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                if normalize_values:
+                    plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w/(A\omega)$', even_scale=True, func=normalize, paramfile=params, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                else:
+                    plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w$ (m/s)', even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
 
                 # Plot stratification profile on the left
                 axes0 = mfig.add_axes(0, 0, [0, 0, 1.5, 1])#, sharey=axes1)

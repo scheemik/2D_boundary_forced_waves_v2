@@ -104,6 +104,8 @@ A = params.forcing_amp
 ###############################################################################
 
 merged_snapshots = ef_snapshot_path + "/ef_snapshots.h5"
+# set up multifigure
+fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=False)
 with h5py.File(merged_snapshots, mode='r') as file:
     # Format the dimensionless numbers nicely
     testp = latex_exp(TEST_P)
@@ -114,29 +116,35 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ef = file['tasks']['<ef>']
     st = file['scales']['sim_time']
     t  = st[()]
-    # set up multifigure
-    fig, (ax0, ax1) = plt.subplots(2,1, sharex=True, figsize=(8,12), constrained_layout=False)
 
     # Use my modified plotbot to make heat map of EF
     paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, x_lims=[t_0,t_f], y_lims=[z_b,z_t], title='Energy flux', even_scale=True)
     # Reshape the ef object to put just the top z in an array
     ef = np.rot90(ef[:, 0, :])
     top_ef = ef[0, :]
-    n_t = len(top_ef)
-    #t = np.linspace(t_0, t_f, n_t)
-    #omega = np.cos(np.pi/4)
+    #n_t = len(top_ef)
     t_p = t*omega/(2*np.pi)
-    #t_0p = t_0*omega/(2*np.pi)
-    #t_fp = t_f*omega/(2*np.pi)
 
-    ax1.plot(t_p[1:], top_ef[1:]) # initial value doesn't make sense, so skip it
+    ax1.plot(t_p[1:], top_ef[1:], label='Total measured') # initial value doesn't make sense, so skip it
     ax1.set_title('Top boundary energy flux', fontsize='medium')
     ax1.set_xlabel(r'Oscilation periods $(t/T)$')
     y_label = r'Vertical energy flux $<F_z(z)>$'
     ax1.set_ylabel(y_label)
     ax1.set_xlim(0.0, t_fp)
-    ax1.get_shared_x_axes().join(ax0, ax1)
 
-    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)
-    fig.suptitle(title, fontsize='large')
-    fig.savefig('./_energy_flux/ef_test.png', dpi=100)
+merged_snapshots = ef_snapshot_path + "/p_ef_k/p_ef_k.h5"
+with h5py.File(merged_snapshots, mode='r') as file:
+    p_ef_k = file['tasks']['<p_ef_k>']
+    st = file['scales']['sim_time']
+    t  = st[()]
+    t_p = t*omega/(2*np.pi)
+    # Reshape the ef object to put just the top z in an array
+    p_ef_k = np.rot90(p_ef_k[:, 0, :])
+    top_p_ef_k = p_ef_k[0, :]
+    ax1.plot(t_p[1:], top_p_ef_k[1:], label='Prescribed kinetic') # initial value doesn't make sense, so skip it
+
+ax1.legend()
+ax1.get_shared_x_axes().join(ax0, ax1)
+title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)
+fig.suptitle(title, fontsize='large')
+fig.savefig('./_energy_flux/ef_test.png', dpi=100)
