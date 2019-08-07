@@ -23,8 +23,9 @@
 #	-> create mp4 from frames
 
 echo 'Test parameter currently set to max sponge layer modifier'
-sh run.sh -v 0 -i 0 -k 1 -t 40.0
-sh run.sh -v 0 -i 0 -k 1 -t 50.0
-sh run.sh -v 0 -i 0 -k 1 -t 60.0
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 10.0
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 20.0
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 30.0
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 40.0
 
 echo "Many runs script done"

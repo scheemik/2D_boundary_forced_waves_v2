@@ -157,8 +157,8 @@ def main(filename, start, count, output):
             # Find aspect ratio from params file
             AR = float(params.aspect_ratio)
             x_left = float(params.forcing_left_edge)
-            image = plot_tools.Box(2, 1)
-            x_limits=[x_left, x_left+1.0]
+            image = plot_tools.Box(AR, 1)
+            x_limits=[0.0, 0.75] #[x_left, x_left+1.0]
         else:
             image = plot_tools.Box(1, 1)
             x_limits=[0.0, 0.5]

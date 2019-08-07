@@ -260,7 +260,7 @@ then
 	fi
 
 	# Check if plotting energy flux if relevant
-	if [ $SIM_TYPE -eq 1 ] #|| [ 1 -eq 1 ]
+	if [ $SIM_TYPE -eq 1 ] || [ 1 -eq 1 ]
 	then
 		echo ''
 		echo "Plotting EF for z vs. t"

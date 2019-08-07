@@ -71,7 +71,7 @@ print_params = True
 
 # Options for simulation
 use_sponge_layer = True
-set_N_const = True
+set_N_const = False
 
 ###############################################################################
 
@@ -154,7 +154,7 @@ nz_sp    = params.nz_sp
 # Slope of tanh function in slope
 sp_slope = params.sp_slope
 # Max coefficient for nu at bottom of sponge
-max_sp   = TEST_P #params.max_sp
+max_sp   = params.max_sp
 # Bottom of sponge layer
 z_sb     = params.z_sb
 
@@ -233,7 +233,7 @@ if SIM_TYPE==0:
     f_slope = float(params.forcing_slope)
     # Bounds of the forcing window
     fl_edge, fr_edge = float(params.forcing_left_edge), float(params.forcing_rightedge)
-    problem.parameters['slope'] = f_slope
+    problem.parameters['slope'] = TEST_P #f_slope
     problem.parameters['left_edge'] = fl_edge
     problem.parameters['right_edge'] = fr_edge
     problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"
@@ -318,15 +318,18 @@ else: # Construct a staircase profile
         slope = float(params.profile_slope)#*(n_layers+1)
         N_1 = float(params.N_1)                  # Stratification value above staircase
         N_2 = float(params.N_2)                  # Stratification value below staircase
-        if n_layers == 1:                        # Top of staircase (not domain)
-            st_bot = float(params.stair_bot_1)
-        elif n_layers == 2:
-            st_bot = float(params.stair_bot_2)
-        else:
-            print("NI must be 1 or 2 for reproduction run")
         st_top = float(params.stair_top)         # Bottom of staircase (not domian)
         from Foran_profile import Foran_profile
-        BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
+        if n_layers == 1:                        # Top of staircase (not domain)
+            st_bot = float(params.stair_bot_1)
+            BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
+        elif n_layers == 2:
+            st_bot = float(params.stair_bot_2)
+            BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
+        elif n_layers == 0:
+            BP_array = z*0 + 1.0 # N = const
+        else:
+            print("NI must be 0, 1, or 2 for reproduction run")
     else:
         slope = 100
         st_buffer = 0.1

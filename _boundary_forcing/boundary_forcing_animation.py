@@ -17,12 +17,12 @@ from sympy import *
 ###############################################################################
 # %%
 # Boundary forcing parameters
-Lx = 3.0 #m
-x_min = -Lx/2
-x_max =  Lx/2
+Lx = 1.5 #m
+x_min = -Lx/3.0
+x_max =  2*Lx/3.0
 # Bounds of the forcing window
-fl_edge = -3.0*Lx/12.0
-fr_edge = -1.0*Lx/12.0
+fl_edge = -1.0*Lx/12.0
+fr_edge = 0.0 #-1.0*Lx/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
@@ -45,7 +45,7 @@ t = np.linspace(0, period, 30)
 X2, T2 = np.meshgrid(x, t)
 
 # Windowing function (multiplying tanh's)
-slope = 10
+slope = 40
 left_side = 0.5*(np.tanh(slope*(X2-fl_edge))+1)
 right_side = 0.5*(np.tanh(slope*(-X2+fr_edge))+1)
 win = left_side*right_side

@@ -4,14 +4,14 @@
 import numpy as np
 
 # Stop times for the simulation
-sim_period_stop = 4 # oscillation periods, time in seconds calculated below
-wall_time_stop = 35 # min
+sim_period_stop = 5 # oscillation periods, time in seconds calculated below
+wall_time_stop = 60 # min
 
 # Determine whether adaptive time stepping is on or off
 adapt_dt = False
 
 # Aspect ratio of display domain
-aspect_ratio = 3.0
+aspect_ratio = 1.5
 
 # Number of points in each dimension
 n_x = 256
@@ -36,7 +36,7 @@ stair_top   = -0.22         # Top of staircase (not domian)
 N_0 = 1.0 # [rad/s]
 #   Bounds of the forcing window
 forcing_left_edge = -1.0*L_x/12.0
-forcing_rightedge =  1.0*L_x/12.0
+forcing_rightedge =  0.0 #1.0*L_x/12.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
@@ -51,7 +51,20 @@ omega = N_0 * np.cos(theta) # [s^-1]
 T = 2*np.pi / omega
 # Other parameters
 forcing_slope = 10 # for tanh window
-forcing_amp   = 3.0e-4
+# Forcing amplitude modifier
+forcing_amp = 3.0e-4
+# Forcing amplitude ramp (number of oscillations)
+nT = 3.0
+
+# Sponge layer parameters
+# Number of grid points in z direction in sponge domain
+nz_sp    =  40
+# Slope of tanh function in slope
+sp_slope = -5.0
+# Max coefficient for nu at bottom of sponge
+max_sp   =  50.0
+# Bottom of sponge layer
+z_sb     = -1.5
 
 # Calculate stop time
 sim_time_stop = sim_period_stop * T # time units (t)
