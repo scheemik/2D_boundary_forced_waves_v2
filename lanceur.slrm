@@ -39,7 +39,7 @@ export MPLBACKEND=pdf
 
 source ${HOME}/Dedalus/Vanilla_Dedalus/venv/bin/activate
 
-sh many_runs.sh
+sh Niagara_many_runs.sh -c $CORES
 
 deactivate
 
