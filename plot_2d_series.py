@@ -26,6 +26,7 @@ from dedalus.extras import plot_tools
 import sys
 sys.path.insert(0, './_misc')
 from plot_tools_mod import plot_bot_3d_mod
+from latex_fmt import latex_exp
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
@@ -49,19 +50,7 @@ str_test = r'Test param'
 str_om = r'$\omega$'
 str_am = r'$A$'
 
-# Expects numbers in the format 7.0E+2
-def latex_exp(num):
-    float_str = "{:.1E}".format(num)
-    if "E" in float_str:
-        base, exponent = float_str.split("E")
-        exp = int(exponent)
-        str1 = '$' + str(base)
-        if (exp != 0):
-            str1 = str1 + r'\cdot10^{' + str(exp)
-        str1 = str1 + '}$'
-        return r"{0}".format(str1)
-    else:
-        return float_str
+###############################################################################
 
 def set_title_save(fig, output, file, index, dpi, title_func, savename_func):
     # Add time title
