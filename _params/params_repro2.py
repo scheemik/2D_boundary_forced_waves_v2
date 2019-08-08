@@ -23,8 +23,8 @@ stair_top   = -0.22         # Top of staircase (not domian)
 # Characteristic stratification
 N_0 = N_1 # 1.0 [rad/s]
 #   Bounds of the forcing window
-forcing_left_edge = -1.0*L_x/12.0
-forcing_rightedge =  0.0 #1.0*L_x/12.0
+forcing_left_edge = -1.0*L_x/24.0
+forcing_rightedge =  1.0*L_x/24.0
 # Angle of beam w.r.t. the horizontal
 theta = np.pi*0.2262280422
 # Horizontal wavelength
@@ -40,7 +40,7 @@ T = 2*np.pi / omega
 # Other parameters
 forcing_slope = 20 # for tanh window
 # Forcing amplitude modifier
-forcing_amp = 3.0e-4
+forcing_amp = 2.5e-4
 # Forcing amplitude ramp (number of oscillations)
 nT = 3.0
 
