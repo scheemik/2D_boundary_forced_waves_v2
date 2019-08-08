@@ -128,7 +128,7 @@ omega  = float(params.omega)
 # Oscillation period = 2pi / omega
 T      = float(params.T)
 # Forcing amplitude modifier
-A      = float(params.forcing_amp)
+A      = TEST_P #float(params.forcing_amp)
 # Forcing amplitude ramp (number of oscillations)
 nT     = float(params.nT)
 
@@ -248,7 +248,7 @@ if SIM_TYPE==0:
     f_slope = float(params.forcing_slope)
     # Bounds of the forcing window
     fl_edge, fr_edge = float(params.forcing_left_edge), float(params.forcing_rightedge)
-    problem.parameters['slope'] = TEST_P #f_slope
+    problem.parameters['slope'] = f_slope
     problem.parameters['left_edge'] = fl_edge
     problem.parameters['right_edge'] = fr_edge
     problem.substitutions['window'] = "(1/2)*(tanh(slope*(x-left_edge))+1)*(1/2)*(tanh(slope*(-x+right_edge))+1)"

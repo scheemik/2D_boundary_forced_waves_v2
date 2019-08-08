@@ -14,14 +14,14 @@ z_b, z_t = -L_z, 0.0
 
 # Background profile parameters
 profile_slope = 200.0
-N_1 = 1.0#0.95                  # The stratification value above the staircase
+N_1 = 0.95                  # The stratification value above the staircase
 N_2 = 1.24                  # The stratification value below the staircase
 stair_bot = -0.30         # Bottom of staircase (not domain) for 1 layer
 stair_top   = -0.22         # Top of staircase (not domian)
 
 # Boundary forcing parameters
 # Characteristic stratification
-N_0 = 1.0 # 1.0 [rad/s]
+N_0 = N_1 # 1.0 [rad/s]
 #   Bounds of the forcing window
 forcing_left_edge = -1.0*L_x/12.0
 forcing_rightedge =  0.0 #1.0*L_x/12.0
