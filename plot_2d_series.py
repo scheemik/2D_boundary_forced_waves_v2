@@ -8,7 +8,7 @@ Options:
     --output=<dir>      # Output directory [default: ./frames]
     LOC                 # 1 if local, 0 if on Niagara
     SIM_TYPE            # -e, Simulation type: (1)Energy flux or (0) reproducing run
-    NI		            # [nondim]	Number of inner interfaces
+    NI		            # Number of inner interfaces
     TEST_P	            # Test parameter
     BGPF                # path to background profile snapshots
 
@@ -172,7 +172,7 @@ def main(filename, start, count, output):
             AR = float(params.aspect_ratio)
             x_left = float(params.forcing_left_edge)
             image = plot_tools.Box(AR, 1)
-            x_limits=[0.0, 0.75] #[x_left, x_left+1.0]
+            x_limits=[0.0, 0.5] #[x_left, x_left+1.0]
         else:
             image = plot_tools.Box(1, 1)
             x_limits=[0.0, 0.5]

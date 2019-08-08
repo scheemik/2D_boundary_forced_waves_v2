@@ -1,21 +1,10 @@
 # Parameters for running a reproduction of Foran's/Ghaemsaidi's system
-#   Runs faster, but coarser resolution
+#   Single layer
 
 import numpy as np
 
-# Stop times for the simulation
-sim_period_stop = 25 # oscillation periods, time in seconds calculated below
-wall_time_stop = 60 # min
-
-# Determine whether adaptive time stepping is on or off
-adapt_dt = False
-
 # Aspect ratio of display domain
-aspect_ratio = 1.5
-
-# Number of points in each dimension
-n_x = 256
-n_z = 512
+aspect_ratio = 1.0
 
 # Domain size
 L_x = 1.5 # m
@@ -25,21 +14,19 @@ z_b, z_t = -L_z, 0.0
 
 # Background profile parameters
 profile_slope = 200.0
-N_1 = 0.95                  # The stratification value above the staircase
+N_1 = 1.0#0.95                  # The stratification value above the staircase
 N_2 = 1.24                  # The stratification value below the staircase
 stair_bot = -0.30         # Bottom of staircase (not domain) for 1 layer
-#stair_bot_2 = -0.38         # Bottom of staircase (not domain) for 2 layer
 stair_top   = -0.22         # Top of staircase (not domian)
 
 # Boundary forcing parameters
 # Characteristic stratification
-N_0 = N_1 # 1.0 [rad/s]
+N_0 = 1.0 # 1.0 [rad/s]
 #   Bounds of the forcing window
 forcing_left_edge = -1.0*L_x/12.0
 forcing_rightedge =  0.0 #1.0*L_x/12.0
 # Angle of beam w.r.t. the horizontal
-theta = np.pi/4
-#theta_2 = np.pi*0.2262280422
+theta = np.pi/4.0
 # Horizontal wavelength
 lam_x = forcing_rightedge - forcing_left_edge
 # Horizontal wavenumber
@@ -66,6 +53,3 @@ sp_slope = -5.0
 max_sp   =  50.0
 # Bottom of sponge layer
 z_sb     = -1.5
-
-# Calculate stop time
-sim_time_stop = sim_period_stop * T # time units (t)

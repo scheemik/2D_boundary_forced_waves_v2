@@ -94,7 +94,7 @@ if __name__ == '__main__':
         print('TEST_P =',TEST_P)
 
 ###############################################################################
-# Fetch parameters from the correct params file
+# Fetch parameters from the correct params files
 
 # Add path to params files
 sys.path.insert(0, './_params')
@@ -113,8 +113,6 @@ else:
     import params_ef
     params = params_ef
 
-# Number of grid points in each dimension
-nx, nz = int(params.n_x), int(params.n_z)  # doesn't include sponge layer
 # Domain size
 Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer
 x_span = params.x_interval # tuple
@@ -134,9 +132,21 @@ A      = float(params.forcing_amp)
 # Forcing amplitude ramp (number of oscillations)
 nT     = float(params.nT)
 
-sim_time_stop  = params.sim_time_stop
-wall_time_stop = params.wall_time_stop
-adapt_dt = params.adapt_dt
+if LOC:
+    import lparams_local
+    lparams = lparams_local
+else:
+    import lparams_Niagara
+    lparams = lparams_Niagara
+
+# Number of grid points in each dimension
+nx, nz = int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
+# Timing of simulation
+sim_period_stop  = lparams.sim_period_stop
+wall_time_stop = lparams.wall_time_stop
+adapt_dt = lparams.adapt_dt
+# Calculate stop time
+sim_time_stop = sim_period_stop * T # time units (t)
 if (rank==0 and print_params):
     print('n_x =',nx)
     print('n_z =',nz)
@@ -325,16 +335,12 @@ else: # Construct a staircase profile
         N_2 = float(params.N_2)                  # Stratification value below staircase
         st_top = float(params.stair_top)         # Bottom of staircase (not domian)
         from Foran_profile import Foran_profile
-        if n_layers == 1:                        # Top of staircase (not domain)
-            st_bot = float(params.stair_bot_1)
-            BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
-        elif n_layers == 2:
-            st_bot = float(params.stair_bot_2)
-            BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
-        elif n_layers == 0:
+        if n_layers == 0:                        # Top of staircase (not domain)
             BP_array = z*0 + 1.0 # N = const
         else:
-            print("NI must be 0, 1, or 2 for reproduction run")
+            st_bot = float(params.stair_bot)
+            BP_array = Foran_profile(z, n_layers, st_bot, st_top, slope, N_1, N_2)
+
     else:
         slope = 100
         st_buffer = 0.1

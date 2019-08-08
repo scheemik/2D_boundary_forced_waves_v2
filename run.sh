@@ -117,9 +117,9 @@ then
 	# Create experiment log file
 	LOG_FILE=_experiments/$NAME/LOG_${NAME}.txt
 	touch $LOG_FILE
-	echo "Log created: ${DATETIME}"
-	echo ""
-	echo "--Run options:" >> $LOG_FILE
+	echo "Log created: ${DATETIME}" >> $LOG_FILE
+	echo "" >> $LOG_FILE
+	echo "--Run options--" >> $LOG_FILE
 	echo "" >> $LOG_FILE
 	echo "-n, Experiment name = ${NAME}" >> $LOG_FILE
 	echo "-c, Number of cores = ${CORES}" >> $LOG_FILE
@@ -141,7 +141,7 @@ then
 	echo "" >> $LOG_FILE
 
 	# Write out from parameter file
-	python3 write_out_params.py $LOC $NAME $SIM_TYPE
+	python3 write_out_params.py $LOC $NAME $SIM_TYPE $NI
 	echo 'Done'
 fi
 

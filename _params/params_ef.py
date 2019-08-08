@@ -1,18 +1,7 @@
-# Parameters for running a reproduction of Foran's/Ghaemsaidi's system
-#   Runs faster, but coarser resolution
+# Parameters for measuring energy flux
+
 
 import numpy as np
-
-# Stop times for the simulation
-sim_period_stop = 20 # oscillation periods, time in seconds calculated below
-wall_time_stop = 60 # min
-
-# Determine whether adaptive time stepping is on or off
-adapt_dt = False
-
-# Number of points in each dimension
-n_x = 256
-n_z = 512
 
 # Domain size
 L_x = 0.5 # m
@@ -49,6 +38,3 @@ sp_slope = -5.0
 max_sp   =  50.0
 # Bottom of sponge layer
 z_sb     = -1.5
-
-# Calculate stop time
-sim_time_stop = sim_period_stop * T # time units (t)

@@ -98,12 +98,22 @@ else:
     import params_ef
     params = params_ef
 
-t_0  = 0.0
-t_f  = params.sim_time_stop     #[seconds]
-t_fp = params.sim_period_stop   #[t/T]
 z_b, z_t =  params.z_b, params.z_t
 omega = params.omega
 A = params.forcing_amp
+T = params.T
+
+if LOC==1:
+    import lparams_local
+    lparams = lparams_local
+else:
+    import lparams_Niagara
+    lparams = lparams_Niagara
+
+t_0  = 0.0
+t_fp = lparams.sim_period_stop   #[t/T]
+# Calculate stop time
+t_f = t_fp * T # [seconds]
 
 ###############################################################################
 
