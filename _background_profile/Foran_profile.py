@@ -36,6 +36,8 @@ def tanh_bump(z, height, slope, center, width):
     values += tanh_(z, height, slope, c_l)
     # add right side
     values += tanh_(z, height, -slope, c_r)
+    # correct for added height
+    values -= height
     return values
 
 def Foran_profile(z, n, z_b, z_t, slope, N_1, N_2):
@@ -56,7 +58,6 @@ def Foran_profile(z, n, z_b, z_t, slope, N_1, N_2):
         for i in range(n):
             c_i = z_b + (height/2.0 + i*height)
             values += tanh_bump(z, bump_h, slope, c_i, 0.05)
-            #values += cosh2(z, bump_h, slope, c_i)
     return values
 
 # %%

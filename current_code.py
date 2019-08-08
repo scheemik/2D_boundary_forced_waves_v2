@@ -339,7 +339,7 @@ else: # Construct a staircase profile
             BP_array = z*0 + 1.0 # N = const
         else:
             st_bot = float(params.stair_bot)
-            BP_array = Foran_profile(z, n_layers, st_bot, st_top, slope, N_1, N_2)
+            BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
 
     else:
         slope = 100
