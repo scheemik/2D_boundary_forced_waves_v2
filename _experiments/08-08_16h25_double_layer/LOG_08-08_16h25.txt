@@ -1,0 +1,40 @@
+Log created: 08-08_16h25
+
+--Run options--
+
+-n, Experiment name = 08-08_16h25
+-c, Number of cores = 2
+-e, (0) Simulation for reproducing results
+-i, Number of interfaces = 2
+-l, (1) Simulation run on local pc
+-v, Version of run = 0
+-t, Test parameter = 2.5e-4
+
+
+--Simulation Parameters--
+
+Sim Runtime (periods):              20
+Sim Runtime (seconds):              174.53292520941605
+
+Adaptive timestepping:              False
+
+Horizontal grid points:       n_x = 256
+Vertical grid points:         n_z = 512
+
+--Experiment Parameters--
+
+Horizontal extent (m):        L_x = 1.5
+Vertical extent (m):          L_z = 0.5
+
+Horizontal wavenumber:        k_x = 50.26548245743669
+Vertical wavenumber:          k_z = 43.26727187545333
+
+Forcing frequency (s^-1):   omega = 0.7199999999588168
+Forcing period (s):             T = 8.726646260470803
+Forcing angle (rad):        theta = 0.7107163554115217
+Forcing amplitude:              A = 0.00025
+
+Sponge layer grid points:           40
+Sponge layer slope:                 -5.0
+Max viscosity coefficient:          50.0
+Bottom of sponge layer:             -1.5
