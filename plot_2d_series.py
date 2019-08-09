@@ -67,7 +67,9 @@ def normalize(xmesh, ymesh, data, paramsfile):
     if paramsfile is not None:
         A = paramsfile.forcing_amp
         omega = paramsfile.omega
-        return_data = data / (A*omega)
+        g = 9.81 # [m/s^2]   Acceleration due to gravity
+        N = paramsfile.N_0
+        return_data = data * (N**2) / (g*omega*A)
     else:
         return_data = data
     return xmesh, ymesh, return_data
