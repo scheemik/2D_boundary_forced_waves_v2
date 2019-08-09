@@ -292,7 +292,7 @@ def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
     plt.grid(True)
     return fig
 ###############################################################################
-
+'''
 # Sponge Layer (SL) as an NCC
 #   Check state of `use_sponge_layer` above
 SL = domain.new_field()
@@ -322,6 +322,7 @@ fg = test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
 fg.savefig('sp_layer.png')
 if (plot_SL and rank == 0 and LOC):
     plt.show()
+'''
 ###############################################################################
 
 # Background Profile (BP) as an NCC
@@ -376,13 +377,11 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) -SL*NU*dx(dx(u)) - NU*dz(uz) + dx(p)"
+problem.add_equation("dt(u) -NU*dx(dx(u)) - NU*dz(uz) + dx(p)"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) -SL*NU*dx(dx(w)) - NU*dz(wz) + dz(p) - b"
+problem.add_equation("dt(w) -NU*dx(dx(w)) - NU*dz(wz) + dz(p) - b"
                     + "= - (u*dx(w) + w*wz)")
-#problem.add_equation("dt(w) - NU*dz(wz) + dz(p) - b" #/R0"
-#                    + "= SL*NU*dx(dx(w)) - (u*dx(w) + w*wz)")
 
 # Required for solving differential equations in Chebyshev dimension
 problem.add_equation("bz - dz(b) = 0")
