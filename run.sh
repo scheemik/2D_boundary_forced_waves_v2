@@ -370,7 +370,7 @@ then
 		# Check if snapshots exist
 		if [ -e $snapshot_path ]
 		then
-			if [ $SAVE_SNAPSHOTS -eq 1 ]
+			if [ $SAVE_SNAPSHOTS -eq 1 ] || [ $LOC -eq 0 ]
 			then
 				# Move snapshots to new directory
 				mv $snapshot_path/ _experiments/$NAME/
