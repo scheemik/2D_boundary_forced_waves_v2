@@ -28,6 +28,8 @@ if __name__ == '__main__':
     SIM_TYPE = int(arguments['SIM_TYPE'])
     NI = int(arguments['NI'])
 
+arctic_params = False
+
 ###############################################################################
 # Fetch parameters from the correct params file
 
@@ -43,8 +45,12 @@ if SIM_TYPE==0:
         params = params_repro2
 else:
     # Measuring energy flux
-    import params_ef
-    params = params_ef
+    if arctic_params:
+        import params_ef_arctic
+        params = params_ef_arctic
+    else:
+        import params_ef
+        params = params_ef
 
 # Domain size
 Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer

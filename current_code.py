@@ -66,14 +66,14 @@ save_all_snapshots = True
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
-plot_BP = True
+plot_BP = False
 print_params = True
 
 # Options for simulation
 use_sponge_layer = True
 
 # Only for EF runs
-arctic_params = True
+arctic_params = False
 
 ###############################################################################
 
@@ -335,22 +335,19 @@ if n_layers == 0:
 else: # Construct a staircase profile
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
+    st_top = float(params.stair_top)         # Top of staircase (not domain)
+    st_bot = float(params.stair_bot)         # Bottom of staircase (not domian)
     if SIM_TYPE==0:
         slope = float(params.profile_slope)
         N_1 = float(params.N_1)                  # Stratification value above staircase
         N_2 = float(params.N_2)                  # Stratification value below staircase
-        st_top = float(params.stair_top)         # Top of staircase (not domain)
         from Foran_profile import Foran_profile
-        st_bot = float(params.stair_bot)         # Bottom of staircase (not domian)
         BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
 
     else:
         slope = params.bp_slope
-        st_buffer = params.st_buffer
         bump = params.bump
         bg_height = params.bg_height
-        st_bot = z_b + st_buffer
-        st_top = z_t - st_buffer
         from background_profile import N2_profile
         BP_array = N2_profile(z, n_layers-1, bg_height, st_bot, st_top, slope, bump)
 BP['g'] = BP_array

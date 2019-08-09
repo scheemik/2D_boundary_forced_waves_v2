@@ -30,7 +30,7 @@ omega  = N_0 * np.cos(theta) # [s^-1]
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
 # Forcing amplitude modifier
-forcing_amp = 2.5e-4
+forcing_amp = 2.0e-4
 # Forcing amplitude ramp (number of oscillations)
 nT = 3.0
 
@@ -46,6 +46,7 @@ z_sb     = -1.5
 
 # Background profile parameters
 bp_slope = 100
-st_buffer = 0.1   # m
-bump = 1.3        # N (rad s^-1)
-bg_height = N_0   # N (rad s^-1)
+stair_top =  0.0 - 0.15    # m
+stair_bot = -L_z + 0.05    # m
+bump = 1.3              # N (rad s^-1)
+bg_height = N_0         # N (rad s^-1)

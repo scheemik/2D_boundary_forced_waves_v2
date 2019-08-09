@@ -16,9 +16,9 @@ aspect_ratio = 2.0
 
 # Boundary forcing parameters
 # Characteristic stratification
-N_0 = 0.005 # [rad/s]
+N_0 = 0.01 # [rad/s]
 # Angle of beam w.r.t. the horizontal
-theta = np.pi/4
+theta = np.pi/8
 # Horizontal wavelength
 lam_x = L_x
 # Horizontal wavenumber
