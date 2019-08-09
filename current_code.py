@@ -66,12 +66,14 @@ save_all_snapshots = True
 # Optional outputs (will not plot if run remotely)
 plot_z_basis = False
 plot_SL = False
-plot_BP = False
+plot_BP = True
 print_params = True
 
 # Options for simulation
 use_sponge_layer = True
-set_N_const = False
+
+# Only for EF runs
+arctic_params = True
 
 ###############################################################################
 
@@ -110,8 +112,12 @@ if SIM_TYPE==0:
 else:
     if rank==0:
         print('Measuring energy flux')
-    import params_ef
-    params = params_ef
+    if arctic_params:
+        import params_ef_arctic
+        params = params_ef_arctic
+    else:
+        import params_ef
+        params = params_ef
 
 # Domain size
 Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer
@@ -323,32 +329,30 @@ print_arrays = False
 BP = domain.new_field()
 BP.meta['x']['constant'] = True  # means the NCC is constant along x
 # Construct profile in an array so it can be used later
-if set_N_const:
+n_layers = NI
+if n_layers == 0:
     BP_array = z*0 + 1.0
 else: # Construct a staircase profile
-    n_layers = NI
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
     if SIM_TYPE==0:
         slope = float(params.profile_slope)
         N_1 = float(params.N_1)                  # Stratification value above staircase
         N_2 = float(params.N_2)                  # Stratification value below staircase
-        st_top = float(params.stair_top)         # Bottom of staircase (not domian)
+        st_top = float(params.stair_top)         # Top of staircase (not domain)
         from Foran_profile import Foran_profile
-        if n_layers == 0:                        # Top of staircase (not domain)
-            BP_array = z*0 + 1.0 # N = const
-        else:
-            st_bot = float(params.stair_bot)
-            BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
+        st_bot = float(params.stair_bot)         # Bottom of staircase (not domian)
+        BP_array = Foran_profile(z, n_layers-1, st_bot, st_top, slope, N_1, N_2)
 
     else:
-        slope = 100
-        st_buffer = 0.1
-        bump = 1.3
+        slope = params.bp_slope
+        st_buffer = params.st_buffer
+        bump = params.bump
+        bg_height = params.bg_height
         st_bot = z_b + st_buffer
         st_top = z_t - st_buffer
         from background_profile import N2_profile
-        BP_array = N2_profile(z, n_layers, st_bot, st_top, slope, bump)
+        BP_array = N2_profile(z, n_layers-1, bg_height, st_bot, st_top, slope, bump)
 BP['g'] = BP_array
 problem.parameters['BP'] = BP  # pass function in as a parameter
 del BP

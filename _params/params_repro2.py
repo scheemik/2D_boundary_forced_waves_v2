@@ -11,6 +11,8 @@ L_x = 1.5 # m
 L_z = 0.5 # m, not including the sponge layer
 x_interval = (-L_x/3.0, 2.0*L_x/3.0)
 z_b, z_t = -L_z, 0.0
+# Display limits for plot
+x_limits=[0.0, 0.5]
 
 # Background profile parameters
 profile_slope = 200.0
