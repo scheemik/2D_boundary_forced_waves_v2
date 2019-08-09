@@ -130,13 +130,10 @@ def main(filename, start, count, output):
     margin = plot_tools.Frame(0.3, 0.2, 0.1, 0.1)
 
     # Plot settings
+    # Find aspect ratio from params file
+    AR = float(params.aspect_ratio)
+    image = plot_tools.Box(AR, 1)
     if plot_all:
-        if SIM_TYPE==0:
-            # Find aspect ratio from params file
-            AR = float(params.aspect_ratio)
-            image = plot_tools.Box(AR, 1)
-        else:
-            image = plot_tools.Box(1, 1)
         # Specify tasks to plot
         tasks = ['b', 'p', 'u', 'w']
         nrows, ncols = 2, 2
@@ -156,15 +153,8 @@ def main(filename, start, count, output):
                 set_title_save(fig, output, file, index, dpi, title_func, savename_func)
         plt.close(fig)
     else: # Just plotting background profile and w
-        if SIM_TYPE==0:
-            # Find aspect ratio from params file
-            AR = float(params.aspect_ratio)
-            x_left = float(params.forcing_left_edge)
-            image = plot_tools.Box(AR, 1)
-            x_limits=[0.0, 0.5] #[x_left, x_left+1.0]
-        else:
-            image = plot_tools.Box(1, 1)
-            x_limits=[0.0, 0.5]
+        # Display limits for plot
+        x_limits = params.x_limits
         # Plot data and parameters for background profile
         dis_ratio = 6.0 # Profile plot gets skinnier as this goes up
         xleft  = min(hori)
@@ -172,12 +162,8 @@ def main(filename, start, count, output):
         ybott  = min(vert)
         ytop   = max(vert)
         if (xright-xleft == 0):
-            #print('whoops')
-            #dis_ratio = 0.4
             xleft  =  0.0
             xright =  1.5
-            #ybott  = -0.5
-            #ytop   =  0.0
         calc_ratio = abs((xright-xleft)/(ybott-ytop))*dis_ratio
         task = 'w'
         nrows, ncols = 1, 2

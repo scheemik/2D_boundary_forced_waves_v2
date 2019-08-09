@@ -44,13 +44,13 @@ def rho_profile(z, n, bottom, top, slope, left, right):
 ###############################################################################
 # Functions to define an arbitrary N^2 staircase profile
 
-def N2_profile(z, n, stair_bot, stair_top, slope, bump):
+def N2_profile(z, n, bg_height, stair_bot, stair_top, slope, bump):
     # initialize array of values to be returned
     values = 0*z
     # Add upper stratification
-    values += tanh_(z, 1.0, slope, stair_top)
+    values += tanh_(z, bg_height, slope, stair_top)
     # Add lower stratification
-    values += tanh_(z, 1.0, -slope, stair_bot)
+    values += tanh_(z, bg_height, -slope, stair_bot)
     # Find height of staircase region
     H = stair_top - stair_bot
     # If there are steps to be added...
