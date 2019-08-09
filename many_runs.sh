@@ -22,10 +22,10 @@
 # VER = 4
 #	-> create mp4 from frames
 
-echo 'Test parameter currently set to forcing amplitude, A'
-#sh run.sh -v 0 -e 0 -i 2 -k 1 -t 2.5e-4
-#sh run.sh -v 0 -e 0 -i 1 -k 1 -t 2.5e-4
-sh run.sh -v 0 -e 1 -i 0 -k 1 -t 2.0e-4
-sh run.sh -v 0 -e 1 -i 1 -k 1 -t 2.0e-4
+echo 'Test parameter currently set to (-) bottom of staircase'
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 0.25
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 0.3
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 0.35
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 0.4
 
 echo "Many runs script done"

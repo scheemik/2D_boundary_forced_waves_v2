@@ -180,7 +180,7 @@ def main(filename, start, count, output):
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
                 if normalize_values:
-                    plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w/(A\omega)$', even_scale=True, func=normalize, paramfile=params, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                    plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$wN^2/(Ag\omega)$', even_scale=True, func=normalize, paramfile=params, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
                 else:
                     plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w$ (m/s)', even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
 
