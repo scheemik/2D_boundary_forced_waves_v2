@@ -49,6 +49,6 @@ z_sb     = -2.0
 # Background profile parameters
 bp_slope = 150
 stair_top =  0.0 - 0.2    # m
-stair_bot = -L_z + 0.05    # m
+stair_bot = -L_z + 0.25    # m
 bump = 1.3              # N (rad s^-1)
 bg_height = N_0         # N (rad s^-1)

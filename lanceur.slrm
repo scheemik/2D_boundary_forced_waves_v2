@@ -4,7 +4,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --ntasks-per-node=40
 #SBATCH --nodes=1
-#SBATCH --time=0-00:50  # d-HH:MM
+#SBATCH --time=0-02:00  # d-HH:MM
 
 # Optionally takes in arguments:
 #	$ sbatch lanceur.slrm -c <cores>
@@ -39,7 +39,7 @@ export MPLBACKEND=pdf
 
 source ${HOME}/Dedalus/Vanilla_Dedalus/venv/bin/activate
 
-sh run.sh -c $CORES -e 0 -i 2 -l 0 -v 2 -k 1 -t 2.5e-4
+sh run.sh -c $CORES -e 0 -i 2 -l 0 -v 2 -k 1 -t 520
 
 deactivate
 
