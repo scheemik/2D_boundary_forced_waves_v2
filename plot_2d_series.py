@@ -185,7 +185,7 @@ def main(filename, start, count, output):
                     plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w$ (m/s)', even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
 
                 # Plot stratification profile on the left
-                axes0 = mfig.add_axes(0, 0, [0, 0, 1.5, 1])#, sharey=axes1)
+                axes0 = mfig.add_axes(0, 0, [0, 0, 1.7, 1])#, sharey=axes1)
                 axes0.set_title('Profile')
                 axes0.set_xlabel(r'$N$ (s$^{-1}$)')
                 axes0.set_ylabel(r'$z$ (m)')
