@@ -39,7 +39,7 @@ export MPLBACKEND=pdf
 
 source ${HOME}/Dedalus/Vanilla_Dedalus/venv/bin/activate
 
-sh run.sh -c $CORES -e 0 -i 1 -l 0 -v 2 -k 1 -t 2.5e-4
+sh run.sh -c $CORES -e 0 -i 2 -l 0 -v 2 -k 1 -t 2.5e-4
 
 deactivate
 
