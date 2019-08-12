@@ -12,6 +12,9 @@
 
 Running_directory=~/Documents/Dedalus_Projects/2D_boundary_forced_waves_v2
 SAVE_SNAPSHOTS=0
+#aux_snaps[0]=p_ef_k
+#aux_snaps[1]=ef_advec
+#n_aux=${#aux_snaps[@]}
 
 # if:
 # VER = 0 (Full)
@@ -259,15 +262,18 @@ then
 		mpiexec -n $CORES python3 merge.py $ef_snapshot_path
 		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path ef_snapshots
 	fi
-	# Check if p_ef_k snapshots have already been merged
-	if [ -e $ef_snapshot_path/p_ef_k/p_ef_k.h5 ]
-	then
-		echo "Prescribed kinetic energy flux snapshots already merged"
-	else
-		echo "Merging prescribed kinetic energy flux snapshots"
-		mpiexec -n $CORES python3 merge.py $ef_snapshot_path/p_ef_k
-		python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path/p_ef_k p_ef_k
-	fi
+	# Check if aux snapshots have already been merged
+	for aux_snap in ef_advec ef_press ef_visc;
+	do
+		if [ -e $ef_snapshot_path/${aux_snap}/${aux_snap}.h5 ]
+		then
+			echo "${aux_snap} snapshots already merged"
+		else
+			echo "Merging ${aux_snap} snapshots"
+			mpiexec -n $CORES python3 merge.py $ef_snapshot_path/${aux_snap}
+			python3 _energy_flux/ef_super_merge_h5.py $ef_snapshot_path/${aux_snap} ${aux_snap}
+		fi
+	done
 
 	# Check if plotting energy flux if relevant
 	if [ $SIM_TYPE -eq 1 ] || [ 1 -eq 1 ]
@@ -416,6 +422,13 @@ then
 			# Move energy flux plot to new directory
 			mv _energy_flux/ef_test.png _experiments/$NAME/${NAME}_EF.png
 			echo 'Archived energy flux plot'
+		fi
+		# Check if aux energy flux plot exists
+		if [ -e _energy_flux/ef_aux.png ]
+		then
+			# Move energy flux plot to new directory
+			mv _energy_flux/ef_aux.png _experiments/$NAME/${NAME}_EF_aux.png
+			echo 'Archived aux energy flux plot'
 		fi
 	else
 		# Copy the energy flux plotting script to new directory
