@@ -134,7 +134,7 @@ omega  = float(params.omega)
 # Oscillation period = 2pi / omega
 T      = float(params.T)
 # Forcing amplitude modifier
-A      = float(params.forcing_amp)
+A      = TEST_P #float(params.forcing_amp)
 # Forcing amplitude ramp (number of oscillations)
 nT     = float(params.nT)
 
@@ -340,7 +340,7 @@ else: # Construct a staircase profile
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
     st_top = float(params.stair_top)         # Top of staircase (not domain)
-    st_bot = -TEST_P #float(params.stair_bot)         # Bottom of staircase (not domian)
+    st_bot = float(params.stair_bot)         # Bottom of staircase (not domian)
     if SIM_TYPE==0:
         slope = float(params.profile_slope)
         N_1 = float(params.N_1)                  # Stratification value above staircase
