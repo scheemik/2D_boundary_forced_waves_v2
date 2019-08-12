@@ -380,10 +380,10 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) -NU*dx(dx(u)) - NU*dz(uz) + dx(p)"
+problem.add_equation("dt(u) -NU*(dx(dx(u)) + dz(uz)) + dx(p)"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) -NU*dx(dx(w)) - NU*dz(wz) + dz(p) - b"
+problem.add_equation("dt(w) -NU*(dx(dx(w)) + dz(wz)) + dz(p) - b"
                     + "= - (u*dx(w) + w*wz)")
 
 # Required for solving differential equations in Chebyshev dimension
@@ -483,15 +483,18 @@ if (save_all_snapshots or SIM_TYPE==1):
     # Total energy flux measurement
     ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
     # Adding a task to integrate energy flux across x for values of z
-    #ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3), 'x')", layout='g', name='<ef>')
     ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
 
-    # Prescribed kinetic energy flux
-    p_ef_k_path = ef_snapshots_path + '/p_ef_k'
-    p_ef_k = solver.evaluator.add_file_handler(p_ef_k_path, sim_dt=0.25, max_writes=100)
-    # Adding a task to integrate prescribed energy flux across x at the top z
-    #problem.parameters['z_top'] = z_t
-    p_ef_k.add_task("integ(0.5*(BFw**3)*((kx/kz)**2 + 1)*sin(kx*x + kz*z_top - omega*t)*ramp, 'x')", layout='g', name='<p_ef_k>')
+    # Auxilary energy snapshots
+    #   prescribed advec ef: "p_ef_k"      "integ(0.5*(BFw**3)*((kx/kz)**2 + 1)*sin(kx*x + kz*z_top - omega*t)*ramp, 'x')"
+    aux_snaps = ["ef_advec", "ef_press", "ef_visc"]
+    aux_exprs = ["integ(0.5*(w*u**2 + w**3), 'x')", "integ(p*w, 'x')", "integ(-NU*(u*uz + w*wz), 'x')"]
+    aux_solver = [0, 1, 2]
+    for i in range(len(aux_snaps)):
+        file_path = ef_snapshots_path + '/' + aux_snaps[i]
+        aux_solver[i] = solver.evaluator.add_file_handler(file_path, sim_dt=0.25, max_writes=100)
+        temp_name = '<' + aux_snaps[i] + '>'
+        aux_solver[i].add_task(aux_exprs[i], layout='g', name=temp_name)
 
 ###############################################################################
 

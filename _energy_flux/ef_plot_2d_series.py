@@ -35,7 +35,11 @@ rank = comm.Get_rank()
 ###############################################################################
 
 # Make a twin axis for top and bottom energy fluxes
+#   Twin=true means they will each have their own vertical axis
 twin_top_bot = True
+
+# Plot auxiliary energy flux snapshots (3 terms)
+plot_aux_ef = True
 
 # Strings for the parameters
 str_test = r'Test param'
@@ -148,7 +152,7 @@ with h5py.File(merged_snapshots, mode='r') as file:
     else:
         color = 'tab:orange'
         ln2 = ax1.plot(t_p[1:], bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
-
+'''
 merged_snapshots = ef_snapshot_path + "/p_ef_k/p_ef_k.h5"
 with h5py.File(merged_snapshots, mode='r') as file:
     p_ef_k = file['tasks']['<p_ef_k>']
@@ -159,7 +163,7 @@ with h5py.File(merged_snapshots, mode='r') as file:
     p_ef_k = np.rot90(p_ef_k[:, 0, :])
     top_p_ef_k = p_ef_k[0, :]
     #ax1.plot(t_p[1:], top_p_ef_k[1:], label='Top - Prescribed kinetic') # initial value doesn't make sense, so skip it
-
+'''
 # put together the legend
 lns = ln1+ln2
 labels = [l.get_label() for l in lns]
@@ -168,3 +172,34 @@ ax1.get_shared_x_axes().join(ax0, ax1)
 title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)
 fig.suptitle(title, fontsize='large')
 fig.savefig('./_energy_flux/ef_test.png', dpi=100)
+
+
+###############################################################################
+# auxiliary
+if plot_aux_ef == True:
+    fig, (ax0, ax1, ax2) = plt.subplots(3,1, sharex=True, figsize=(8,12), constrained_layout=False)
+    axes = [ax0, ax1, ax2]
+    line_colors = ['tab:blue', 'tab:orange', 'tab:green']
+    aux_snaps = ["ef_advec", "ef_press", "ef_visc"]
+    plot_titles = ["Advection term", "Pressure term", "Viscous term"]
+    for i in range(len(axes)):
+        merged_snapshots = ef_snapshot_path + "/" + aux_snaps[i] + "/" + aux_snaps[i] + ".h5"
+        with h5py.File(merged_snapshots, mode='r') as file:
+            task_name = '<' + aux_snaps[i] + '>'
+            aux_snap = file['tasks'][task_name]
+            st = file['scales']['sim_time']
+            t  = st[()]
+            t_p = t*omega/(2*np.pi)
+            # Reshape the ef object to put just the top z in an array
+            aux_snap = np.rot90(aux_snap[:, 0, :])
+            top_aux_snap = aux_snap[0, :]
+            axes[i].plot(t_p[1:], top_aux_snap[1:], label=task_name, color=line_colors[i]) # initial value doesn't make sense, so skip it
+            axes[i].set_title(plot_titles[i], fontsize='medium')
+            y_label = r'Vertical energy flux $<F_z(z)>$'
+            axes[i].set_ylabel(y_label)
+            axes[i].set_xlim(0.0, t_fp)
+            axes[i].grid(True)
+    axes[len(axes)-1].set_xlabel(r'Oscilation periods $(t/T)$')
+    title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)
+    fig.suptitle(title, fontsize='large')
+    fig.savefig('./_energy_flux/ef_aux.png', dpi=100)
