@@ -74,12 +74,12 @@ nT     = float(params.nT)
 # Sponge layer parameters
 # Number of grid points in z direction in sponge domain
 nz_sp    = int(params.nz_sp)
-'''
+
 # Slope of tanh function in slope
 sp_slope = float(params.sp_slope)
 # Max coefficient for nu at bottom of sponge
 max_sp   = float(params.max_sp)
-'''
+
 # Bottom of sponge layer
 z_sb     = float(params.z_sb)
 
@@ -131,6 +131,6 @@ with open(logfile, 'a') as the_file:
     the_file.write('Forcing amplitude:              A = ' + str(A) + '\n')
     the_file.write('\n')
     the_file.write('Sponge layer grid points:           ' + str(nz_sp) + '\n')
-    #the_file.write('Sponge layer slope:                 ' + str(sp_slope) + '\n')
-    #the_file.write('Max viscosity coefficient:          ' + str(max_sp) + '\n')
+    the_file.write('Sponge layer slope:                 ' + str(sp_slope) + '\n')
+    the_file.write('Max viscosity coefficient:          ' + str(max_sp) + '\n')
     the_file.write('Bottom of sponge layer:             ' + str(z_sb) + '\n')

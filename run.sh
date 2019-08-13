@@ -12,9 +12,6 @@
 
 Running_directory=~/Documents/Dedalus_Projects/2D_boundary_forced_waves_v2
 SAVE_SNAPSHOTS=0
-#aux_snaps[0]=p_ef_k
-#aux_snaps[1]=ef_advec
-#n_aux=${#aux_snaps[@]}
 
 # if:
 # VER = 0 (Full)
