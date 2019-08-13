@@ -23,9 +23,9 @@
 #	-> create mp4 from frames
 
 echo 'Test parameter currently set to nz'
-sh run.sh -v 0 -e 1 -i 1 -k 1 -t 512
-sh run.sh -v 0 -e 1 -i 1 -k 1 -t 524
-sh run.sh -v 0 -e 1 -i 1 -k 1 -t 532
-sh run.sh -v 0 -e 1 -i 1 -k 1 -t 548
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 1
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 2
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 3
+sh run.sh -v 0 -e 1 -i 1 -k 1 -t 4
 
 echo "Many runs script done"

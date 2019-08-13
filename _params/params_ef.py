@@ -47,7 +47,7 @@ max_sp   =  50.0
 z_sb     = -2.0 #1.5
 
 # Background profile parameters
-bp_slope = 100
+bp_slope = 120
 stair_top =  0.0 - 0.2    # m
 stair_bot = -L_z + 0.23    # m
 bump = 1.3              # N (rad s^-1)
