@@ -1,7 +1,7 @@
 # Parameters for running on my local machine
 
 # Stop times for the simulation
-sim_period_stop = 3 # oscillation periods, time in seconds calculated below
+sim_period_stop = 12 # oscillation periods, time in seconds calculated below
 wall_time_stop = 60 # min
 
 # Determine whether adaptive time stepping is on or off

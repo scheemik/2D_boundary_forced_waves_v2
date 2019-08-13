@@ -86,7 +86,7 @@ if __name__ == '__main__':
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
     NI = int(arguments['NI'])
-    TEST_P = int(arguments['TEST_P'])
+    TEST_P = float(arguments['TEST_P'])
     if (rank == 0 and print_params):
         print('LOC =',LOC)
         print('SIM_TYPE =',SIM_TYPE)
@@ -128,7 +128,7 @@ N0     = float(params.N_0)
 # Angle of beam w.r.t. the horizontal
 theta  = float(params.theta)
 # Wavenumbers
-kx, kz = float(params.k_x), float(params.k_z)
+kx, kz = float(params.k_x)*TEST_P, float(params.k_z)*TEST_P
 # Forcing oscillation frequency
 omega  = float(params.omega)
 # Oscillation period = 2pi / omega
@@ -146,7 +146,7 @@ else:
     lparams = lparams_Niagara
 
 # Number of grid points in each dimension
-nx, nz = int(lparams.n_x), TEST_P #int(lparams.n_z)  # doesn't include sponge layer
+nx, nz = int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
 # Timing of simulation
 sim_period_stop  = lparams.sim_period_stop
 wall_time_stop = lparams.wall_time_stop
@@ -172,12 +172,12 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 
 # Number of grid points in z direction in sponge domain
 nz_sp    = params.nz_sp
-'''
+
 # Slope of tanh function in slope
 sp_slope = params.sp_slope
 # Max coefficient for nu at bottom of sponge
 max_sp   = params.max_sp
-'''
+
 # Bottom of sponge layer
 z_sb     = params.z_sb
 
@@ -295,7 +295,7 @@ def test_plot(vert, hori, plt_title, x_label, y_label, y_lims):
     plt.grid(True)
     return fig
 ###############################################################################
-'''
+
 # Sponge Layer (SL) as an NCC
 #   Check state of `use_sponge_layer` above
 SL = domain.new_field()
@@ -325,7 +325,7 @@ fg = test_plot(vert, hori, plt_title, x_label, y_label, y_lims)
 fg.savefig('sp_layer.png')
 if (plot_SL and rank == 0 and LOC):
     plt.show()
-'''
+
 ###############################################################################
 
 # Background Profile (BP) as an NCC
@@ -380,10 +380,10 @@ problem.add_equation("dx(u) + wz = 0")
 problem.add_equation("dt(b) - KA*(dx(dx(b)) + dz(bz))"
                     + "= -((N0*BP)**2)*w - (u*dx(b) + w*bz)")
 #   Horizontal momentum equation
-problem.add_equation("dt(u) -NU*(dx(dx(u)) + dz(uz)) + dx(p)"
+problem.add_equation("dt(u) -SL*NU*dx(dx(u)) - NU*dz(uz) + dx(p)"
                     + "= - (u*dx(u) + w*uz)")
 #   Vertical momentum equation
-problem.add_equation("dt(w) -NU*(dx(dx(w)) + dz(wz)) + dz(p) - b"
+problem.add_equation("dt(w) -SL*NU*dx(dx(w)) - NU*dz(wz) + dz(p) - b"
                     + "= - (u*dx(w) + w*wz)")
 
 # Required for solving differential equations in Chebyshev dimension
