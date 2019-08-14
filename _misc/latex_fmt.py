@@ -16,6 +16,8 @@ def latex_exp(num, pos=None):
             str1 = str1 + str(base)
         elif (exp == 1):
             str1 = str1 + str(b*10.0)
+        elif (exp == 2):
+            str1 = str1 + str(b*100.0)
         else:
             str1 = str1 + str(base) + r'\cdot10^{' + str(exp) + '}'
         str1 = str1 + '$'
