@@ -128,10 +128,7 @@ N0     = float(params.N_0)
 # Angle of beam w.r.t. the horizontal
 theta  = float(params.theta)
 # Wavenumbers
-#kx, kz = float(params.k_x), float(params.k_z)
-lam_x = Lx / TEST_P
-kx = 2*np.pi/lam_x
-kz = kx * np.tan(theta)
+kx, kz = float(params.k_x), float(params.k_z)
 # Forcing oscillation frequency
 omega  = float(params.omega)
 # Oscillation period = 2pi / omega
@@ -149,7 +146,7 @@ else:
     lparams = lparams_Niagara
 
 # Number of grid points in each dimension
-nx, nz = int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
+nx, nz = TEST_P, int(lparams.n_z) #int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
 # Timing of simulation
 sim_period_stop  = lparams.sim_period_stop
 wall_time_stop = lparams.wall_time_stop
