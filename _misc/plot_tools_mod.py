@@ -138,7 +138,7 @@ def plot_bot(dset, image_axes, data_slices, x_lims=None, y_lims=None, image_scal
         # Fix the off-by-one error
         xmesh = xmesh[1:,1:]
         ymesh = ymesh[1:,1:]
-        plat = paxes.contour(xmesh, ymesh, data, 15, cmap='coolwarm')#'RdBu_r')
+        plat = paxes.contour(xmesh, ymesh, data, 10, cmap='coolwarm')#'RdBu_r')
     paxes.axis(pad_limits(xmesh, ymesh))
     #paxes.tick_params(length=0, width=0)
     if clim is None:
