@@ -20,7 +20,7 @@ N_0 = 1.0 # [rad/s]
 # Angle of beam w.r.t. the horizontal
 theta = np.pi/4
 # Horizontal wavelength
-lam_x = L_x
+lam_x = L_x / 3.0
 # Horizontal wavenumber
 k_x    = 2*np.pi/lam_x
 # Vertical wavenumber = 2*pi/lam_z, or from trig:
