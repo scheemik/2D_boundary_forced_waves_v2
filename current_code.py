@@ -86,7 +86,7 @@ if __name__ == '__main__':
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
     NI = int(arguments['NI'])
-    TEST_P = float(arguments['TEST_P'])
+    TEST_P = int(arguments['TEST_P'])
     if (rank == 0 and print_params):
         print('LOC =',LOC)
         print('SIM_TYPE =',SIM_TYPE)
@@ -128,7 +128,10 @@ N0     = float(params.N_0)
 # Angle of beam w.r.t. the horizontal
 theta  = float(params.theta)
 # Wavenumbers
-kx, kz = float(params.k_x), float(params.k_z)
+#kx, kz = float(params.k_x), float(params.k_z)
+lam_x = Lx / TEST_P
+kx = 2*np.pi/lam_x
+kz = kx * np.tan(theta)
 # Forcing oscillation frequency
 omega  = float(params.omega)
 # Oscillation period = 2pi / omega
@@ -340,7 +343,7 @@ else: # Construct a staircase profile
     # Import the staircase function from the background profile script
     sys.path.insert(0, './_background_profile')
     st_top = float(params.stair_top)         # Top of staircase (not domain)
-    st_bot = TEST_P #float(params.stair_bot)         # Bottom of staircase (not domian)
+    st_bot = float(params.stair_bot)         # Bottom of staircase (not domian)
     if SIM_TYPE==0:
         slope = float(params.profile_slope)
         N_1 = float(params.N_1)                  # Stratification value above staircase
