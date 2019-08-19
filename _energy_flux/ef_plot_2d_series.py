@@ -41,11 +41,22 @@ twin_top_bot = True
 # Plot auxiliary energy flux snapshots (3 terms)
 plot_aux_ef = True
 
+# Take running average energy flux values over a period
+take_r_avg = True
+
 # Strings for the parameters
 str_test = r'Test param'
 str_nl = r'$n_{layers}$'
 str_om = r'$\omega$'
 str_am = r'$A$'
+
+###############################################################################
+# Function to give running averages
+
+def running_avg(data, window_width):
+    cumsum_vec = np.cumsum(np.insert(data, 0, 0))
+    ra_vec = (cumsum_vec[window_width:] - cumsum_vec[:-window_width]) / window_width
+    return ra_vec
 
 ###############################################################################
 
@@ -63,7 +74,7 @@ if __name__ == "__main__":
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     SIM_TYPE = int(args['SIM_TYPE'])
     NI = int(args['NI'])
-    TEST_P = float(args['TEST_P'])
+    TEST_P = int(args['TEST_P'])
     ef_snapshot_path = str(args['SNAPSHOT_PATH'])
     print_vals = False
     if (rank==0 and print_vals):
@@ -128,12 +139,18 @@ with h5py.File(merged_snapshots, mode='r') as file:
 
     # Use my modified plotbot to make heat map of EF
     paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, x_lims=[t_0,t_f], y_lims=[z_b,z_t], title='Vertical energy flux', even_scale=True)
-    # Reshape the ef object to put just the top z in an array
+    # Reshape the ef object
     ef = np.rot90(ef[:, 0, :])
-    top_ef = ef[0, :]
-    # then the bottom z
-    bot_ef = ef[nz, :]
     t_p = t*omega/(2*np.pi)
+    if take_r_avg:
+        r_avg_window = int(T/0.25)
+        top_ef = running_avg(ef[0, :], r_avg_window)
+        bot_ef = running_avg(ef[nz, :], r_avg_window)
+        plot_tp = t_p[1:len(top_ef)]
+    else:
+        top_ef = ef[0, :]
+        bot_ef = ef[nz, :]
+        plot_tp = t_p[1:]
 
     ax1.set_title('Energy flux through boundaries', fontsize='medium')
     ax1.set_xlabel(r'Oscilation periods $(t/T)$')
@@ -142,16 +159,16 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ax1.set_xlim(0.0, t_fp)
 
     color = 'tab:blue'
-    ln1 = ax1.plot(t_p[1:], top_ef[1:], label='Top - Total measured', color=color) # initial value doesn't make sense, so skip it
+    ln1 = ax1.plot(plot_tp, top_ef[1:], label='Top - Total measured', color=color) # initial value doesn't make sense, so skip it
     if twin_top_bot:
         ax1.tick_params(axis='y', labelcolor=color)
         ax2 = ax1.twinx()
         color = 'tab:orange'
-        ln2 = ax2.plot(t_p[1:], bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
+        ln2 = ax2.plot(plot_tp, bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
         ax2.tick_params(axis='y', labelcolor=color)
     else:
         color = 'tab:orange'
-        ln2 = ax1.plot(t_p[1:], bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
+        ln2 = ax1.plot(plot_tp, bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
 '''
 merged_snapshots = ef_snapshot_path + "/p_ef_k/p_ef_k.h5"
 with h5py.File(merged_snapshots, mode='r') as file:
@@ -192,12 +209,19 @@ if plot_aux_ef == True:
             t_p = t*omega/(2*np.pi)
             # Reshape the ef object to put just the top z in an array
             aux_snap = np.rot90(aux_snap[:, 0, :])
-            top_aux_snap = aux_snap[0, :]
-            axes[i].plot(t_p[1:], top_aux_snap[1:], label=task_name, color=line_colors[i]) # initial value doesn't make sense, so skip it
+            if take_r_avg:
+                top_aux_snap = running_avg(aux_snap[0, :], r_avg_window)
+                plot_tp = t_p[1:len(top_aux_snap)]
+                axes[i].set_xlim(0.0, plot_tp[-1])
+            else:
+                top_aux_snap = aux_snap[0, :]
+                plot_tp = t_p[1:]
+                axes[i].set_xlim(0.0, plot_tp[-1])
+            axes[i].plot(plot_tp, top_aux_snap[1:], label=task_name, color=line_colors[i]) # initial value doesn't make sense, so skip it
             axes[i].set_title(plot_titles[i], fontsize='medium')
             y_label = r'Vertical energy flux $<F_z(z)>$'
             axes[i].set_ylabel(y_label)
-            axes[i].set_xlim(0.0, t_fp)
+            #axes[i].set_xlim(0.0, t_fp)
             axes[i].grid(True)
     axes[len(axes)-1].set_xlabel(r'Oscilation periods $(t/T)$')
     title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)

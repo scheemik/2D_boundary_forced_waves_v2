@@ -24,6 +24,8 @@ SAVE_SNAPSHOTS=0
 # 	-> merge, plot EF if relevant. plot frames, and create a gif
 # VER = 4
 #	-> create mp4 from frames
+# VER = 5
+#	-> plot EF and aux EF
 
 # Define physical parameters
 NU=1.0E-6		# [m^2/s]   Viscosity (momentum diffusivity)
@@ -92,7 +94,7 @@ fi
 # keep - create archive directory for experiment
 #	if (KEEP = 1 and VER != 4)
 
-if [ $KEEP -eq 1 ] && [ $VER -ne 3 ] && [ $VER -ne 4 ]
+if [ $KEEP -eq 1 ] && [ $VER -ne 3 ] && [ $VER -ne 4 ] && [ $VER -ne 5 ]
 then
 	echo ''
 	echo '--Preparing archive directory--'
@@ -199,7 +201,7 @@ fi
 # Setting paths to outputs
 
 # If VER = 3, change paths to snapshot directories
-if [ $VER -eq 3 ]
+if [ $VER -eq 3 ] || [ $VER -eq 5 ]
 then
 	snapshot_path=_experiments/$NAME/snapshots
 	background_snapshot_path=_experiments/$NAME/current_bgpf
@@ -220,14 +222,14 @@ fi
 # merge and plot EF if relevant
 #	if (VER = 0, 1, 3)
 
-if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 3 ]
+if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 3 ] || [ $VER -eq 5 ]
 then
 	echo ''
 	echo '--Merging--'
 	echo ''
 	# Check to make sure snapshots folder exists
 	echo "Checking for snapshots in $snapshot_path"
-	if [ -e $snapshot_path ]
+	if [ -e $snapshot_path ] || [ $VER -eq 5 ]
 	then
 		continue
 	else
@@ -235,7 +237,7 @@ then
 		exit 1
 	fi
 	# Check if snapshots have already been merged
-	if [ -e $snapshot_path/snapshots_s1.h5 ]
+	if [ -e $snapshot_path/snapshots_s1.h5 ] && [ $VER -ne 5 ]
 	then
 		echo "Snapshots already merged"
 	else
@@ -243,7 +245,7 @@ then
 		mpiexec -n $CORES python3 merge.py $snapshot_path
 	fi
 	# Check if background profile snapshots have already been merged
-	if [ -e $background_snapshot_path/current_bgpf_s1.h5 ]
+	if [ -e $background_snapshot_path/current_bgpf_s1.h5 ] && [ $VER -ne 5 ]
 	then
 		echo "Background profile snapshot already merged"
 	else
@@ -411,7 +413,7 @@ then
 		fi
 	fi
 	# Plot of EF if (VER = 0, 1, 3)
-	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 3 ]
+	if [ $VER -eq 0 ] || [ $VER -eq 1 ] || [ $VER -eq 3 ] || [ $VER -eq 5 ]
 	then
 		# Check if energy flux plot exists
 		if [ -e _energy_flux/ef_test.png ]

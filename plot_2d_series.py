@@ -38,7 +38,7 @@ rank = comm.Get_rank()
 # Switchboard
 plot_all = False
 print_args = False
-contours = True
+contours = False
 print_arrays = False
 normalize_values = True
 ###############################################################################
