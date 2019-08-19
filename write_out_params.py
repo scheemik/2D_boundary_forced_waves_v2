@@ -74,9 +74,11 @@ A      = float(params.forcing_amp)
 nT     = float(params.nT)
 # Horizontal wavelength
 lam_x = params.lam_x
-# Bounds of the forcing window
-win_left  = params.forcing_left_edge
-win_right = params.forcing_rightedge
+if SIM_TYPE==0:
+    # Reproducing results from Ghaemsaidi
+    # Bounds of the forcing window
+    win_left  = params.forcing_left_edge
+    win_right = params.forcing_rightedge
 
 # Sponge layer parameters
 # Number of grid points in z direction in sponge domain
@@ -157,8 +159,10 @@ with open(logfile, 'a') as the_file:
     the_file.write('Forcing amplitude:              A = ' + str(A) + '\n')
     the_file.write('\n')
     the_file.write('Horizontal wavelength (m):  lam_x = ' + str(lam_x) + '\n')
-    the_file.write('Forcing window left edge:          ' + str(win_left) + '\n')
-    the_file.write('Forcing window right edge:          ' + str(win_right) + '\n')
+    if SIM_TYPE==0:
+        # Reproducing results from Ghaemsaidi
+        the_file.write('Forcing window left edge:          ' + str(win_left) + '\n')
+        the_file.write('Forcing window right edge:          ' + str(win_right) + '\n')
     the_file.write('\n')
     the_file.write('--Sponge Layer Parameters--\n')
     the_file.write('\n')
