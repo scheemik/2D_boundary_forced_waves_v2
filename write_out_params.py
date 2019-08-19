@@ -14,6 +14,7 @@ Options:
 """
 
 import sys
+import numpy as np
 # For adding arguments when running
 from docopt import docopt
 
@@ -56,6 +57,7 @@ else:
 Lx, Lz = float(params.L_x), float(params.L_z) # not including the sponge layer
 x_span = params.x_interval # tuple
 z_b,z_t= float(params.z_b), float(params.z_t) #(-Lz, 0.0) #(-Lz/2, Lz/2)
+x_limits = params.x_limits # tuple
 # Characteristic stratification [rad/s]
 N0     = float(params.N_0)
 # Angle of beam w.r.t. the horizontal
@@ -70,6 +72,11 @@ T      = float(params.T)
 A      = float(params.forcing_amp)
 # Forcing amplitude ramp (number of oscillations)
 nT     = float(params.nT)
+# Horizontal wavelength
+lam_x = params.lam_x
+# Bounds of the forcing window
+win_left  = params.forcing_left_edge
+win_right = params.forcing_rightedge
 
 # Sponge layer parameters
 # Number of grid points in z direction in sponge domain
@@ -115,20 +122,45 @@ with open(logfile, 'a') as the_file:
     the_file.write('Adaptive timestepping:              ' + str(adapt_dt) + '\n')
     the_file.write('\n')
     the_file.write('Horizontal grid points:       n_x = ' + str(nx) + '\n')
-    the_file.write('Vertical grid points:         n_z = ' + str(nz) + '\n')
+    the_file.write('Vertical   grid points:       n_z = ' + str(nz) + '\n')
     the_file.write('\n')
-    the_file.write('--Experiment Parameters--\n')
+    the_file.write('--Simulation Domain Parameters--\n')
     the_file.write('\n')
     the_file.write('Horizontal extent (m):        L_x = ' + str(Lx) + '\n')
-    the_file.write('Vertical extent (m):          L_z = ' + str(Lz) + '\n')
+    the_file.write('Vertical   extent (m):        L_z = ' + str(z_t-z_sb) + '\n')
+    the_file.write('\n')
+    the_file.write('Left   side:                       ' + str(x_span[0]) + '\n')
+    the_file.write('Right  side:                        ' + str(x_span[1]) + '\n')
+    the_file.write('Top    side:                        ' + str(z_t) + '\n')
+    the_file.write('Bottom side:                       ' + str(z_sb) + '\n')
+    the_file.write('\n')
+    the_file.write('--Measurement Domain Parameters--\n')
+    the_file.write('\n')
+    the_file.write('Horizontal extent (m):        L_x = ' + str(x_limits[1]-x_limits[0]) + '\n')
+    the_file.write('Vertical   extent (m):        L_z = ' + str(Lz) + '\n')
+    the_file.write('\n')
+    the_file.write('Left   side:                        ' + str(x_limits[0]) + '\n')
+    the_file.write('Right  side:                        ' + str(x_limits[1]) + '\n')
+    the_file.write('Top    side:                        ' + str(z_t) + '\n')
+    the_file.write('Bottom side:                       ' + str(z_b) + '\n')
+    the_file.write('\n')
+    the_file.write('--Boundary Forcing Parameters--\n')
     the_file.write('\n')
     the_file.write('Horizontal wavenumber:        k_x = ' + str(kx) + '\n')
-    the_file.write('Vertical wavenumber:          k_z = ' + str(kz) + '\n')
+    the_file.write('Vertical   wavenumber:        k_z = ' + str(kz) + '\n')
     the_file.write('\n')
     the_file.write('Forcing frequency (s^-1):   omega = ' + str(omega) + '\n')
-    the_file.write('Forcing period (s):             T = ' + str(T) + '\n')
     the_file.write('Forcing angle (rad):        theta = ' + str(theta) + '\n')
+    the_file.write('Forcing angle (deg):        theta = ' + str(theta*180/np.pi) + '\n')
+    the_file.write('\n')
+    the_file.write('Forcing period (s):             T = ' + str(T) + '\n')
     the_file.write('Forcing amplitude:              A = ' + str(A) + '\n')
+    the_file.write('\n')
+    the_file.write('Horizontal wavelength (m):  lam_x = ' + str(lam_x) + '\n')
+    the_file.write('Forcing window left edge:          ' + str(win_left) + '\n')
+    the_file.write('Forcing window right edge:          ' + str(win_right) + '\n')
+    the_file.write('\n')
+    the_file.write('--Sponge Layer Parameters--\n')
     the_file.write('\n')
     the_file.write('Sponge layer grid points:           ' + str(nz_sp) + '\n')
     the_file.write('Sponge layer slope:                 ' + str(sp_slope) + '\n')
