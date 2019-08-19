@@ -146,7 +146,7 @@ else:
     lparams = lparams_Niagara
 
 # Number of grid points in each dimension
-nx, nz = TEST_P, int(lparams.n_z) #int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
+nx, nz = int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
 # Timing of simulation
 sim_period_stop  = lparams.sim_period_stop
 wall_time_stop = lparams.wall_time_stop
