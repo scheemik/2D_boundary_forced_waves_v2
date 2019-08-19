@@ -138,7 +138,7 @@ with h5py.File(merged_snapshots, mode='r') as file:
     t  = st[()]
 
     # Use my modified plotbot to make heat map of EF
-    paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, x_lims=[t_0,t_f], y_lims=[z_b,z_t], title='Vertical energy flux', even_scale=True)
+    paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, x_lims=[t_0,t_f], y_lims=[z_b,z_t], title='Vertical energy flux $<F_z(z, t)>$ $($Wm$^2/$kg$)$', even_scale=True)
     # Reshape the ef object
     ef = np.rot90(ef[:, 0, :])
     t_p = t*omega/(2*np.pi)
@@ -153,22 +153,22 @@ with h5py.File(merged_snapshots, mode='r') as file:
         plot_tp = t_p[1:]
 
     ax1.set_title('Energy flux through boundaries', fontsize='medium')
-    ax1.set_xlabel(r'Oscilation periods $(t/T)$')
-    y_label = r'Vertical energy flux $<F_z(z)>$'
+    ax1.set_xlabel(r'Oscilation periods $t/T$')
+    y_label = r'Vertical energy flux $<F_z(z, t)>$ $($Wm$^2/$kg$)$'
     ax1.set_ylabel(y_label)
     ax1.set_xlim(0.0, t_fp)
 
     color = 'tab:blue'
-    ln1 = ax1.plot(plot_tp, top_ef[1:], label='Top - Total measured', color=color) # initial value doesn't make sense, so skip it
+    ln1 = ax1.plot(plot_tp, top_ef[1:], label='Top Surface', color=color) # initial value doesn't make sense, so skip it
     if twin_top_bot:
         ax1.tick_params(axis='y', labelcolor=color)
         ax2 = ax1.twinx()
         color = 'tab:orange'
-        ln2 = ax2.plot(plot_tp, bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
+        ln2 = ax2.plot(plot_tp, bot_ef[1:], label='Bottom Surface', color=color) # initial value doesn't make sense, so skip it
         ax2.tick_params(axis='y', labelcolor=color)
     else:
         color = 'tab:orange'
-        ln2 = ax1.plot(plot_tp, bot_ef[1:], label='Bottom - Total measured', color=color) # initial value doesn't make sense, so skip it
+        ln2 = ax1.plot(plot_tp, bot_ef[1:], label='Bottom - Total', color=color) # initial value doesn't make sense, so skip it
 '''
 merged_snapshots = ef_snapshot_path + "/p_ef_k/p_ef_k.h5"
 with h5py.File(merged_snapshots, mode='r') as file:
@@ -198,7 +198,7 @@ if plot_aux_ef == True:
     axes = [ax0, ax1, ax2]
     line_colors = ['tab:blue', 'tab:orange', 'tab:green']
     aux_snaps = ["ef_advec", "ef_press", "ef_visc"]
-    plot_titles = ["Advection term", "Pressure term", "Viscous term"]
+    plot_titles = ["Kinetic Advection", "Pressure Work", "Viscous Term"]
     for i in range(len(axes)):
         merged_snapshots = ef_snapshot_path + "/" + aux_snaps[i] + "/" + aux_snaps[i] + ".h5"
         with h5py.File(merged_snapshots, mode='r') as file:
@@ -219,11 +219,11 @@ if plot_aux_ef == True:
                 axes[i].set_xlim(0.0, plot_tp[-1])
             axes[i].plot(plot_tp, top_aux_snap[1:], label=task_name, color=line_colors[i]) # initial value doesn't make sense, so skip it
             axes[i].set_title(plot_titles[i], fontsize='medium')
-            y_label = r'Vertical energy flux $<F_z(z)>$'
+            y_label = r' $<F_z(z, t)>$ $($Wm$^2/$kg$)$'
             axes[i].set_ylabel(y_label)
             #axes[i].set_xlim(0.0, t_fp)
             axes[i].grid(True)
-    axes[len(axes)-1].set_xlabel(r'Oscilation periods $(t/T)$')
+    axes[len(axes)-1].set_xlabel(r'Oscilation periods $t/T$')
     title = r'{:}, {:}={:}, {:}={:}, {:}={:}, {:}={:}'.format(str_loc, str_test, testp, str_nl, n_l, str_om, Om, str_am, Am)
     fig.suptitle(title, fontsize='large')
     fig.savefig('./_energy_flux/ef_aux.png', dpi=100)
