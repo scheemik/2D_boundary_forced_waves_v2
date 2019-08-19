@@ -17,16 +17,19 @@ x_limits=[0.0, 0.5]
 # Boundary forcing parameters
 # Characteristic stratification
 N_0 = 1.0 # [rad/s]
-# Angle of beam w.r.t. the horizontal
-theta = np.pi/4
-# Horizontal wavelength
+# Horizontal wavelength (3 across top boundary)
 lam_x = L_x / 3.0
-# Horizontal wavenumber
-k_x    = 2*np.pi/lam_x
-# Vertical wavenumber = 2*pi/lam_z, or from trig:
-k_z    = k_x * np.tan(theta)
 # Oscillation frequency = N_0 * cos(theta), from dispersion relation
-omega  = N_0 * np.cos(theta) # [s^-1]
+omega = 0.7071 # [rad s^-1]
+# Angle of beam w.r.t. the horizontal
+theta = np.arccos(omega/N_0) # [rad]
+# Horizontal wavenumber
+k_x    = 2*np.pi/lam_x # [m^-1] k*cos(theta)
+# Characteristic wavenumber
+k   = k_x*N_0/omega # [m^-1]
+# Vertical wavenumber
+k_z   = k*np.sin(theta) # [m^-1] k*sin(theta)
+
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
 # Forcing amplitude modifier
@@ -37,14 +40,12 @@ nT = 3.0
 # Sponge layer parameters
 # Number of grid points in z direction in sponge domain
 nz_sp    =  40
-
 # Slope of tanh function in slope
 sp_slope = -5.0
 # Max coefficient for nu at bottom of sponge
 max_sp   =  50.0
-
 # Bottom of sponge layer
-z_sb     = -2.0 #1.5
+z_sb     = -1.5
 
 # Background profile parameters
 bp_slope = 120
