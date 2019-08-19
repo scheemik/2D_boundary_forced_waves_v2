@@ -24,19 +24,22 @@ stair_top   = -0.22         # Top of staircase (not domian)
 # Boundary forcing parameters
 # Characteristic stratification
 N_0 = N_1 # 1.0 [rad/s]
-#   Bounds of the forcing window
-forcing_left_edge = -1.0*L_x/24.0
-forcing_rightedge =  1.0*L_x/24.0
-# Angle of beam w.r.t. the horizontal
-theta = np.pi/4.0
-# Horizontal wavelength
-lam_x = forcing_rightedge - forcing_left_edge
-# Horizontal wavenumber
-k_x    = 2*np.pi/lam_x
-# Vertical wavenumber = 2*pi/lam_z, or from trig:
-k_z    = k_x * np.tan(theta)
+# Characteristic wavenumber
+k   = 45 # [m^-1]
 # Oscillation frequency = N_0 * cos(theta), from dispersion relation
-omega = N_0 * np.cos(theta) # [s^-1]
+omega = 0.67 # [rad s^-1]
+# Angle of beam w.r.t. the horizontal
+theta = np.arccos(omega/N_0) # [rad]
+# Horizontal wavenumber
+k_x   = k*omega/N_0 # [m^-1] k*cos(theta)
+# Vertical wavenumber
+k_z   = k*np.sin(theta) # [m^-1] k*sin(theta)
+# Horizontal wavelength
+lam_x = 2*np.pi / k_x # [m]
+# Bounds of the forcing window
+forcing_left_edge = x_limits[0] - lam_x/2.0 #-1.0*L_x/24.0
+forcing_rightedge = x_limits[0] + lam_x/2.0 # 1.0*L_x/24.0
+
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
 # Other parameters
