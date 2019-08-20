@@ -8,5 +8,5 @@ wall_time_stop = 60 # min
 adapt_dt = False
 
 # Number of points in each dimension
-n_x = 40*7
+n_x = 40*14
 n_z = 40*13
