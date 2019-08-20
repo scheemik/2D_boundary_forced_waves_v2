@@ -86,7 +86,7 @@ if __name__ == '__main__':
     NU = float(arguments['NU'])
     KA = float(arguments['KA'])
     NI = int(arguments['NI'])
-    TEST_P = int(arguments['TEST_P'])
+    TEST_P = float(arguments['TEST_P'])
     if (rank == 0 and print_params):
         print('LOC =',LOC)
         print('SIM_TYPE =',SIM_TYPE)

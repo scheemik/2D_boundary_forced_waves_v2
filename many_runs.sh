@@ -22,10 +22,12 @@
 # VER = 4
 #	-> create mp4 from frames
 
-echo 'Test parameter currently not set'
-sh run.sh -v 0 -e 1 -i 0 -k 1 -t 99
+echo 'Test parameter currently set to clim+'
+#sh run.sh -v 0 -e 1 -i 0 -k 1 -t 1
 
-#sh run.sh -v 0 -e 0 -i 1 -k 1 -t 512
-#sh run.sh -v 0 -e 0 -i 2 -k 1 -t 512
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.3
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.4
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.5
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.6
 
 echo "Many runs script done"

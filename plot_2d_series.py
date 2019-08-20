@@ -114,6 +114,7 @@ def main(filename, start, count, output):
     A = params.forcing_amp
     T = params.T
     z_b, z_t = params.z_b, params.z_t
+    clim = [-TEST_P, TEST_P]
 
     # Format the dimensionless numbers nicely
     n_l   = NI
@@ -151,7 +152,7 @@ def main(filename, start, count, output):
                     axes = mfig.add_axes(i, j, [0, 0, 1, 1])
                     # Call 3D plotting helper, slicing in time
                     dset = file['tasks'][task]
-                    plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes, title=task, even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                    plot_bot_3d_mod(dset, 0, index, y_lims=[z_b, z_t], axes=axes, title=task, even_scale=True, clim=clim, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
                 set_title_save(fig, output, file, index, dpi, title_func, savename_func)
         plt.close(fig)
     else: # Just plotting background profile and w
@@ -180,9 +181,9 @@ def main(filename, start, count, output):
                 # Call 3D plotting helper, slicing in time
                 dset = file['tasks'][task]
                 if normalize_values:
-                    plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$wN^2/(Ag\omega)$', even_scale=True, func=normalize, paramfile=params, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                    plot_bot_3d_mod(dset, 0, index, clim=clim, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$wN^2/(Ag\omega)$', even_scale=True, func=normalize, paramfile=params, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
                 else:
-                    plot_bot_3d_mod(dset, 0, index, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w$ (m/s)', even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
+                    plot_bot_3d_mod(dset, 0, index, clim=clim, x_lims=x_limits, y_lims=[z_b, z_t], axes=axes1, title=r'$w$ (m/s)', even_scale=True, plot_contours=contours) # clim=(cmin,cmax) # specify constant colorbar limits
 
                 # Plot stratification profile on the left
                 axes0 = mfig.add_axes(0, 0, [0, 0, 1.3, 1])#, sharey=axes1)
@@ -214,7 +215,7 @@ if __name__ == "__main__":
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     SIM_TYPE = int(args['SIM_TYPE'])
     NI = int(args['NI'])
-    TEST_P = int(args['TEST_P'])
+    TEST_P = float(args['TEST_P'])
     bgpf_dir = str(args['BGPF'])
     if (rank==0 and print_args):
         print('plot',str_loc)
