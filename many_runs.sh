@@ -1,14 +1,5 @@
 #!/bin/bash
 # A bash script to run the Dedalus python code many times
-# run.sh takes in these arguments:
-#	$ sh run.sh -n <name of particular run>
-#				-c <cores>
-#				-e <EF(1) or reproducing run(0)>
-#				-i <number of interfaces in background profile>
-#				-l <local(1) or Niagara(0)>
-#				-v <version: what scripts to run>
-#				-k <keep(1) or allow overwriting(0)>
-#				-t <test parameter>
 
 # if:
 # VER = 0 (Full)
@@ -22,12 +13,12 @@
 # VER = 4
 #	-> create mp4 from frames
 
-echo 'Test parameter currently set to clim+'
+echo 'Test parameter currently set to A'
 #sh run.sh -v 0 -e 1 -i 0 -k 1 -t 1
 
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.3
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.4
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.5
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 1.6
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 2.3E-4
+sh run.sh -v 0 -e 0 -i 2 -k 1 -t 2.3E-4
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 6.45E-4
+sh run.sh -v 0 -e 0 -i 2 -k 1 -t 6.45E-4
 
 echo "Many runs script done"

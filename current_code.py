@@ -134,7 +134,7 @@ omega  = float(params.omega)
 # Oscillation period = 2pi / omega
 T      = float(params.T)
 # Forcing amplitude modifier
-A      = float(params.forcing_amp)
+A      = TEST_P #float(params.forcing_amp)
 # Forcing amplitude ramp (number of oscillations)
 nT     = float(params.nT)
 
@@ -172,12 +172,10 @@ g     = 9.81        # [m/s^2]   Acceleration due to gravity
 
 # Number of grid points in z direction in sponge domain
 nz_sp    = params.nz_sp
-
 # Slope of tanh function in slope
 sp_slope = params.sp_slope
 # Max coefficient for nu at bottom of sponge
 max_sp   = params.max_sp
-
 # Bottom of sponge layer
 z_sb     = params.z_sb
 
@@ -231,6 +229,7 @@ problem.parameters['N0'] = N0
 PolRel = {'u': A*(g*omega*kz)/(N0**2*kx),
           'w': A*(g*omega)/(N0**2),
           'b': A*g}#,
+          #'p': A*(g*(omega**2)*kz)/((N0**2)*(kx**2))}
           #'p': A*(g*rho_0*kz)/(kx**2+kz**2)} # relation for p not used
 
 # Creating forcing amplitudes

@@ -6,6 +6,9 @@ import numpy as np
 # Aspect ratio of display domain
 aspect_ratio = 1.0
 
+# Limits for color bars
+clims = [-1.5, 1.5]
+
 # Domain size
 L_x = 1.5 # m
 L_z = 0.5 # m, not including the sponge layer

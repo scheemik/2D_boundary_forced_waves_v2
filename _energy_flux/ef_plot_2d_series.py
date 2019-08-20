@@ -105,7 +105,7 @@ else:
 
 z_b, z_t =  params.z_b, params.z_t
 omega = params.omega
-A = params.forcing_amp
+A = TEST_P #params.forcing_amp
 T = params.T
 
 if LOC==1:

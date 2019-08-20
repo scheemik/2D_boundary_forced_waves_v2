@@ -111,10 +111,10 @@ def main(filename, start, count, output):
         import params_ef
         params = params_ef
     omega = params.omega
-    A = params.forcing_amp
+    A = TEST_P #params.forcing_amp
     T = params.T
     z_b, z_t = params.z_b, params.z_t
-    clim = [-TEST_P, TEST_P]
+    clim = params.clims
 
     # Format the dimensionless numbers nicely
     n_l   = NI
