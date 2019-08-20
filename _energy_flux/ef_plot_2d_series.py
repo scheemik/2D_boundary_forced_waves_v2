@@ -48,7 +48,7 @@ take_r_avg = True
 str_test = r'Test param'
 str_nl = r'$n_{layers}$'
 str_om = r'$\omega$'
-str_am = r'$A$'
+str_am = r'$\hat A$'
 
 ###############################################################################
 # Function to give running averages
