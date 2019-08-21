@@ -4,7 +4,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --ntasks-per-node=40
 #SBATCH --nodes=1
-#SBATCH --time=0-00:30  # d-HH:MM
+#SBATCH --time=0-00:50  # d-HH:MM
 
 # Optionally takes in arguments:
 #	$ sbatch lanceur.slrm -c <cores>
