@@ -133,12 +133,12 @@ def plot_bot(dset, image_axes, data_slices, x_lims=None, y_lims=None, image_scal
     cmap.set_bad('0.7')
 
     # Plot
-    plot = paxes.pcolormesh(xmesh, ymesh, data, cmap=cmap, zorder=1)
+    plot = paxes.pcolormesh(xmesh, ymesh, data, cmap=cmap, zorder=2.5)
     if plot_contours:
         # Fix the off-by-one error
         xmesh = xmesh[1:,1:]
         ymesh = ymesh[1:,1:]
-        plat = paxes.contour(xmesh, ymesh, data, 10, cmap='coolwarm')#'RdBu_r')
+        plat = paxes.contour(xmesh, ymesh, data, 10, cmap='coolwarm', zorder=3.5)#'RdBu_r')
     paxes.axis(pad_limits(xmesh, ymesh))
     #paxes.tick_params(length=0, width=0)
     if clim is None:
