@@ -46,7 +46,7 @@ forcing_rightedge = x_limits[0] + lam_x/2.0 # 1.0*L_x/24.0
 # Oscillation period = 2pi / omega
 T = 2*np.pi / omega
 # Other parameters
-forcing_slope = 20 # for tanh window
+forcing_slope = 50 # for tanh window
 # Forcing amplitude modifier
 forcing_amp = 2.3e-4
 # Forcing amplitude ramp (number of oscillations)
