@@ -41,6 +41,9 @@ twin_top_bot = True
 # Plot auxiliary energy flux snapshots (3 terms)
 plot_aux_ef = True
 
+# plot line of vertical group velocity
+plot_cgz = True
+
 # Take running average energy flux values over a period
 take_r_avg = True
 
@@ -105,8 +108,14 @@ else:
 
 z_b, z_t =  params.z_b, params.z_t
 omega = params.omega
+# Wavenumbers
+kx, kz = float(params.k_x), float(params.k_z)
 A = TEST_P #params.forcing_amp
 T = params.T
+# Forcing amplitude ramp (number of oscillations)
+nT = params.nT
+t0 = T*(nT - 1)
+print("t0 =",t0)
 
 if LOC==1:
     import lparams_local
@@ -139,6 +148,11 @@ with h5py.File(merged_snapshots, mode='r') as file:
 
     # Use my modified plotbot to make heat map of EF
     paxes, caxes = plot_bot_3d_mod(ef, 1, 0, axes=ax0, x_lims=[t_0,t_f], y_lims=[z_b,z_t], title='Vertical energy flux $<F_z(z, t)>$ $($Wm$^2/$kg$)$', even_scale=True)
+    # Add the vertical group velocity line
+    if plot_cgz:
+        z_cg = -omega * kz / (kx**2 + kz**2) * (t - t0)
+        paxes.plot(t, z_cg, label=r'$c_{gz}$', color='red', linestyle='--', dashes=(2,8), zorder=5.5)
+        paxes.legend(loc=3)
     # Reshape the ef object
     ef = np.rot90(ef[:, 0, :])
     t_p = t*omega/(2*np.pi)
