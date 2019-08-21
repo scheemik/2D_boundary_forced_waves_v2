@@ -237,7 +237,7 @@ then
 		exit 1
 	fi
 	# Check if snapshots have already been merged
-	if [ -e $snapshot_path/snapshots_s1.h5 ] && [ $VER -ne 5 ]
+	if [ -e $snapshot_path/snapshots_s1.h5 ] || [ $VER -eq 5 ]
 	then
 		echo "Snapshots already merged"
 	else
