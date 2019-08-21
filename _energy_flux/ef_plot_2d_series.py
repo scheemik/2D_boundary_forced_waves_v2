@@ -115,7 +115,7 @@ T = params.T
 # Forcing amplitude ramp (number of oscillations)
 nT = params.nT
 t0 = T*(nT - 1)
-print("t0 =",t0)
+#print("t0 =",t0)
 
 if LOC==1:
     import lparams_local
