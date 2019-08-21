@@ -215,7 +215,7 @@ if __name__ == "__main__":
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     SIM_TYPE = int(args['SIM_TYPE'])
     NI = int(args['NI'])
-    TEST_P = float(args['TEST_P'])
+    TEST_P = int(args['TEST_P'])
     bgpf_dir = str(args['BGPF'])
     if (rank==0 and print_args):
         print('plot',str_loc)

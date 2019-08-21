@@ -77,7 +77,7 @@ if __name__ == "__main__":
     str_loc = 'Local' if bool(LOC) else 'Niagara'
     SIM_TYPE = int(args['SIM_TYPE'])
     NI = int(args['NI'])
-    TEST_P = float(args['TEST_P'])
+    TEST_P = int(args['TEST_P'])
     ef_snapshot_path = str(args['SNAPSHOT_PATH'])
     print_vals = False
     if (rank==0 and print_vals):
