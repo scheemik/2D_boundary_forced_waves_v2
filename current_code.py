@@ -146,7 +146,7 @@ else:
     lparams = lparams_Niagara
 
 # Number of grid points in each dimension
-nx, nz = TEST_P*40, (TEST_P*40-40) #int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
+nx, nz = TEST_P, (TEST_P-40) #int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
 # Timing of simulation
 sim_period_stop  = lparams.sim_period_stop
 wall_time_stop = lparams.wall_time_stop
@@ -461,7 +461,9 @@ CFL.add_velocities(('u', 'w'))
 # Flow properties
 flow = flow_tools.GlobalFlowProperty(solver, cadence=10)
 # Some other linear criterion
-flow.add_property("dx(u)/omega", name='Lin_Criterion')
+#flow.add_property("dx(u)/omega", name='Lin_Criterion')
+# A different linear criterion
+flow.add_property("(kx*u + kz*w)/omega", name='Lin_Criterion')
 
 ###############################################################################
 # Outputting background profile structure to file
@@ -508,7 +510,7 @@ try:
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
-            logger.info('Max linear criterion = {0:f}'.format(flow.max('Lin_Criterion')))
+            logger.info('Max linear criterion2 = {0:f}'.format(flow.max('Lin_Criterion')))
             if np.isnan(flow.max('Lin_Criterion')):
                 raise NameError('Code blew up it seems')
 except:
