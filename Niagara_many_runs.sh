@@ -38,6 +38,6 @@ fi
 #	-> create mp4 from frames
 
 echo 'Test parameter currently set to A'
-sh run.sh -c $CORES -v 1 -l 0 -e 0 -i 1 -k 1 -t 17
+sh run.sh -c $CORES -v 1 -l 0 -e 0 -i 1 -k 1 -t 20
 
 echo "Many runs script done"
