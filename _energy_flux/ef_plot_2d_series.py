@@ -110,7 +110,7 @@ z_b, z_t =  params.z_b, params.z_t
 omega = params.omega
 # Wavenumbers
 kx, kz = float(params.k_x), float(params.k_z)
-A = TEST_P #params.forcing_amp
+A = params.forcing_amp
 T = params.T
 # Forcing amplitude ramp (number of oscillations)
 nT = params.nT
@@ -124,7 +124,7 @@ else:
     import lparams_Niagara
     lparams = lparams_Niagara
 
-nz = TEST_P*40 - 40 #lparams.n_z
+nz = lparams.n_z
 t_0  = 0.0
 t_fp = lparams.sim_period_stop   #[t/T]
 # Calculate stop time
@@ -157,7 +157,7 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ef = np.rot90(ef[:, 0, :])
     t_p = t*omega/(2*np.pi)
     if take_r_avg:
-        r_avg_window = int(T/0.25)
+        r_avg_window = int(round(T/0.25))
         top_ef = running_avg(ef[0, :], r_avg_window)
         bot_ef = running_avg(ef[nz, :], r_avg_window)
         plot_tp = t_p[1:len(top_ef)]

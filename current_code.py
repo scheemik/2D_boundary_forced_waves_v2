@@ -146,7 +146,7 @@ else:
     lparams = lparams_Niagara
 
 # Number of grid points in each dimension
-nx, nz = TEST_P, (TEST_P-40) #int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
+nx, nz = int(lparams.n_x), int(lparams.n_z)  # doesn't include sponge layer
 # Timing of simulation
 sim_period_stop  = lparams.sim_period_stop
 wall_time_stop = lparams.wall_time_stop
@@ -253,7 +253,7 @@ problem.parameters['z_top'] = z_t
 if SIM_TYPE==0:
     # Windowing function (multiplying tanh's)
     # Slope of tanh for forcing window
-    f_slope = float(params.forcing_slope)
+    f_slope = TEST_P #float(params.forcing_slope)
     # Bounds of the forcing window
     fl_edge, fr_edge = float(params.forcing_left_edge), float(params.forcing_rightedge)
     problem.parameters['slope'] = f_slope
