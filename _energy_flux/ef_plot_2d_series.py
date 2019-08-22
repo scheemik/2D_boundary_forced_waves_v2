@@ -157,7 +157,7 @@ with h5py.File(merged_snapshots, mode='r') as file:
     ef = np.rot90(ef[:, 0, :])
     t_p = t*omega/(2*np.pi)
     if take_r_avg:
-        r_avg_window = int(round(T/0.25))
+        r_avg_window = int(round(T/0.125))
         top_ef = running_avg(ef[0, :], r_avg_window)
         bot_ef = running_avg(ef[nz, :], r_avg_window)
         plot_tp = t_p[1:len(top_ef)]

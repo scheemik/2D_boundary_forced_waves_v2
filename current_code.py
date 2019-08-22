@@ -449,7 +449,7 @@ solver.stop_iteration = np.inf
 # Analysis
 if (save_all_snapshots or SIM_TYPE==0):
     snapshots_path = 'snapshots'
-    snapshots = solver.evaluator.add_file_handler(snapshots_path, sim_dt=0.25, max_writes=50)
+    snapshots = solver.evaluator.add_file_handler(snapshots_path, sim_dt=dt, max_writes=50)
     snapshots.add_system(solver.state)
 
 # CFL - adapts time step as the code runs depending on stiffness
@@ -482,7 +482,7 @@ ef_snapshots_path = 'ef_snapshots'
 # Adding new file handlers
 if (save_all_snapshots or SIM_TYPE==1):
     # Total energy flux measurement
-    ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=0.25, max_writes=100)
+    ef_snapshots = solver.evaluator.add_file_handler(ef_snapshots_path, sim_dt=dt, max_writes=100)
     # Adding a task to integrate energy flux across x for values of z
     ef_snapshots.add_task("integ(0.5*(w*u**2 + w**3) + p*w - NU*(u*uz + w*wz), 'x')", layout='g', name='<ef>')
 
@@ -493,7 +493,7 @@ if (save_all_snapshots or SIM_TYPE==1):
     aux_solver = [0, 1, 2]
     for i in range(len(aux_snaps)):
         file_path = ef_snapshots_path + '/' + aux_snaps[i]
-        aux_solver[i] = solver.evaluator.add_file_handler(file_path, sim_dt=0.25, max_writes=100)
+        aux_solver[i] = solver.evaluator.add_file_handler(file_path, sim_dt=dt, max_writes=100)
         temp_name = '<' + aux_snaps[i] + '>'
         aux_solver[i].add_task(aux_exprs[i], layout='g', name=temp_name)
 
@@ -510,7 +510,7 @@ try:
         dt = solver.step(dt)
         if (solver.iteration-1) % 10 == 0:
             logger.info('Iteration: %i, Time: %e, dt: %e' %(solver.iteration, solver.sim_time, dt))
-            logger.info('Max linear criterion2 = {0:f}'.format(flow.max('Lin_Criterion')))
+            logger.info('Max linear criterion = {0:f}'.format(flow.max('Lin_Criterion')))
             if np.isnan(flow.max('Lin_Criterion')):
                 raise NameError('Code blew up it seems')
 except:
