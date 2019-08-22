@@ -14,9 +14,7 @@
 #	-> create mp4 from frames
 
 echo 'Test parameter currently set to forcing slope'
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 30
-sh run.sh -v 0 -e 0 -i 2 -k 1 -t 30
-sh run.sh -v 0 -e 0 -i 1 -k 1 -t 50
-sh run.sh -v 0 -e 0 -i 2 -k 1 -t 50
+sh run.sh -v 0 -e 0 -i 2 -k 1 -t 35
+sh run.sh -v 0 -e 0 -i 1 -k 1 -t 35
 
 echo "Many runs script done"
