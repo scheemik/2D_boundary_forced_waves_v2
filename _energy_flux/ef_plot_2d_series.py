@@ -42,7 +42,7 @@ twin_top_bot = True
 plot_aux_ef = True
 
 # plot line of vertical group velocity
-plot_cgz = True
+plot_cgz = False
 
 # Take running average energy flux values over a period
 take_r_avg = True
@@ -124,7 +124,7 @@ else:
     import lparams_Niagara
     lparams = lparams_Niagara
 
-nz = lparams.n_z
+nz = TEST_P*40 - 40 #lparams.n_z
 t_0  = 0.0
 t_fp = lparams.sim_period_stop   #[t/T]
 # Calculate stop time
