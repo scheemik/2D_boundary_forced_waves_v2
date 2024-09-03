@@ -49,7 +49,7 @@ z_bot = -0.3 #z_b
 z_top =  -0.22 #z_t
 
 # Store profile in an array
-bgpf_array = Foran_profile(z, n_layers, z_bot, z_top, slope, N_1, N_2)
+bgpf_array = Foran_profile(z, n_layers-1, z_bot, z_top, slope, N_1, N_2)
 #bgpf_array2 = N2_profile(z, n_layers, val_bot, val_top, slope, z_bot, z_top)
 
 # Plots the background profile
